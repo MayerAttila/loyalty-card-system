@@ -1,0 +1,53 @@
+import Link from "next/link";
+
+const navItems = [
+  { href: "/admin/business", label: "Business" },
+  { href: "/admin/cards", label: "Cards" },
+  { href: "/admin/employees", label: "Employees" },
+  { href: "/admin/logs", label: "Logs" },
+  { href: "/admin/stamping", label: "Stamping" },
+  { href: "/admin/customers", label: "Customers" },
+];
+
+export default function AdminLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <div className="min-h-screen bg-primary text-contrast">
+      <header className="border-b border-accent-3 bg-accent-1">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-4">
+          <div className="flex flex-1 items-center gap-3">
+            <span className="text-sm uppercase tracking-wide text-contrast/70">
+              Admin
+            </span>
+            <h1 className="text-lg font-semibold text-brand">
+              Loyalty Dashboard
+            </h1>
+          </div>
+          <Link
+            className="rounded-lg border border-accent-4 px-3 py-1 text-sm font-semibold text-contrast"
+            href="/"
+          >
+            Home
+          </Link>
+        </div>
+        <nav className="border-t border-accent-3">
+          <div className="mx-auto flex max-w-6xl flex-wrap gap-3 px-6 py-3">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                className="rounded-full border border-accent-4 bg-primary px-4 py-1 text-sm font-medium text-contrast"
+                href={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </header>
+      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+    </div>
+  );
+}
