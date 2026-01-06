@@ -1,9 +1,15 @@
 import Link from "next/link";
 import CustomInput from "@/components/CustomInput";
+import MainFooter from "@/components/MainFooter";
+import MainHeader from "@/components/MainHeader";
+import TopBrandWave from "@/components/TopBrandWave";
+import BottomBrandWave from "@/components/BottomBrandWave";
 
 const page = () => {
   return (
     <main className="min-h-screen bg-primary text-contrast">
+      <MainHeader />
+      <TopBrandWave />
       <div>
         <CustomInput id="text" type="search" placeholder="text" />
       </div>
@@ -65,6 +71,8 @@ const page = () => {
           </div>
         </section>
       </div>
+      <BottomBrandWave />
+      <MainFooter />
     </main>
   );
 };
