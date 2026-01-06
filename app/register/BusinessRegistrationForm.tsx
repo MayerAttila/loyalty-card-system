@@ -1,14 +1,27 @@
 import CustomInput from "@/components/CustomInput";
+import { toast } from "react-toastify";
 
 const BusinessRegistrationForm = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    toast.success("Business account created!");
+  };
+
   return (
     <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
       <h2 className="text-lg font-semibold">Register a Business</h2>
       <p className="mt-2 text-sm text-contrast/80">
         Set up your business profile, rewards, and team access.
       </p>
-      <form className="mt-6 grid gap-4 md:grid-cols-2">
-        <CustomInput id="businessName" type="text" placeholder="Business name" />
+      <form
+        className="mt-6 grid gap-4 md:grid-cols-2"
+        onSubmit={handleSubmit}
+      >
+        <CustomInput
+          id="businessName"
+          type="text"
+          placeholder="Business name"
+        />
         <CustomInput
           id="businessEmail"
           type="email"

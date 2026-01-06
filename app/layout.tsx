@@ -3,6 +3,7 @@ import MainFooter from "@/components/MainFooter";
 import MainHeader from "@/components/MainHeader";
 import TopBrandWave from "@/components/TopBrandWave";
 import BottomBrandWave from "@/components/BottomBrandWave";
+import ToastProvider from "@/components/ToastProvider";
 
 export default function RootLayout({
   children,
@@ -14,6 +15,7 @@ export default function RootLayout({
       <body>
         <MainHeader />
         <TopBrandWave />
+        <ToastProvider />
         {children}
         <BottomBrandWave />
         <MainFooter />
