@@ -1,6 +1,14 @@
-type Props = { className?: string };
+type Props = {
+  className?: string;
+  topClassName?: string;
+  bottomClassName?: string;
+};
 
-export default function BottomBrandWave({ className = "" }: Props) {
+export default function BottomBrandWave({
+  className = "",
+  topClassName = "fill-brand",
+  bottomClassName = "fill-primary",
+}: Props) {
   return (
     <svg
       className={className}
@@ -8,9 +16,10 @@ export default function BottomBrandWave({ className = "" }: Props) {
       preserveAspectRatio="none"
       aria-hidden="true"
     >
+      <rect className={bottomClassName} x="0" y="0" width="1440" height="60" />
       <path
+        className={topClassName}
         d="M 0 60 H 1440 V 0 C 700 50 700 50, 0 0 Z"
-        fill="rgb(var(--color-brand))"
       />
     </svg>
   );

@@ -10,7 +10,7 @@ const MainHeader = () => {
         <div className="flex items-center gap-4 text-sm font-semibold">
           <Link
             className="text-primary/80 hover:text-primary"
-            href="/register/business"
+            href="/register"
           >
             Register
           </Link>

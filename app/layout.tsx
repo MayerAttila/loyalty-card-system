@@ -1,4 +1,8 @@
 ﻿import "./globals.css";
+import MainFooter from "@/components/MainFooter";
+import MainHeader from "@/components/MainHeader";
+import TopBrandWave from "@/components/TopBrandWave";
+import BottomBrandWave from "@/components/BottomBrandWave";
 
 export default function RootLayout({
   children,
@@ -7,7 +11,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <MainHeader />
+        <TopBrandWave />
+        {children}
+        <BottomBrandWave />
+        <MainFooter />
+      </body>
     </html>
   );
 }

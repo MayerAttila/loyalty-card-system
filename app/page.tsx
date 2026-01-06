@@ -1,15 +1,9 @@
 import Link from "next/link";
 import CustomInput from "@/components/CustomInput";
-import MainFooter from "@/components/MainFooter";
-import MainHeader from "@/components/MainHeader";
-import TopBrandWave from "@/components/TopBrandWave";
-import BottomBrandWave from "@/components/BottomBrandWave";
 
 const page = () => {
   return (
     <main className="min-h-screen bg-primary text-contrast">
-      <MainHeader />
-      <TopBrandWave />
       <div>
         <CustomInput id="text" type="search" placeholder="text" />
       </div>
@@ -28,32 +22,18 @@ const page = () => {
           </p>
         </header>
 
-        <section className="grid gap-6 md:grid-cols-3">
+        <section className="grid gap-6 md:grid-cols-2">
           <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-            <h2 className="text-lg font-semibold">Register a Business</h2>
+            <h2 className="text-lg font-semibold">Register</h2>
             <p className="mt-2 text-sm text-contrast/80">
-              Create your business profile, set up loyalty rules, and start
-              inviting employees.
+              Choose whether you are registering a business or joining as an
+              employee.
             </p>
             <Link
               className="mt-4 block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
-              href="/register/business"
+              href="/register"
             >
-              Business Registration
-            </Link>
-          </div>
-
-          <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-            <h2 className="text-lg font-semibold">Register as Employee</h2>
-            <p className="mt-2 text-sm text-contrast/80">
-              Join a business, scan customer cards, and apply rewards in
-              seconds.
-            </p>
-            <Link
-              className="mt-4 block w-full rounded-lg border border-accent-4 px-4 py-2 text-center text-sm font-semibold text-contrast"
-              href="/register/employee"
-            >
-              Employee Registration
+              Choose Registration
             </Link>
           </div>
 
@@ -71,8 +51,6 @@ const page = () => {
           </div>
         </section>
       </div>
-      <BottomBrandWave />
-      <MainFooter />
     </main>
   );
 };
