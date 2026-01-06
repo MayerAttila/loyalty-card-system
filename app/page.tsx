@@ -1,8 +1,13 @@
 import Link from "next/link";
+import CustomInput from "@/components/CustomInput";
 
 const page = () => {
   return (
     <main className="min-h-screen bg-primary text-contrast">
+      <div>
+        <CustomInput id="text" type="search" placeholder="text" />
+      </div>
+
       <div className="mx-auto max-w-5xl px-6 py-16">
         <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">
@@ -11,9 +16,9 @@ const page = () => {
           <h1 className="text-3xl font-semibold text-brand">Brand Name</h1>
           <p className="mt-4 max-w-2xl text-base text-contrast/80">
             A loyalty card platform where businesses can register and manage
-            reward programs, and employees can enroll to track visits and
-            unlock rewards. Build stronger customer relationships with a simple,
-            modern digital card.
+            reward programs, and employees can enroll to track visits and unlock
+            rewards. Build stronger customer relationships with a simple, modern
+            digital card.
           </p>
         </header>
 
