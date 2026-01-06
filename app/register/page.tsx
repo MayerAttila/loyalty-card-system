@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import CustomInput from "@/components/CustomInput";
+import BusinessRegistrationForm from "./BusinessRegistrationForm";
+import EmployeeRegistrationForm from "./EmployeeRegistrationForm";
 import FormSwitch from "@/components/FormSwitch";
 
 const registerOptions = [
@@ -39,89 +40,9 @@ const RegisterPage = () => {
         </div>
 
         {activeKey === "business" ? (
-          <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-            <h2 className="text-lg font-semibold">Register a Business</h2>
-            <p className="mt-2 text-sm text-contrast/80">
-              Set up your business profile, rewards, and team access.
-            </p>
-            <form className="mt-6 grid gap-4 md:grid-cols-2">
-              <CustomInput
-                id="businessName"
-                type="text"
-                placeholder="Business name"
-              />
-              <CustomInput
-                id="ownerName"
-                type="name"
-                placeholder="Owner name"
-              />
-              <CustomInput
-                id="businessEmail"
-                type="email"
-                placeholder="Business email"
-              />
-              <CustomInput
-                id="businessPhone"
-                type="tel"
-                placeholder="Business phone"
-              />
-              <div className="md:col-span-2">
-                <CustomInput
-                  id="businessPassword"
-                  type="password"
-                  placeholder="Create password"
-                />
-              </div>
-              <button
-                type="submit"
-                className="md:col-span-2 rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-              >
-                Create Business Account
-              </button>
-            </form>
-          </div>
+          <BusinessRegistrationForm />
         ) : (
-          <div className="rounded-xl border border-accent-3 bg-accent-2 p-6">
-            <h2 className="text-lg font-semibold">Register as Employee</h2>
-            <p className="mt-2 text-sm text-contrast/80">
-              Join an existing business and start managing customer rewards.
-            </p>
-            <form className="mt-6 grid gap-4 md:grid-cols-2">
-              <CustomInput
-                id="employeeName"
-                type="name"
-                placeholder="Full name"
-              />
-              <CustomInput
-                id="employeeEmail"
-                type="email"
-                placeholder="Work email"
-              />
-              <CustomInput
-                id="employeePhone"
-                type="tel"
-                placeholder="Phone number"
-              />
-              <CustomInput
-                id="businessCode"
-                type="text"
-                placeholder="Business code"
-              />
-              <div className="md:col-span-2">
-                <CustomInput
-                  id="employeePassword"
-                  type="password"
-                  placeholder="Create password"
-                />
-              </div>
-              <button
-                type="submit"
-                className="md:col-span-2 rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-              >
-                Create Employee Account
-              </button>
-            </form>
-          </div>
+          <EmployeeRegistrationForm />
         )}
       </section>
     </main>
