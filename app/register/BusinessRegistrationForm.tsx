@@ -1,10 +1,32 @@
+"use client";
+
 import CustomInput from "@/components/CustomInput";
 import { toast } from "react-toastify";
+import { createBusiness } from "@/api/client/business.api";
+import { CreateBusinessPayload } from "@/api/client/business.api";
 
 const BusinessRegistrationForm = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    toast.success("Business account created!");
+
+    const form = event.currentTarget;
+    const formData = new FormData(event.currentTarget);
+
+    const payload: CreateBusinessPayload = {
+      name: String(formData.get("businessName") ?? ""),
+      email: String(formData.get("businessEmail") ?? ""),
+      password: String(formData.get("businessPassword") ?? ""),
+      address: String(formData.get("businessAddress") ?? "") || undefined,
+    };
+
+    try {
+      await createBusiness(payload);
+      form.reset();
+      toast.success("Business account created!");
+    } catch (error) {
+      console.error("createBusiness failed", error);
+      toast.error("Unable to create business account.");
+    }
   };
 
   return (
@@ -13,10 +35,7 @@ const BusinessRegistrationForm = () => {
       <p className="mt-2 text-sm text-contrast/80">
         Set up your business profile, rewards, and team access.
       </p>
-      <form
-        className="mt-6 grid gap-4 md:grid-cols-2"
-        onSubmit={handleSubmit}
-      >
+      <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
         <CustomInput
           id="businessName"
           type="text"

@@ -3,11 +3,13 @@ import { apiFetch } from "./fetch";
 import { Employee } from "@/types/employee";
 
 export const getEmployeeById = async (id: string) => {
-  const data = await apiFetch<Employee>(`/employees/id/${id}`);
+  const data = await apiFetch<Employee>(`/employee/id/${id}`);
   return data;
 };
 
 export const getEmployeesByBusinessId = async (businessId: string) => {
-  const data = await apiFetch<Employee[]>(`/employees/business/${businessId}`);
+  const data = await apiFetch<Employee[]>(
+    `/employee/businessId/${businessId}`
+  );
   return data;
 };
