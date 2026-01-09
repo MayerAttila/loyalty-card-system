@@ -39,8 +39,8 @@ export const signIn = async function name(payload: {
     password: payload.password,
     callbackUrl:
       typeof window !== "undefined"
-        ? `${window.location.origin}/admin`
-        : "/admin",
+        ? `${window.location.origin}/business-name`
+        : "/business-name",
     json: "true",
   });
 

@@ -11,6 +11,21 @@ const LoginPage = () => {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const router = useRouter();
 
+  const resolveAppRedirect = (url?: string | null) => {
+    if (!url || typeof window === "undefined") {
+      return null;
+    }
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.origin !== window.location.origin) {
+        return null;
+      }
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return null;
+    }
+  };
+
   const clearFieldError = (field: string) => {
     setErrors((prev) => {
       if (!prev[field]) {
@@ -53,11 +68,8 @@ const LoginPage = () => {
       const result = await signIn(payload);
       toast.success("Welcome back!");
       form.reset();
-      if (result?.url) {
-        router.push(result.url);
-      } else {
-        router.push("/admin");
-      }
+      const redirectTo = resolveAppRedirect(result?.url) ?? "/business-name";
+      router.push(redirectTo);
     } catch (error) {
       console.log(error);
       toast.error("Invalid email or password.");

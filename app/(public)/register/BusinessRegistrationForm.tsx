@@ -14,6 +14,21 @@ const BusinessRegistrationForm = () => {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const router = useRouter();
 
+  const resolveAppRedirect = (url?: string | null) => {
+    if (!url || typeof window === "undefined") {
+      return null;
+    }
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.origin !== window.location.origin) {
+        return null;
+      }
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return null;
+    }
+  };
+
   const clearFieldError = (field: string) => {
     setErrors((prev) => {
       if (!prev[field]) {
@@ -98,7 +113,8 @@ const BusinessRegistrationForm = () => {
           email: ownerEmail,
           password: ownerPassword,
         });
-        router.push(result?.url ?? "/admin");
+        const redirectTo = resolveAppRedirect(result?.url) ?? "/admin";
+        router.push(redirectTo);
       } catch (error) {
         console.error("auto sign-in failed", error);
         toast.info("Account created. Please log in from the login page.");

@@ -1,25 +1,14 @@
-﻿import "./globals.css";
-import MainFooter from "@/components/MainFooter";
-import MainHeader from "@/components/MainHeader";
-import TopBrandWave from "@/components/TopBrandWave";
-import BottomBrandWave from "@/components/BottomBrandWave";
-import ToastProvider from "@/components/ToastProvider";
+// app/layout.tsx
+import "./globals.css";
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body>
-        <MainHeader />
-        <TopBrandWave />
-        <ToastProvider />
-        {children}
-        <BottomBrandWave />
-        <MainFooter />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -12,6 +12,21 @@ const EmployeeRegistrationForm = () => {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const router = useRouter();
 
+  const resolveAppRedirect = (url?: string | null) => {
+    if (!url || typeof window === "undefined") {
+      return null;
+    }
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.origin !== window.location.origin) {
+        return null;
+      }
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return null;
+    }
+  };
+
   const clearFieldError = (field: string) => {
     setErrors((prev) => {
       if (!prev[field]) {
@@ -87,10 +102,11 @@ const EmployeeRegistrationForm = () => {
         toast.success("Employee account created! Signing you in...");
         try {
           const result = await signIn({
-            email: employeeEmail,
-            password: employeePassword,
-          });
-          router.push(result?.url ?? "/admin");
+          email: employeeEmail,
+          password: employeePassword,
+        });
+        const redirectTo = resolveAppRedirect(result?.url) ?? "/admin";
+        router.push(redirectTo);
           return;
         } catch (error) {
           console.error("auto sign-in failed", error);
