@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "@/api/client/auth.api";
 
 const navItems = [
   { href: "/admin/business", label: "Business" },
@@ -14,6 +18,7 @@ export default function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-primary text-contrast">
       <header className="border-b border-accent-3 bg-accent-1">
@@ -32,6 +37,16 @@ export default function AdminLayout({
           >
             Home
           </Link>
+          <button
+            type="button"
+            onClick={async () => {
+              await signOut();
+              router.push("/login");
+            }}
+            className="rounded-lg bg-brand px-3 py-1 text-sm font-semibold text-primary"
+          >
+            Sign out
+          </button>
         </div>
         <nav className="border-t border-accent-3">
           <div className="mx-auto flex max-w-6xl flex-wrap gap-3 px-6 py-3">

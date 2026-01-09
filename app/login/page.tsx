@@ -1,40 +1,122 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import CustomInput from "@/components/CustomInput";
+import { signIn, signInPayload } from "@/api/client/auth.api";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const router = useRouter();
+
+  const clearFieldError = (field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    const nextErrors: Partial<Record<string, string>> = {};
+    if (!email) {
+      nextErrors.email = "Email is required.";
+    }
+    if (!password) {
+      nextErrors.password = "Password is required.";
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      toast.error("Please enter your login details.");
+      return;
+    }
+
+    const payload: signInPayload = {
+      email: email,
+      password: password,
+    };
+
+    try {
+      const result = await signIn(payload);
+      toast.success("Welcome back!");
+      form.reset();
+      if (result?.url) {
+        router.push(result.url);
+      } else {
+        router.push("/admin");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Invalid email or password.");
+      return;
+    }
+  };
+
   return (
     <main className="min-h-screen bg-primary text-contrast">
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <header className="mb-8">
+      <section className="mx-auto max-w-5xl px-6 py-16">
+        <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">
             Welcome Back
           </p>
-          <h1 className="text-3xl font-semibold text-brand">Log In</h1>
-          <p className="mt-4 text-base text-contrast/80">
-            Access your business dashboard or continue serving customers.
+          <h1 className="text-3xl font-semibold text-brand">Log in</h1>
+          <p className="mt-4 max-w-2xl text-base text-contrast/80">
+            Sign in to manage loyalty programs, track visits, and keep customers
+            engaged.
           </p>
         </header>
 
-        <section className="rounded-xl border border-accent-3 bg-accent-2 p-6">
-          <p className="text-sm text-contrast/80">
-            Login form fields will go here. This will support business owners
-            and employees.
+        <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+          <h2 className="text-lg font-semibold">Access your account</h2>
+          <p className="mt-2 text-sm text-contrast/80">
+            Use your email and password to continue.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary"
-              href="/admin"
+          <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
+            <CustomInput
+              id="email"
+              type="email"
+              placeholder="Email address"
+              errorText={errors.email}
+              onChange={() => clearFieldError("email")}
+            />
+            <CustomInput
+              id="password"
+              type="password"
+              placeholder="Password"
+              errorText={errors.password}
+              onChange={() => clearFieldError("password")}
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
             >
-              Log In
-            </Link>
+              Log in
+            </button>
+          </form>
+          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
+            <span className="text-contrast/70">New here?</span>
             <Link
-              className="rounded-lg border border-accent-4 px-4 py-2 text-sm font-semibold text-contrast"
-              href="/"
+              className="font-semibold text-brand hover:text-brand/80"
+              href="/register"
             >
-              Back to Home
+              Create an account
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 };

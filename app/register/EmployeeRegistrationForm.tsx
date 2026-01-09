@@ -4,12 +4,13 @@ import CustomInput from "@/components/CustomInput";
 import { toast } from "react-toastify";
 import { CreateUserPayload, createUser } from "@/api/client/user.api";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "@/api/client/auth.api";
 
 const EmployeeRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<
-    Partial<Record<string, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const router = useRouter();
 
   const clearFieldError = (field: string) => {
     setErrors((prev) => {
@@ -79,10 +80,28 @@ const EmployeeRegistrationForm = () => {
 
     try {
       setIsSubmitting(true);
-      await createUser(payload);
+      const user = await createUser(payload);
       setErrors({});
       form.reset();
+      if (user?.approved) {
+        toast.success("Employee account created! Signing you in...");
+        try {
+          const result = await signIn({
+            email: employeeEmail,
+            password: employeePassword,
+          });
+          router.push(result?.url ?? "/admin");
+          return;
+        } catch (error) {
+          console.error("auto sign-in failed", error);
+          toast.info("Account created. Please log in from the login page.");
+          router.push("/login");
+          return;
+        }
+      }
+
       toast.success("Employee account created!");
+      router.push("/pending-approval");
     } catch (error) {
       console.error("createUser failed", error);
       toast.error("Unable to create employee account.");

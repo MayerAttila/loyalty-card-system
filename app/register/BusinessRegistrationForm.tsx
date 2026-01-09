@@ -6,12 +6,13 @@ import { createBusiness } from "@/api/client/business.api";
 import { CreateBusinessPayload } from "@/api/client/business.api";
 import { createUser } from "@/api/client/user.api";
 import { useState } from "react";
+import { signIn } from "@/api/client/auth.api";
+import { useRouter } from "next/navigation";
 
 const BusinessRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<
-    Partial<Record<string, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const router = useRouter();
 
   const clearFieldError = (field: string) => {
     setErrors((prev) => {
@@ -87,10 +88,21 @@ const BusinessRegistrationForm = () => {
         password: ownerPassword,
         businessId: business.id,
         role: "OWNER",
+        approved: true,
       });
       setErrors({});
       form.reset();
-      toast.success("Business account created!");
+      toast.success("Business account created! Signing you in...");
+      try {
+        const result = await signIn({
+          email: ownerEmail,
+          password: ownerPassword,
+        });
+        router.push(result?.url ?? "/admin");
+      } catch (error) {
+        console.error("auto sign-in failed", error);
+        toast.info("Account created. Please log in from the login page.");
+      }
     } catch (error) {
       console.error("createBusiness failed", error);
       toast.error("Unable to create business account.");

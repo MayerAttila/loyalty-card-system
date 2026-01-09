@@ -7,6 +7,7 @@ export type CreateUserPayload = {
   password: string;
   businessId: string;
   role?: "OWNER" | "ADMIN" | "STAFF";
+  approved?: boolean;
 };
 
 export const createUser = async (payload: CreateUserPayload) => {
