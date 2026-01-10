@@ -26,7 +26,9 @@ export default function Admin() {
           ? (e as { response?: { status?: number } }).response?.status
           : undefined;
       setError(
-        status ? `Request failed: ${status}` : "Network error while fetching session."
+        status
+          ? `Request failed: ${status}`
+          : "Network error while fetching session."
       );
       setSession(null);
     } finally {
