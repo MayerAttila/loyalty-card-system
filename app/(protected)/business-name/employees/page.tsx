@@ -1,14 +1,19 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
+import { getUsersByBusinessId } from "@/api/server/user.api";
+import EmployeeClient from "./EmployeeClient";
+import { getSession } from "@/api/server/auth.api";
 
-const EmployeesPage = () => {
+const EmployeesPage = async () => {
+  const session = await getSession();
+
+  if (!session?.user?.businessId) return <p>Missing business ID</p>;
+
+  const businessId = session.user.businessId;
+  const initialUserData = await getUsersByBusinessId(businessId);
+
   return (
     <RequireRole allow={["ADMIN", "OWNER"]}>
-      <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-        <h2 className="text-xl font-semibold text-brand">Employees</h2>
-        <p className="mt-2 text-sm text-contrast/80">
-          Manage employee access, roles, and onboarding invitations.
-        </p>
-      </section>
+      <EmployeeClient initialUserData={initialUserData} />
     </RequireRole>
   );
 };
