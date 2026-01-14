@@ -34,9 +34,11 @@ export default async function ProtectedLayout({
   if (session.user.approved === false) redirect("/pending-approval");
 
   return (
-    <div className="min-h-screen bg-primary text-contrast">
+    <div className="flex min-h-screen bg-primary text-contrast">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <main className="flex-1 px-6 py-8">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }

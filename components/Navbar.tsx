@@ -2,61 +2,102 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { signOut } from "@/api/client/auth.api";
+import {
+  FiBriefcase,
+  FiCheckSquare,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCreditCard,
+  FiList,
+  FiLogOut,
+  FiUser,
+  FiUsers,
+} from "react-icons/fi";
 
 const navItems = [
-  { href: "/business-name/business", label: "Business" },
-  { href: "/business-name/cards", label: "Cards" },
-  { href: "/business-name/employees", label: "Employees" },
-  { href: "/business-name/customers", label: "Customers" },
-  { href: "/business-name/stamping-logs", label: "Logs" },
-  { href: "/business-name/stamping", label: "Stamping" },
+  { href: "/business-name/business", label: "Business", icon: FiBriefcase },
+  { href: "/business-name/cards", label: "Cards", icon: FiCreditCard },
+  { href: "/business-name/employees", label: "Employees", icon: FiUsers },
+  { href: "/business-name/customers", label: "Customers", icon: FiUser },
+  { href: "/business-name/stamping-logs", label: "Logs", icon: FiList },
+  { href: "/business-name/stamping", label: "Stamping", icon: FiCheckSquare },
 ];
 
 export default function Navbar() {
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <header className="border-b border-accent-3 bg-accent-1">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-4">
-        <div className="flex flex-1 items-center gap-3">
-          <span className="text-sm uppercase tracking-wide text-contrast/70">
-            Admin
-          </span>
-          <h1 className="text-lg font-semibold text-brand">
-            Loyalty Dashboard
+    <aside
+      className={`flex min-h-screen flex-col border-r border-accent-3 bg-accent-1 transition-all duration-200 ${
+        collapsed ? "w-16" : "w-64"
+      }`}
+    >
+      <div className="flex items-center justify-between px-4 py-5">
+        <div
+          className={`flex min-w-0 items-center gap-3 overflow-hidden transition-all ${
+            collapsed ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <h1 className="truncate whitespace-nowrap text-base font-semibold text-brand">
+            business-name
           </h1>
         </div>
-        <Link
-          className="rounded-lg border border-accent-4 px-3 py-1 text-sm font-semibold text-contrast"
-          href="/"
+        <button
+          type="button"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={() => setCollapsed((prev) => !prev)}
+          className="rounded-lg border border-accent-4 p-2 text-contrast transition hover:bg-accent-2"
         >
-          Home
-        </Link>
+          {collapsed ? (
+            <FiChevronRight className="h-4 w-4" />
+          ) : (
+            <FiChevronLeft className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
+      <nav className="flex-1 space-y-1 px-3">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={item.label}
+              aria-label={item.label}
+              className={`flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-contrast transition hover:border-accent-4 hover:bg-accent-2 ${
+                collapsed ? "justify-center" : ""
+              }`}
+            >
+              <Icon className="h-5 w-5 shrink-0 text-contrast" />
+              {!collapsed && (
+                <span className="whitespace-nowrap">{item.label}</span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="space-y-2 border-t border-accent-3 px-3 py-4">
         <button
           type="button"
           onClick={async () => {
             await signOut();
             router.push("/login");
           }}
-          className="rounded-lg bg-brand px-3 py-1 text-sm font-semibold text-primary"
+          title="Sign out"
+          aria-label="Sign out"
+          className={`flex w-full items-center gap-3 rounded-xl bg-brand px-3 py-2 text-sm font-semibold text-primary transition hover:brightness-110 ${
+            collapsed ? "justify-center" : ""
+          }`}
         >
-          Sign out
+          <FiLogOut className="h-5 w-5 shrink-0 text-primary" />
+          {!collapsed && <span className="whitespace-nowrap">Sign out</span>}
         </button>
       </div>
-      <nav className="border-t border-accent-3">
-        <div className="mx-auto flex max-w-6xl flex-wrap gap-3 px-6 py-3">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              className="rounded-full border border-accent-4 bg-primary px-4 py-1 text-sm font-medium text-contrast"
-              href={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
-    </header>
+    </aside>
   );
 }
