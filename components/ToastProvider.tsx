@@ -1,9 +1,12 @@
 "use client";
 
 import { Slide, ToastContainer } from "react-toastify";
+import { useTheme } from "next-themes";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ToastProvider() {
+  const { resolvedTheme } = useTheme();
+
   return (
     <ToastContainer
       position="top-center"
@@ -16,7 +19,7 @@ export default function ToastProvider() {
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light"
+      theme={resolvedTheme === "dark" ? "dark" : "light"}
       transition={Slide}
     />
   );

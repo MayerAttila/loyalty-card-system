@@ -43,10 +43,10 @@ const FormSwitch = ({
 
   return (
     <div
-      className="relative inline-flex items-center space-x-1 rounded-full bg-gray-200 p-1 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:bg-[#333] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
+      className="relative inline-flex items-center space-x-1 rounded-full bg-accent-2 p-1 shadow-[inset_0_2px_4px_rgba(15,23,42,0.08)]"
     >
       <div
-        className="absolute rounded-full bg-gray-100 shadow-md transition-all duration-[350ms] ease-in-out dark:bg-black"
+        className="absolute rounded-full bg-primary shadow-md transition-all duration-[350ms] ease-in-out"
         style={{
           width: slideStyle.width,
           height: "calc(100% - 8px)",
@@ -64,17 +64,17 @@ const FormSwitch = ({
           onClick={() => onChange(item.key)}
           className={`relative z-10 rounded-full px-5 py-2 text-xs font-semibold transition-colors duration-300 sm:text-sm ${
             activeKey === item.key
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-600 dark:text-[#AAA]"
+              ? "text-contrast"
+              : "text-contrast/70"
           }`}
         >
           {typeof item.status === "boolean" ? (
             <div className="flex items-center space-x-2">
               <span>{item.label}</span>
               {item.status ? (
-                <FaRegCircleCheck color="#22c55e" size={20} />
+                <FaRegCircleCheck className="text-brand" size={20} />
               ) : (
-                <IoCloseCircleOutline color="#ef4444" size={20} />
+                <IoCloseCircleOutline className="text-contrast/60" size={20} />
               )}
             </div>
           ) : (

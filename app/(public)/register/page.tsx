@@ -31,7 +31,7 @@ const RegisterPage = () => {
           </p>
         </header>
 
-        <div className="mb-8 flex justify-center md:justify-start">
+        <div className="mb-8 flex justify-center">
           <FormSwitch
             items={registerOptions}
             activeKey={activeKey}
