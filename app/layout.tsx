@@ -1,6 +1,7 @@
 // app/layout.tsx
 import "./globals.css";
 import ToastProvider from "@/components/ToastProvider";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -8,10 +9,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ToastProvider />
-        {children}
+        <ThemeProvider>
+          <ToastProvider />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

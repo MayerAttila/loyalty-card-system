@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 const MainHeader = () => {
   return (
@@ -8,6 +11,11 @@ const MainHeader = () => {
           Brand Name
         </Link>
         <div className="flex items-center gap-4 text-sm font-semibold">
+          <ThemeSwitch
+            showLabel={false}
+            className="rounded-lg border border-primary/40 p-2 text-primary/90 transition hover:bg-primary/10"
+            iconClassName="h-4 w-4"
+          />
           <Link
             className="text-primary/80 hover:text-primary"
             href="/register"

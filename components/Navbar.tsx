@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/api/client/auth.api";
+import ThemeSwitch from "@/components/ThemeSwitch";
 import {
   FiBriefcase,
   FiCheckSquare,
@@ -82,6 +83,14 @@ export default function Navbar() {
       </nav>
 
       <div className="space-y-2 border-t border-accent-3 px-3 py-4">
+        <ThemeSwitch
+          showLabel={!collapsed}
+          className={`flex w-full items-center gap-3 rounded-xl border border-accent-4 px-3 py-2 text-sm font-semibold text-contrast transition hover:bg-accent-2 ${
+            collapsed ? "justify-center" : ""
+          }`}
+          iconClassName="h-5 w-5 shrink-0"
+          labelClassName="whitespace-nowrap"
+        />
         <button
           type="button"
           onClick={async () => {
