@@ -102,11 +102,12 @@ const EmployeeRegistrationForm = () => {
         toast.success("Employee account created! Signing you in...");
         try {
           const result = await signIn({
-          email: employeeEmail,
-          password: employeePassword,
-        });
-        const redirectTo = resolveAppRedirect(result?.url) ?? "/admin";
-        router.push(redirectTo);
+            email: employeeEmail,
+            password: employeePassword,
+          });
+          const redirectTo =
+            resolveAppRedirect(result?.url) ?? "/business-name";
+          router.push(redirectTo);
           return;
         } catch (error) {
           console.error("auto sign-in failed", error);

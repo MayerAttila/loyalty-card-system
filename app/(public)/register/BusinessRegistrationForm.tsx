@@ -113,7 +113,7 @@ const BusinessRegistrationForm = () => {
           email: ownerEmail,
           password: ownerPassword,
         });
-        const redirectTo = resolveAppRedirect(result?.url) ?? "/admin";
+        const redirectTo = resolveAppRedirect(result?.url) ?? "/business-name";
         router.push(redirectTo);
       } catch (error) {
         console.error("auto sign-in failed", error);
