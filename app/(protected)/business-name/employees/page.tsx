@@ -13,7 +13,10 @@ const EmployeesPage = async () => {
 
   return (
     <RequireRole allow={["ADMIN", "OWNER"]}>
-      <EmployeeClient initialUserData={initialUserData} />
+      <EmployeeClient
+        initialUserData={initialUserData}
+        currentUserRole={session.user.role}
+      />
     </RequireRole>
   );
 };
