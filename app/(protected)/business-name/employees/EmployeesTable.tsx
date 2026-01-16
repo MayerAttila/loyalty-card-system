@@ -51,14 +51,14 @@ const EmployeesTable = ({
           <span className="text-contrast/80">
             {row.approved ? "Yes" : "No"}
           </span>
-          <ApproveButton
-            approved={row.approved}
-            disabled={
-              updatingIds.has(row.id) ||
-              (currentUserRole === "ADMIN" && row.role !== "STAFF")
-            }
-            onClick={() => onToggleApproval(row.id, !row.approved)}
-          />
+          {row.role !== "OWNER" &&
+            (currentUserRole !== "ADMIN" || row.role === "STAFF") && (
+            <ApproveButton
+              approved={row.approved}
+              disabled={updatingIds.has(row.id)}
+              onClick={() => onToggleApproval(row.id, !row.approved)}
+            />
+          )}
         </div>
       ),
       sortValue: (row) => (row.approved ? 1 : 0),
