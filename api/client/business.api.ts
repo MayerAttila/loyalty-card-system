@@ -13,3 +13,11 @@ export const createBusiness = async (payload: {
   const { data } = await api.post<Business>("/business", payload);
   return data;
 };
+
+export const updateBusiness = async (
+  id: string,
+  payload: { name: string; address?: string }
+) => {
+  const { data } = await api.patch<Business>(`/business/id/${id}`, payload);
+  return data;
+};

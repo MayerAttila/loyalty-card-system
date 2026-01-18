@@ -1,14 +1,19 @@
+import { getBusinessById } from "@/api/server/business.api";
+import { getSession } from "@/api/server/auth.api";
 import { RequireRole } from "@/lib/auth/RequireRole";
+import BusinessClient from "./BusinessClient";
 
-const BusinessPage = () => {
+const BusinessPage = async () => {
+  const session = await getSession();
+
+  if (!session?.user?.businessId) return <p>Missing business ID</p>;
+
+  const business = await getBusinessById(session.user.businessId);
+  if (!business) return <p>Business not found</p>;
+
   return (
     <RequireRole allow={["ADMIN", "OWNER"]}>
-      <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-        <h2 className="text-xl font-semibold text-brand">Business</h2>
-        <p className="mt-2 text-sm text-contrast/80">
-          Review business details, locations, contacts, and operating settings.
-        </p>
-      </section>
+      <BusinessClient initialBusiness={business} />
     </RequireRole>
   );
 };
