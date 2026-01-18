@@ -8,6 +8,9 @@ type LoyaltyCardProps = {
   maxPoints: number;
   filledPoints?: number;
   rewardsCollected?: number;
+  cardColor?: string;
+  accentColor?: string;
+  textColor?: string;
   className?: string;
 };
 
@@ -17,22 +20,57 @@ const LoyaltyCard = ({
   maxPoints,
   filledPoints = 0,
   rewardsCollected = 0,
+  cardColor = "#141b2d",
+  accentColor = "#f59e0b",
+  textColor = "#f8fafc",
   className = "",
 }: LoyaltyCardProps) => {
-  const safeMax = Math.max(1, Math.min(24, maxPoints));
+  const safeMax = Math.max(4, Math.min(16, maxPoints));
   const safeFilled = Math.min(Math.max(0, filledPoints), safeMax);
   const shouldSplitRows = safeMax > 6;
   const firstRowCount = shouldSplitRows ? Math.ceil(safeMax / 2) : safeMax;
   const secondRowCount = shouldSplitRows ? safeMax - firstRowCount : 0;
   const stamps = Array.from({ length: safeMax });
 
+  const withAlpha = (color: string, alpha: number) => {
+    const normalized = color.trim();
+    if (!normalized.startsWith("#")) return color;
+    const hex = normalized.replace("#", "");
+    const full =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map((char) => char + char)
+            .join("")
+        : hex;
+    if (full.length !== 6) return color;
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   return (
     <div
-      className={`w-full max-w-[360px] aspect-[1.586/1] rounded-2xl border border-accent-3 bg-accent-1 p-5 text-contrast ${className}`}
+      className={`w-full max-w-[360px] aspect-[1.586/1] rounded-2xl border p-5 text-contrast ${className}`}
+      style={{
+        backgroundColor: cardColor,
+        borderColor: withAlpha(accentColor, 0.35),
+        color: textColor,
+      }}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-brand">{businessName}</h3>
-        <div className="rounded-full border border-accent-3 bg-primary px-3 py-1 text-xs font-semibold text-contrast/80">
+        <h3 className="text-lg font-semibold" style={{ color: accentColor }}>
+          {businessName}
+        </h3>
+        <div
+          className="rounded-full border px-3 py-1 text-xs font-semibold"
+          style={{
+            borderColor: withAlpha(accentColor, 0.35),
+            backgroundColor: withAlpha(accentColor, 0.12),
+            color: withAlpha(textColor, 0.85),
+          }}
+        >
           {safeFilled}/{safeMax} stamps
         </div>
       </div>
@@ -45,10 +83,21 @@ const LoyaltyCard = ({
               <div
                 key={`stamp-${index}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
-                  isFilled
-                    ? "border-brand/50 bg-brand/15 text-brand"
-                    : "border-accent-3 bg-primary text-contrast/60"
+                  isFilled ? "" : "border-accent-3 bg-primary text-contrast/60"
                 }`}
+                style={
+                  isFilled
+                    ? {
+                        borderColor: withAlpha(accentColor, 0.6),
+                        backgroundColor: withAlpha(accentColor, 0.18),
+                        color: accentColor,
+                      }
+                    : {
+                        borderColor: withAlpha(textColor, 0.18),
+                        backgroundColor: withAlpha(textColor, 0.06),
+                        color: withAlpha(textColor, 0.65),
+                      }
+                }
               >
                 {index + 1}
               </div>
@@ -64,10 +113,21 @@ const LoyaltyCard = ({
                 <div
                   key={`stamp-${absoluteIndex}`}
                   className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
-                    isFilled
-                      ? "border-brand/50 bg-brand/15 text-brand"
-                      : "border-accent-3 bg-primary text-contrast/60"
+                    isFilled ? "" : "border-accent-3 bg-primary text-contrast/60"
                   }`}
+                  style={
+                    isFilled
+                      ? {
+                          borderColor: withAlpha(accentColor, 0.6),
+                          backgroundColor: withAlpha(accentColor, 0.18),
+                          color: accentColor,
+                        }
+                      : {
+                          borderColor: withAlpha(textColor, 0.18),
+                          backgroundColor: withAlpha(textColor, 0.06),
+                          color: withAlpha(textColor, 0.65),
+                        }
+                  }
                 >
                   {absoluteIndex + 1}
                 </div>
@@ -77,9 +137,12 @@ const LoyaltyCard = ({
         ) : null}
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-sm text-contrast/70">
-        <span>Owner: {ownerName}</span>
-        <span>Rewards collected: {rewardsCollected}</span>
+      <div
+        className="mt-4 flex items-center justify-between text-sm"
+        style={{ color: withAlpha(textColor, 0.7) }}
+      >
+        <span> {ownerName}</span>
+        <span>Rewards: {rewardsCollected}</span>
       </div>
     </div>
   );

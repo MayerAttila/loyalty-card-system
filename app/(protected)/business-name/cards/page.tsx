@@ -1,5 +1,5 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
-import LoyaltyCard from "./LoyaltyCard";
+import CardEditorClient from "./CardEditorClient";
 
 const CardsPage = () => {
   return (
@@ -9,22 +9,7 @@ const CardsPage = () => {
         <p className="mt-2 text-sm text-contrast/80">
           Create and manage loyalty card templates, rewards, and stamp rules.
         </p>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <LoyaltyCard
-            businessName="Coffee Club"
-            ownerName="Alex Morgan"
-            maxPoints={10}
-            filledPoints={3}
-            rewardsCollected={1}
-          />
-          <LoyaltyCard
-            businessName="Lunch Passport"
-            ownerName="Jordan Lee"
-            maxPoints={8}
-            filledPoints={0}
-            rewardsCollected={0}
-          />
-        </div>
+        <CardEditorClient />
       </section>
     </RequireRole>
   );
