@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { createCardTemplate } from "@/api/client/cardTemplate.api";
 import CustomInput from "@/components/CustomInput";
+import { useSession } from "@/lib/auth/useSession";
 import LoyaltyCard from "./LoyaltyCard";
 
 type CardEditorClientProps = {
@@ -21,6 +24,8 @@ const CardEditorClient = ({
   initialAccentColor = "#f59e0b",
   initialTextColor = "#f8fafc",
 }: CardEditorClientProps) => {
+  const { session } = useSession();
+  const businessId = session?.user?.businessId;
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [maxPoints, setMaxPoints] = useState(initialMaxPoints);
   const [filledPoints, setFilledPoints] = useState(initialFilledPoints);
@@ -28,6 +33,10 @@ const CardEditorClient = ({
   const [cardColor, setCardColor] = useState(initialCardColor);
   const [accentColor, setAccentColor] = useState(initialAccentColor);
   const [textColor, setTextColor] = useState(initialTextColor);
+  const [templateTitle, setTemplateTitle] = useState(
+    `${initialBusinessName} Card`
+  );
+  const [saving, setSaving] = useState(false);
 
   const sanitized = useMemo(() => {
     const safeMax = Math.max(4, Math.min(16, maxPoints || 4));
@@ -61,6 +70,12 @@ const CardEditorClient = ({
           Card Details
         </h3>
         <div className="mt-4 space-y-4">
+          <CustomInput
+            id="cardTemplateTitle"
+            placeholder="Template name"
+            value={templateTitle}
+            onChange={(event) => setTemplateTitle(event.target.value)}
+          />
           <CustomInput
             id="cardBusinessName"
             placeholder="Business name"
@@ -124,6 +139,42 @@ const CardEditorClient = ({
               />
             </label>
           </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            disabled={saving || !templateTitle.trim() || !businessId}
+            onClick={async () => {
+              if (!businessId) {
+                toast.error("No business selected.");
+                return;
+              }
+              if (!templateTitle.trim()) {
+                toast.error("Template name is required.");
+                return;
+              }
+              setSaving(true);
+              try {
+                await createCardTemplate({
+                  title: templateTitle.trim(),
+                  businessId,
+                  maxPoints: sanitized.maxPoints,
+                  cardColor: sanitized.cardColor,
+                  accentColor: sanitized.accentColor,
+                  textColor: sanitized.textColor,
+                });
+                toast.success("Card template saved.");
+              } catch (error) {
+                console.error(error);
+                toast.error("Unable to save card template.");
+              } finally {
+                setSaving(false);
+              }
+            }}
+            className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
+          >
+            {saving ? "Saving..." : "Save template"}
+          </button>
         </div>
       </div>
       <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
