@@ -3,7 +3,7 @@
 import React from "react";
 import { User } from "@/types/user";
 import DataTable, { DataTableColumn } from "@/components/DataTable";
-import IconButton from "@/components/IconButton";
+import DeleteButton from "@/components/DeleteButton";
 import ApproveButton from "./ApproveButton";
 
 type EmployeesTableProps = {
@@ -12,6 +12,7 @@ type EmployeesTableProps = {
   currentUserRole?: User["role"];
   onToggleApproval: (userId: string, approved: boolean) => void;
   onUpdateRole: (userId: string, role: User["role"]) => void;
+  onDelete: (userId: string) => void;
 };
 
 const EmployeesTable = ({
@@ -20,6 +21,7 @@ const EmployeesTable = ({
   currentUserRole,
   onToggleApproval,
   onUpdateRole,
+  onDelete,
 }: EmployeesTableProps) => {
   const roleRank: Record<string, number> = {
     OWNER: 0,
@@ -35,6 +37,12 @@ const EmployeesTable = ({
     if (!currentUserRole) return false;
     if (currentUserRole === "OWNER") return true;
     if (currentUserRole === "ADMIN") return row.role !== "OWNER";
+    return false;
+  };
+  const canDelete = (row: User) => {
+    if (!currentUserRole) return false;
+    if (currentUserRole === "OWNER") return true;
+    if (currentUserRole === "ADMIN") return row.role === "STAFF";
     return false;
   };
   const roleOptions =
@@ -115,10 +123,14 @@ const EmployeesTable = ({
       label: "Actions",
       width: 140,
       align: "right",
-      render: () => (
+      render: (_, row) => (
         <div className="flex justify-end gap-2">
-          <IconButton variant="edit" />
-          <IconButton variant="delete" />
+          {canDelete(row) && (
+            <DeleteButton
+              disabled={updatingIds.has(row.id)}
+              onConfirm={() => onDelete(row.id)}
+            />
+          )}
         </div>
       ),
     },

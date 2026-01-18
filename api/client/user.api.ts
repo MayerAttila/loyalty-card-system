@@ -28,3 +28,7 @@ export const updateUserRole = async (id: string, role: User["role"]) => {
   });
   return data;
 };
+
+export const deleteUser = async (id: string) => {
+  await api.delete(`/user/id/${id}`);
+};

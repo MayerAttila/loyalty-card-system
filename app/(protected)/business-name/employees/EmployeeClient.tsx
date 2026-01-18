@@ -2,7 +2,11 @@
 
 import React, { useCallback, useState } from "react";
 import { toast } from "react-toastify";
-import { updateUserApproval, updateUserRole } from "@/api/client/user.api";
+import {
+  deleteUser,
+  updateUserApproval,
+  updateUserRole,
+} from "@/api/client/user.api";
 import { User } from "@/types/user";
 import EmployeesTable from "./EmployeesTable";
 
@@ -73,6 +77,29 @@ const EmployeeClient = ({
     }
   }, []);
 
+  const handleDelete = useCallback(async (userId: string) => {
+    setUpdatingIds((prev) => {
+      const next = new Set(prev);
+      next.add(userId);
+      return next;
+    });
+
+    try {
+      await deleteUser(userId);
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      toast.success("Employee deleted.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to delete employee.");
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
+  }, []);
+
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
       <h2 className="text-xl font-semibold text-brand">Employees</h2>
@@ -85,6 +112,7 @@ const EmployeeClient = ({
         currentUserRole={currentUserRole}
         onToggleApproval={handleToggleApproval}
         onUpdateRole={handleRoleUpdate}
+        onDelete={handleDelete}
       />
     </section>
   );
