@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState } from "react";
 import { toast } from "react-toastify";
-import { updateUserApproval } from "@/api/client/user.api";
+import { updateUserApproval, updateUserRole } from "@/api/client/user.api";
 import { User } from "@/types/user";
 import EmployeesTable from "./EmployeesTable";
 
@@ -48,6 +48,31 @@ const EmployeeClient = ({
     []
   );
 
+  const handleRoleUpdate = useCallback(async (userId: string, role: User["role"]) => {
+    setUpdatingIds((prev) => {
+      const next = new Set(prev);
+      next.add(userId);
+      return next;
+    });
+
+    try {
+      const updated = await updateUserRole(userId, role);
+      setUsers((prev) =>
+        prev.map((user) => (user.id === userId ? updated : user))
+      );
+      toast.success("Role updated.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to update role.");
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
+  }, []);
+
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
       <h2 className="text-xl font-semibold text-brand">Employees</h2>
@@ -59,6 +84,7 @@ const EmployeeClient = ({
         updatingIds={updatingIds}
         currentUserRole={currentUserRole}
         onToggleApproval={handleToggleApproval}
+        onUpdateRole={handleRoleUpdate}
       />
     </section>
   );

@@ -21,3 +21,10 @@ export const updateUserApproval = async (id: string, approved: boolean) => {
   });
   return data;
 };
+
+export const updateUserRole = async (id: string, role: User["role"]) => {
+  const { data } = await api.patch<User>(`/user/id/${id}/role`, {
+    role,
+  });
+  return data;
+};

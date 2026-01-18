@@ -20,6 +20,9 @@ type DataTableProps<T> = {
   columns: DataTableColumn<T>[];
   storageKey?: string;
   emptyMessage?: string;
+  defaultSortKey?: string;
+  defaultSortDirection?: SortDirection;
+  respectStoredSort?: boolean;
 };
 
 type ResizeState = {
@@ -47,10 +50,20 @@ const DataTable = <T,>({
   columns,
   storageKey,
   emptyMessage = "No data found.",
+  defaultSortKey,
+  defaultSortDirection = "asc",
+  respectStoredSort = true,
 }: DataTableProps<T>) => {
-  const defaultSortKey = columns.find((column) => column.sortable)?.key ?? null;
-  const [sortKey, setSortKey] = useState<string | null>(defaultSortKey);
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const fallbackSortKey =
+    columns.find((column) => column.sortable)?.key ?? null;
+  const resolvedSortKey =
+    defaultSortKey &&
+    columns.some((column) => column.key === defaultSortKey && column.sortable)
+      ? defaultSortKey
+      : fallbackSortKey;
+  const [sortKey, setSortKey] = useState<string | null>(resolvedSortKey);
+  const [sortDirection, setSortDirection] =
+    useState<SortDirection>(defaultSortDirection);
   const [columnWidths, setColumnWidths] = useState(() =>
     buildDefaultWidths(columns)
   );
@@ -81,12 +94,16 @@ const DataTable = <T,>({
         }));
       }
 
-      if (parsed.sortKey) {
+      if (respectStoredSort && parsed.sortKey) {
         setSortKey(parsed.sortKey);
+      } else {
+        setSortKey(resolvedSortKey);
       }
 
-      if (parsed.sortDirection) {
+      if (respectStoredSort && parsed.sortDirection) {
         setSortDirection(parsed.sortDirection);
+      } else {
+        setSortDirection(defaultSortDirection);
       }
     } catch {
     } finally {
