@@ -1,16 +1,22 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
-import CardEditorClient from "./CardEditorClient";
+import { getSession } from "@/api/server/auth.api";
+import { getCardTemplatesByBusinessId } from "@/api/server/cardTemplate.api";
+import CardsClient from "./CardsClient";
 
-const CardsPage = () => {
+const CardsPage = async () => {
+  const session = await getSession();
+  const businessId = session?.user?.businessId;
+  const templates = businessId
+    ? await getCardTemplatesByBusinessId(businessId)
+    : [];
+
   return (
     <RequireRole allow={["ADMIN", "OWNER"]}>
-      <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-        <h2 className="text-xl font-semibold text-brand">Cards</h2>
-        <p className="mt-2 text-sm text-contrast/80">
-          Create and manage loyalty card templates, rewards, and stamp rules.
-        </p>
-        <CardEditorClient />
-      </section>
+      <CardsClient
+        initialTemplates={templates}
+        businessId={businessId}
+        initialBusinessName={session?.user?.businessName}
+      />
     </RequireRole>
   );
 };

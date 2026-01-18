@@ -2,30 +2,39 @@
 
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { createCardTemplate } from "@/api/client/cardTemplate.api";
+import { createCardTemplate, updateCardTemplate } from "@/api/client/cardTemplate.api";
 import CustomInput from "@/components/CustomInput";
 import { useSession } from "@/lib/auth/useSession";
 import LoyaltyCard from "./LoyaltyCard";
+import { CardTemplate } from "@/types/cardTemplate";
 
-type CardEditorClientProps = {
+type CardTemplateEditorProps = {
   initialBusinessName?: string;
   initialMaxPoints?: number;
   initialFilledPoints?: number;
   initialCardColor?: string;
   initialAccentColor?: string;
   initialTextColor?: string;
+  businessId?: string;
+  selectedTemplate?: CardTemplate;
+  onTemplateSaved?: (template: CardTemplate) => void;
+  onCancel?: () => void;
 };
 
-const CardEditorClient = ({
+const CardTemplateEditor = ({
   initialBusinessName = "Coffee Club",
   initialMaxPoints = 10,
   initialFilledPoints = 3,
   initialCardColor = "#121826",
   initialAccentColor = "#f59e0b",
   initialTextColor = "#f8fafc",
-}: CardEditorClientProps) => {
+  businessId: businessIdProp,
+  selectedTemplate,
+  onTemplateSaved,
+  onCancel,
+}: CardTemplateEditorProps) => {
   const { session } = useSession();
-  const businessId = session?.user?.businessId;
+  const businessId = businessIdProp ?? session?.user?.businessId;
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [maxPoints, setMaxPoints] = useState(initialMaxPoints);
   const [filledPoints, setFilledPoints] = useState(initialFilledPoints);
@@ -34,9 +43,19 @@ const CardEditorClient = ({
   const [accentColor, setAccentColor] = useState(initialAccentColor);
   const [textColor, setTextColor] = useState(initialTextColor);
   const [templateTitle, setTemplateTitle] = useState(
-    `${initialBusinessName} Card`
+    selectedTemplate?.title ?? `${initialBusinessName} Card`
   );
   const [saving, setSaving] = useState(false);
+
+  React.useEffect(() => {
+    if (!selectedTemplate) return;
+    setTemplateTitle(selectedTemplate.title);
+    setMaxPoints(selectedTemplate.maxPoints);
+    setFilledPoints(Math.min(3, selectedTemplate.maxPoints));
+    setCardColor(selectedTemplate.cardColor);
+    setAccentColor(selectedTemplate.accentColor);
+    setTextColor(selectedTemplate.textColor);
+  }, [selectedTemplate]);
 
   const sanitized = useMemo(() => {
     const safeMax = Math.max(4, Math.min(16, maxPoints || 4));
@@ -140,7 +159,16 @@ const CardEditorClient = ({
             </label>
           </div>
         </div>
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+          {onCancel ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-lg border border-accent-3 px-4 py-3 text-sm font-semibold text-contrast/80"
+            >
+              Cancel
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={saving || !templateTitle.trim() || !businessId}
@@ -155,15 +183,28 @@ const CardEditorClient = ({
               }
               setSaving(true);
               try {
-                await createCardTemplate({
+                const payload = {
                   title: templateTitle.trim(),
-                  businessId,
                   maxPoints: sanitized.maxPoints,
                   cardColor: sanitized.cardColor,
                   accentColor: sanitized.accentColor,
                   textColor: sanitized.textColor,
-                });
-                toast.success("Card template saved.");
+                };
+
+                const saved = selectedTemplate?.id
+                  ? await updateCardTemplate(selectedTemplate.id, payload)
+                  : await createCardTemplate({
+                      ...payload,
+                      businessId,
+                    });
+
+                window.dispatchEvent(new CustomEvent("card-template-saved"));
+                onTemplateSaved?.(saved);
+                toast.success(
+                  selectedTemplate?.id
+                    ? "Card template updated."
+                    : "Card template saved."
+                );
               } catch (error) {
                 console.error(error);
                 toast.error("Unable to save card template.");
@@ -173,7 +214,11 @@ const CardEditorClient = ({
             }}
             className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save template"}
+            {saving
+              ? "Saving..."
+              : selectedTemplate?.id
+                ? "Update template"
+                : "Save template"}
           </button>
         </div>
       </div>
@@ -193,4 +238,4 @@ const CardEditorClient = ({
   );
 };
 
-export default CardEditorClient;
+export default CardTemplateEditor;
