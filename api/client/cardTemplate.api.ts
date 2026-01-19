@@ -42,3 +42,8 @@ export const updateCardTemplate = async (
   );
   return data;
 };
+
+export const deleteCardTemplate = async (id: string) => {
+  const { data } = await api.delete<CardTemplate>(`/card-template/id/${id}`);
+  return data;
+};

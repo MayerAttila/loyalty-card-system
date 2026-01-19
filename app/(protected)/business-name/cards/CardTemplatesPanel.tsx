@@ -2,21 +2,26 @@
 
 import React from "react";
 import EditButton from "@/components/EditButton";
+import DeleteButton from "@/components/DeleteButton";
 import LoyaltyCard from "./LoyaltyCard";
 import { CardTemplate } from "@/types/cardTemplate";
 
 type SavedTemplatesProps = {
   initialTemplates?: CardTemplate[];
   businessId?: string;
+  deletingIds?: Set<string>;
   onEdit?: (template: CardTemplate) => void;
   onCreate?: () => void;
+  onDelete?: (template: CardTemplate) => void;
 };
 
 const CardTemplatesPanel = ({
   initialTemplates = [],
   businessId,
+  deletingIds,
   onEdit,
   onCreate,
+  onDelete,
 }: SavedTemplatesProps) => {
   const templates = initialTemplates;
 
@@ -66,9 +71,18 @@ const CardTemplatesPanel = ({
                       {template.maxPoints} stamps
                     </p>
                   </div>
-                  {onEdit ? (
-                    <EditButton onClick={() => onEdit(template)} />
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    {onEdit ? (
+                      <EditButton onClick={() => onEdit(template)} />
+                    ) : null}
+                    {onDelete ? (
+                      <DeleteButton
+                        onConfirm={() => onDelete(template)}
+                        disabled={deletingIds?.has(template.id)}
+                        ariaLabel={`Delete ${template.title}`}
+                      />
+                    ) : null}
+                  </div>
                 </div>
                 <LoyaltyCard
                   businessName={template.title}
