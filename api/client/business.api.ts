@@ -21,3 +21,48 @@ export const updateBusiness = async (
   const { data } = await api.patch<Business>(`/business/id/${id}`, payload);
   return data;
 };
+
+export const uploadBusinessLogo = async (id: string, file: File) => {
+  const formData = new FormData();
+  formData.append("logo", file);
+  const { data } = await api.post<{ id: string }>(
+    `/business/id/${id}/logo`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data;
+};
+
+export const uploadBusinessStampOn = async (id: string, file: File) => {
+  const formData = new FormData();
+  formData.append("stampOn", file);
+  const { data } = await api.post<{ id: string }>(
+    `/business/id/${id}/stamp-on`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data;
+};
+
+export const uploadBusinessStampOff = async (id: string, file: File) => {
+  const formData = new FormData();
+  formData.append("stampOff", file);
+  const { data } = await api.post<{ id: string }>(
+    `/business/id/${id}/stamp-off`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data;
+};
