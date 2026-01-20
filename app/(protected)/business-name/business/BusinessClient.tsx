@@ -10,6 +10,7 @@ import {
 } from "@/api/client/business.api";
 import CustomInput from "@/components/CustomInput";
 import { Business } from "@/types/business";
+import CustomerInviteCard from "./CustomerInviteCard";
 
 type BusinessClientProps = {
   initialBusiness: Business;
@@ -34,7 +35,6 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
   const [stampOffStatus, setStampOffStatus] = useState<
     "unknown" | "available" | "missing"
   >("unknown");
-
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
     apiBaseUrl && initialBusiness.id
@@ -160,6 +160,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
 
   return (
     <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+      <CustomerInviteCard businessId={initialBusiness.id} />
       <div className="rounded-lg border border-accent-3 bg-primary p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

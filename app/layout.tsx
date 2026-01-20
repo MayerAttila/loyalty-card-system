@@ -10,7 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="bg-primary text-contrast">
         <ThemeProvider>
           <ToastProvider />
           {children}
