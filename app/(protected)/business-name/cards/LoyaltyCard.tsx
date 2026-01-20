@@ -11,6 +11,11 @@ type LoyaltyCardProps = {
   cardColor?: string;
   accentColor?: string;
   textColor?: string;
+  logoSrc?: string;
+  useLogo?: boolean;
+  filledStampSrc?: string;
+  emptyStampSrc?: string;
+  useStampImages?: boolean;
   className?: string;
 };
 
@@ -23,6 +28,11 @@ const LoyaltyCard = ({
   cardColor = "#141b2d",
   accentColor = "#f59e0b",
   textColor = "#f8fafc",
+  logoSrc,
+  useLogo = false,
+  filledStampSrc,
+  emptyStampSrc,
+  useStampImages = false,
   className = "",
 }: LoyaltyCardProps) => {
   const safeMax = Math.max(4, Math.min(16, maxPoints));
@@ -31,6 +41,8 @@ const LoyaltyCard = ({
   const firstRowCount = shouldSplitRows ? Math.ceil(safeMax / 2) : safeMax;
   const secondRowCount = shouldSplitRows ? safeMax - firstRowCount : 0;
   const stamps = Array.from({ length: safeMax });
+  const shouldUseStampImages =
+    useStampImages && Boolean(filledStampSrc) && Boolean(emptyStampSrc);
 
   const withAlpha = (color: string, alpha: number) => {
     const normalized = color.trim();
@@ -60,9 +72,21 @@ const LoyaltyCard = ({
       }}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold" style={{ color: accentColor }}>
-          {businessName}
-        </h3>
+        <div className="flex items-center gap-3">
+          {useLogo && logoSrc ? (
+            <div className="flex h-9 w-9 items-center justify-center bg-transparent">
+              <img
+                src={logoSrc}
+                alt={`${businessName} logo`}
+                className="h-7 w-7 object-contain"
+                crossOrigin="use-credentials"
+              />
+            </div>
+          ) : null}
+          <h3 className="text-lg font-semibold" style={{ color: accentColor }}>
+            {businessName}
+          </h3>
+        </div>
         <div
           className="rounded-full border px-3 py-1 text-xs font-semibold"
           style={{
@@ -82,24 +106,41 @@ const LoyaltyCard = ({
             return (
               <div
                 key={`stamp-${index}`}
-                className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
-                  isFilled ? "" : "border-accent-3 bg-primary text-contrast/60"
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition ${
+                  shouldUseStampImages
+                    ? ""
+                    : isFilled
+                      ? "border"
+                      : "border border-accent-3 bg-primary text-contrast/60"
                 }`}
                 style={
-                  isFilled
+                  shouldUseStampImages
                     ? {
-                        borderColor: withAlpha(accentColor, 0.6),
-                        backgroundColor: withAlpha(accentColor, 0.18),
-                        color: accentColor,
+                        backgroundColor: "transparent",
                       }
-                    : {
-                        borderColor: withAlpha(textColor, 0.18),
-                        backgroundColor: withAlpha(textColor, 0.06),
-                        color: withAlpha(textColor, 0.65),
-                      }
+                    : isFilled
+                      ? {
+                          borderColor: withAlpha(accentColor, 0.6),
+                          backgroundColor: withAlpha(accentColor, 0.18),
+                          color: accentColor,
+                        }
+                      : {
+                          borderColor: withAlpha(textColor, 0.18),
+                          backgroundColor: withAlpha(textColor, 0.06),
+                          color: withAlpha(textColor, 0.65),
+                        }
                 }
               >
-                {index + 1}
+                {shouldUseStampImages ? (
+                  <img
+                    src={isFilled ? filledStampSrc : emptyStampSrc}
+                    alt={isFilled ? "Stamp on" : "Stamp off"}
+                    className="h-6 w-6 object-contain"
+                    crossOrigin="use-credentials"
+                  />
+                ) : (
+                  index + 1
+                )}
               </div>
             );
           })}
@@ -112,24 +153,41 @@ const LoyaltyCard = ({
               return (
                 <div
                   key={`stamp-${absoluteIndex}`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
-                    isFilled ? "" : "border-accent-3 bg-primary text-contrast/60"
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition ${
+                    shouldUseStampImages
+                      ? ""
+                      : isFilled
+                        ? "border"
+                        : "border border-accent-3 bg-primary text-contrast/60"
                   }`}
                   style={
-                    isFilled
+                    shouldUseStampImages
                       ? {
-                          borderColor: withAlpha(accentColor, 0.6),
-                          backgroundColor: withAlpha(accentColor, 0.18),
-                          color: accentColor,
+                          backgroundColor: "transparent",
                         }
-                      : {
-                          borderColor: withAlpha(textColor, 0.18),
-                          backgroundColor: withAlpha(textColor, 0.06),
-                          color: withAlpha(textColor, 0.65),
-                        }
+                      : isFilled
+                        ? {
+                            borderColor: withAlpha(accentColor, 0.6),
+                            backgroundColor: withAlpha(accentColor, 0.18),
+                            color: accentColor,
+                          }
+                        : {
+                            borderColor: withAlpha(textColor, 0.18),
+                            backgroundColor: withAlpha(textColor, 0.06),
+                            color: withAlpha(textColor, 0.65),
+                          }
                   }
                 >
-                  {absoluteIndex + 1}
+                  {shouldUseStampImages ? (
+                    <img
+                      src={isFilled ? filledStampSrc : emptyStampSrc}
+                      alt={isFilled ? "Stamp on" : "Stamp off"}
+                      className="h-6 w-6 object-contain"
+                      crossOrigin="use-credentials"
+                    />
+                  ) : (
+                    absoluteIndex + 1
+                  )}
                 </div>
               );
             })}

@@ -165,7 +165,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
           <div>
             <h3 className="text-sm font-semibold text-contrast">Business logo</h3>
             <p className="text-xs text-contrast/70">
-              PNG, JPG, WEBP, or SVG up to 2MB.
+              PNG, JPG, WEBP, or SVG up to 3MB.
             </p>
           </div>
           <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-primary">
@@ -186,7 +186,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
               alt={`${initialBusiness.name} logo`}
               onLoad={() => setLogoStatus("available")}
               onError={() => setLogoStatus("missing")}
-              className="h-16 w-16 rounded-lg border border-accent-3 object-contain bg-white"
+              className="h-16 w-16 object-contain bg-transparent"
               crossOrigin="use-credentials"
             />
           ) : (
@@ -203,7 +203,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-semibold text-contrast">Stamp images</h3>
           <p className="text-xs text-contrast/70">
-            Upload on/off stamp images. PNG, JPG, WEBP, or SVG up to 2MB.
+            Upload on/off stamp images. PNG, JPG, WEBP, or SVG up to 3MB.
           </p>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

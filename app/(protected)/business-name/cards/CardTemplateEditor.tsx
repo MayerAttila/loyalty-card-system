@@ -46,6 +46,29 @@ const CardTemplateEditor = ({
     selectedTemplate?.title ?? `${initialBusinessName} Card`
   );
   const [saving, setSaving] = useState(false);
+  const [useBusinessLogo, setUseBusinessLogo] = useState(true);
+  const [useBusinessStamps, setUseBusinessStamps] = useState(true);
+  const [filledStampKind, setFilledStampKind] = useState<"on" | "off">("on");
+  const [emptyStampKind, setEmptyStampKind] = useState<"on" | "off">("off");
+  const [logoAvailable, setLogoAvailable] = useState(false);
+  const [stampOnAvailable, setStampOnAvailable] = useState(false);
+  const [stampOffAvailable, setStampOffAvailable] = useState(false);
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const logoSrc =
+    apiBaseUrl && businessId
+      ? `${apiBaseUrl}/business/id/${businessId}/logo`
+      : "";
+  const stampOnSrc =
+    apiBaseUrl && businessId
+      ? `${apiBaseUrl}/business/id/${businessId}/stamp-on`
+      : "";
+  const stampOffSrc =
+    apiBaseUrl && businessId
+      ? `${apiBaseUrl}/business/id/${businessId}/stamp-off`
+      : "";
+  const filledStampSrc = filledStampKind === "on" ? stampOnSrc : stampOffSrc;
+  const emptyStampSrc = emptyStampKind === "on" ? stampOnSrc : stampOffSrc;
 
   React.useEffect(() => {
     if (!selectedTemplate) return;
@@ -56,6 +79,47 @@ const CardTemplateEditor = ({
     setAccentColor(selectedTemplate.accentColor);
     setTextColor(selectedTemplate.textColor);
   }, [selectedTemplate]);
+
+  React.useEffect(() => {
+    let isActive = true;
+
+    const checkImage = async (
+      url: string,
+      setAvailable: (value: boolean) => void
+    ) => {
+      if (!url) {
+        setAvailable(false);
+        return;
+      }
+      try {
+        const response = await fetch(url, { method: "GET" });
+        if (isActive) {
+          setAvailable(response.ok);
+        }
+      } catch {
+        if (isActive) {
+          setAvailable(false);
+        }
+      }
+    };
+
+    checkImage(logoSrc, setLogoAvailable);
+    checkImage(stampOnSrc, setStampOnAvailable);
+    checkImage(stampOffSrc, setStampOffAvailable);
+
+    return () => {
+      isActive = false;
+    };
+  }, [logoSrc, stampOffSrc, stampOnSrc]);
+
+  React.useEffect(() => {
+    if (!logoAvailable) {
+      setUseBusinessLogo(false);
+    }
+    if (!stampOnAvailable || !stampOffAvailable) {
+      setUseBusinessStamps(false);
+    }
+  }, [logoAvailable, stampOffAvailable, stampOnAvailable]);
 
   const sanitized = useMemo(() => {
     const safeMax = Math.max(4, Math.min(16, maxPoints || 4));
@@ -101,6 +165,166 @@ const CardTemplateEditor = ({
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
           />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-lg border border-accent-3 bg-primary p-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-contrast/70">
+                Logo
+              </h4>
+              <div className="mt-3 rounded-lg border border-accent-3 bg-primary/40 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-contrast">
+                      Business logo
+                    </p>
+                    <p className="text-[11px] text-contrast/70">
+                      {logoAvailable ? "Uploaded" : "No logo uploaded"}
+                    </p>
+                  </div>
+                  <div className="flex rounded-lg border border-accent-3 text-[11px] font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setUseBusinessLogo(true)}
+                      disabled={!logoAvailable}
+                      className={`px-3 py-1 ${
+                        useBusinessLogo && logoAvailable
+                          ? "bg-brand text-primary"
+                          : "text-contrast/70"
+                      }`}
+                    >
+                      Use
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUseBusinessLogo(false)}
+                      className={`px-3 py-1 ${
+                        !useBusinessLogo
+                          ? "bg-brand text-primary"
+                          : "text-contrast/70"
+                      }`}
+                    >
+                      None
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 flex h-16 items-center justify-center">
+                  {logoAvailable && logoSrc ? (
+                    <img
+                      src={logoSrc}
+                      alt="Selected logo"
+                      className="h-12 w-12 object-contain"
+                      crossOrigin="use-credentials"
+                    />
+                  ) : (
+                    <span className="text-[11px] text-contrast/50">No logo</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border border-accent-3 bg-primary p-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-contrast/70">
+                Stamps
+              </h4>
+              <div className="mt-3 rounded-lg border border-accent-3 bg-primary/40 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-contrast">
+                      Stamp images
+                    </p>
+                    <p className="text-[11px] text-contrast/70">
+                      {stampOnAvailable && stampOffAvailable
+                        ? "Stamp on/off set"
+                        : "Upload stamp on/off"}
+                    </p>
+                  </div>
+                  <div className="flex rounded-lg border border-accent-3 text-[11px] font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setUseBusinessStamps(true)}
+                      disabled={!stampOnAvailable || !stampOffAvailable}
+                      className={`px-3 py-1 ${
+                        useBusinessStamps && stampOnAvailable && stampOffAvailable
+                          ? "bg-brand text-primary"
+                          : "text-contrast/70"
+                      }`}
+                    >
+                      Use
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUseBusinessStamps(false)}
+                      className={`px-3 py-1 ${
+                        !useBusinessStamps
+                          ? "bg-brand text-primary"
+                          : "text-contrast/70"
+                      }`}
+                    >
+                      None
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-accent-3">
+                    {stampOnAvailable && stampOnSrc ? (
+                      <img
+                        src={stampOnSrc}
+                        alt="Stamp on"
+                        className="h-10 w-10 object-contain"
+                        crossOrigin="use-credentials"
+                      />
+                    ) : (
+                      <span className="text-[11px] text-contrast/50">On</span>
+                    )}
+                  </div>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-accent-3">
+                    {stampOffAvailable && stampOffSrc ? (
+                      <img
+                        src={stampOffSrc}
+                        alt="Stamp off"
+                        className="h-10 w-10 object-contain"
+                        crossOrigin="use-credentials"
+                      />
+                    ) : (
+                      <span className="text-[11px] text-contrast/50">Off</span>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="block text-[11px] text-contrast/70">
+                    Filled stamp
+                    <select
+                      className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-3 py-2 text-xs text-contrast outline-none"
+                      value={filledStampKind}
+                      onChange={(event) =>
+                        setFilledStampKind(
+                          event.target.value === "off" ? "off" : "on"
+                        )
+                      }
+                      disabled={!useBusinessStamps || !stampOnAvailable || !stampOffAvailable}
+                    >
+                      <option value="on">Stamp on</option>
+                      <option value="off">Stamp off</option>
+                    </select>
+                  </label>
+                  <label className="block text-[11px] text-contrast/70">
+                    Empty stamp
+                    <select
+                      className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-3 py-2 text-xs text-contrast outline-none"
+                      value={emptyStampKind}
+                      onChange={(event) =>
+                        setEmptyStampKind(
+                          event.target.value === "off" ? "off" : "on"
+                        )
+                      }
+                      disabled={!useBusinessStamps || !stampOnAvailable || !stampOffAvailable}
+                    >
+                      <option value="off">Stamp off</option>
+                      <option value="on">Stamp on</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-xs text-contrast/70">
               Max stamps
@@ -232,6 +456,19 @@ const CardTemplateEditor = ({
           cardColor={sanitized.cardColor}
           accentColor={sanitized.accentColor}
           textColor={sanitized.textColor}
+          logoSrc={useBusinessLogo && logoAvailable ? logoSrc : undefined}
+          useLogo={useBusinessLogo}
+          filledStampSrc={
+            useBusinessStamps && stampOnAvailable && stampOffAvailable
+              ? filledStampSrc
+              : undefined
+          }
+          emptyStampSrc={
+            useBusinessStamps && stampOnAvailable && stampOffAvailable
+              ? emptyStampSrc
+              : undefined
+          }
+          useStampImages={useBusinessStamps}
         />
       </div>
     </div>
