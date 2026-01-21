@@ -4,23 +4,30 @@ import React, { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import {
   deleteUser,
+  sendEmployeeInvite,
   updateUserApproval,
   updateUserRole,
 } from "@/api/client/user.api";
 import { User } from "@/types/user";
 import EmployeesTable from "./EmployeesTable";
+import InviteEmployeeModal from "./InviteEmployeeModal";
 
 type EmployeeClientProps = {
   initialUserData: User[];
   currentUserRole?: User["role"];
+  businessId: string;
 };
 
 const EmployeeClient = ({
   initialUserData,
   currentUserRole,
+  businessId,
 }: EmployeeClientProps) => {
   const [users, setUsers] = useState<User[]>(initialUserData);
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [isInviting, setIsInviting] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   const handleToggleApproval = useCallback(
     async (userId: string, approved: boolean) => {
@@ -100,12 +107,49 @@ const EmployeeClient = ({
     }
   }, []);
 
+  const handleInviteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isInviting) {
+      return;
+    }
+
+    const trimmedEmail = inviteEmail.trim();
+    if (!trimmedEmail) {
+      toast.error("Enter an email address.");
+      return;
+    }
+
+    try {
+      setIsInviting(true);
+      await sendEmployeeInvite({ email: trimmedEmail, businessId });
+      toast.success("Invite sent.");
+      setInviteEmail("");
+      setIsInviteOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to send invite.");
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-      <h2 className="text-xl font-semibold text-brand">Employees</h2>
-      <p className="mt-2 text-sm text-contrast/80">
-        Manage your team and remove access when needed.
-      </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-brand">Employees</h2>
+          <p className="mt-2 text-sm text-contrast/80">
+            Manage your team and remove access when needed.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsInviteOpen(true)}
+          className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
+        >
+          Invite employee
+        </button>
+      </div>
       <EmployeesTable
         users={users}
         updatingIds={updatingIds}
@@ -113,6 +157,18 @@ const EmployeeClient = ({
         onToggleApproval={handleToggleApproval}
         onUpdateRole={handleRoleUpdate}
         onDelete={handleDelete}
+      />
+      <InviteEmployeeModal
+        isOpen={isInviteOpen}
+        isSubmitting={isInviting}
+        email={inviteEmail}
+        onEmailChange={setInviteEmail}
+        onClose={() => {
+          if (!isInviting) {
+            setIsInviteOpen(false);
+          }
+        }}
+        onSubmit={handleInviteSubmit}
       />
     </section>
   );

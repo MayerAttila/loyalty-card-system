@@ -5,11 +5,17 @@ import { toast } from "react-toastify";
 import { CreateUserPayload, createUser } from "@/api/client/user.api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "@/api/client/auth.api";
 
 const EmployeeRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const searchParams = useSearchParams();
+  const [businessIdValue, setBusinessIdValue] = useState(
+    searchParams.get("businessId") ?? ""
+  );
+  const isInviteRegistration = searchParams.get("invite") === "1";
   const router = useRouter();
 
   const resolveAppRedirect = (url?: string | null) => {
@@ -54,7 +60,7 @@ const EmployeeRegistrationForm = () => {
     const nextErrors: Partial<Record<string, string>> = {};
     const employeeName = String(formData.get("employeeName") ?? "").trim();
     const employeeEmail = String(formData.get("employeeEmail") ?? "").trim();
-    const businessId = String(formData.get("businessId") ?? "").trim();
+    const businessId = businessIdValue.trim();
 
     if (!employeeName) {
       nextErrors.employeeName = "Full name is required.";
@@ -91,6 +97,7 @@ const EmployeeRegistrationForm = () => {
       email: employeeEmail,
       password: employeePassword,
       businessId,
+      ...(isInviteRegistration ? { approved: true } : {}),
     };
 
     try {
@@ -154,7 +161,11 @@ const EmployeeRegistrationForm = () => {
             type="text"
             placeholder="Business ID"
             errorText={errors.businessId}
-            onChange={() => clearFieldError("businessId")}
+            value={businessIdValue}
+            onChange={(event) => {
+              clearFieldError("businessId");
+              setBusinessIdValue(event.target.value);
+            }}
           />
         </div>
         <div className="md:col-span-2">

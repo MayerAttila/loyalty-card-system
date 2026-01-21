@@ -32,3 +32,11 @@ export const updateUserRole = async (id: string, role: User["role"]) => {
 export const deleteUser = async (id: string) => {
   await api.delete(`/user/id/${id}`);
 };
+
+export const sendEmployeeInvite = async (payload: {
+  email: string;
+  businessId: string;
+}) => {
+  const { data } = await api.post<{ message: string }>("/user/invite", payload);
+  return data;
+};

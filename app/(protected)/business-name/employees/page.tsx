@@ -16,6 +16,7 @@ const EmployeesPage = async () => {
       <EmployeeClient
         initialUserData={initialUserData}
         currentUserRole={session.user.role}
+        businessId={businessId}
       />
     </RequireRole>
   );

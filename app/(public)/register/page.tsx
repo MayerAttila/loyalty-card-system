@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import BusinessRegistrationForm from "./BusinessRegistrationForm";
 import EmployeeRegistrationForm from "./EmployeeRegistrationForm";
 import FormSwitch from "@/components/FormSwitch";
@@ -11,8 +12,11 @@ const registerOptions = [
 ];
 
 const RegisterPage = () => {
+  const searchParams = useSearchParams();
+  const initialRole =
+    searchParams.get("role") === "employee" ? "employee" : "business";
   const [activeKey, setActiveKey] = useState<"business" | "employee">(
-    "business"
+    initialRole
   );
 
   return (
