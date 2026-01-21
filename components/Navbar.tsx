@@ -17,18 +17,60 @@ import {
   FiUsers,
 } from "react-icons/fi";
 
-const navItems = [
-  { href: "/business-name/business", label: "Business", icon: FiBriefcase },
-  { href: "/business-name/cards", label: "Cards", icon: FiCreditCard },
-  { href: "/business-name/employees", label: "Employees", icon: FiUsers },
-  { href: "/business-name/customers", label: "Customers", icon: FiUser },
-  { href: "/business-name/stamping-logs", label: "Logs", icon: FiList },
+type Role = "OWNER" | "ADMIN" | "STAFF";
+
+const navItems: Array<{
+  href: string;
+  label: string;
+  icon: typeof FiBriefcase;
+  allow?: Role[];
+}> = [
+  {
+    href: "/business-name/business",
+    label: "Business",
+    icon: FiBriefcase,
+    allow: ["ADMIN", "OWNER"],
+  },
+  {
+    href: "/business-name/cards",
+    label: "Cards",
+    icon: FiCreditCard,
+    allow: ["ADMIN", "OWNER"],
+  },
+  {
+    href: "/business-name/employees",
+    label: "Employees",
+    icon: FiUsers,
+    allow: ["ADMIN", "OWNER"],
+  },
+  {
+    href: "/business-name/customers",
+    label: "Customers",
+    icon: FiUser,
+    allow: ["ADMIN", "OWNER"],
+  },
+  {
+    href: "/business-name/stamping-logs",
+    label: "Logs",
+    icon: FiList,
+    allow: ["ADMIN", "OWNER"],
+  },
+  { href: "/business-name/profile", label: "Profile", icon: FiUser },
   { href: "/business-name/stamping", label: "Stamping", icon: FiCheckSquare },
 ];
 
-export default function Navbar() {
+export default function Navbar({
+  currentUserRole,
+}: {
+  currentUserRole?: Role;
+}) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const allowedNavItems = navItems.filter((item) => {
+    if (!item.allow) return true;
+    if (!currentUserRole) return false;
+    return item.allow.includes(currentUserRole);
+  });
 
   return (
     <aside
@@ -61,7 +103,7 @@ export default function Navbar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3">
-        {navItems.map((item) => {
+        {allowedNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <Link

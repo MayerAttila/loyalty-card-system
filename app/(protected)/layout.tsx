@@ -35,7 +35,7 @@ export default async function ProtectedLayout({
 
   return (
     <div className="flex min-h-screen bg-primary text-contrast">
-      <Navbar />
+      <Navbar currentUserRole={session.user.role} />
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>

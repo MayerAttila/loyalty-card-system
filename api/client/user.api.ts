@@ -29,6 +29,14 @@ export const updateUserRole = async (id: string, role: User["role"]) => {
   return data;
 };
 
+export const updateUserProfile = async (
+  id: string,
+  payload: { name?: string; email?: string }
+) => {
+  const { data } = await api.patch<User>(`/user/id/${id}`, payload);
+  return data;
+};
+
 export const deleteUser = async (id: string) => {
   await api.delete(`/user/id/${id}`);
 };
