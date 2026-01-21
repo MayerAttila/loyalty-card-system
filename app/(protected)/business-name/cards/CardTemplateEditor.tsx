@@ -212,7 +212,6 @@ const CardTemplateEditor = ({
                       src={logoSrc}
                       alt="Selected logo"
                       className="h-12 w-12 object-contain"
-                      crossOrigin="use-credentials"
                     />
                   ) : (
                     <span className="text-[11px] text-contrast/50">No logo</span>
@@ -269,7 +268,6 @@ const CardTemplateEditor = ({
                         src={stampOnSrc}
                         alt="Stamp on"
                         className="h-10 w-10 object-contain"
-                        crossOrigin="use-credentials"
                       />
                     ) : (
                       <span className="text-[11px] text-contrast/50">On</span>
@@ -281,7 +279,6 @@ const CardTemplateEditor = ({
                         src={stampOffSrc}
                         alt="Stamp off"
                         className="h-10 w-10 object-contain"
-                        crossOrigin="use-credentials"
                       />
                     ) : (
                       <span className="text-[11px] text-contrast/50">Off</span>

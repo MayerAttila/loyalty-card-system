@@ -23,7 +23,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoVersion, setLogoVersion] = useState(0);
   const [logoStatus, setLogoStatus] = useState<"unknown" | "available" | "missing">(
-    "unknown"
+    initialBusiness.hasLogo ? "available" : "missing"
   );
   const [stampOnUploading, setStampOnUploading] = useState(false);
   const [stampOffUploading, setStampOffUploading] = useState(false);
@@ -31,10 +31,10 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
   const [stampOffVersion, setStampOffVersion] = useState(0);
   const [stampOnStatus, setStampOnStatus] = useState<
     "unknown" | "available" | "missing"
-  >("unknown");
+  >(initialBusiness.hasStampOn ? "available" : "missing");
   const [stampOffStatus, setStampOffStatus] = useState<
     "unknown" | "available" | "missing"
-  >("unknown");
+  >(initialBusiness.hasStampOff ? "available" : "missing");
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
     apiBaseUrl && initialBusiness.id
@@ -181,14 +181,13 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
           </label>
         </div>
         <div className="mt-4 flex items-center gap-4">
-          {logoStatus !== "missing" && logoSrc ? (
+          {logoStatus === "available" && logoSrc ? (
             <img
               src={logoSrc}
               alt={`${initialBusiness.name} logo`}
               onLoad={() => setLogoStatus("available")}
               onError={() => setLogoStatus("missing")}
               className="h-16 w-16 object-contain bg-transparent"
-              crossOrigin="use-credentials"
             />
           ) : (
             <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-accent-3 bg-contrast/5 text-[10px] text-contrast/60">
@@ -225,14 +224,13 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
               </label>
             </div>
             <div className="mt-3 flex items-center gap-3">
-              {stampOnStatus !== "missing" && stampOnSrc ? (
+              {stampOnStatus === "available" && stampOnSrc ? (
                 <img
                   src={stampOnSrc}
                   alt="Stamp on"
                   onLoad={() => setStampOnStatus("available")}
                   onError={() => setStampOnStatus("missing")}
                   className="h-16 w-16 rounded-lg border border-accent-3 object-contain bg-white"
-                  crossOrigin="use-credentials"
                 />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-accent-3 bg-contrast/5 text-[10px] text-contrast/60">
@@ -261,14 +259,13 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
               </label>
             </div>
             <div className="mt-3 flex items-center gap-3">
-              {stampOffStatus !== "missing" && stampOffSrc ? (
+              {stampOffStatus === "available" && stampOffSrc ? (
                 <img
                   src={stampOffSrc}
                   alt="Stamp off"
                   onLoad={() => setStampOffStatus("available")}
                   onError={() => setStampOffStatus("missing")}
                   className="h-16 w-16 rounded-lg border border-accent-3 object-contain bg-white"
-                  crossOrigin="use-credentials"
                 />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-accent-3 bg-contrast/5 text-[10px] text-contrast/60">
