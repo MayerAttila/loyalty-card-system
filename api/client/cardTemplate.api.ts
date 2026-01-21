@@ -8,6 +8,7 @@ export type CreateCardTemplatePayload = {
   cardColor: string;
   accentColor: string;
   textColor: string;
+  isActive?: boolean;
 };
 
 export const createCardTemplate = async (
@@ -30,6 +31,7 @@ export type UpdateCardTemplatePayload = {
   cardColor?: string;
   accentColor?: string;
   textColor?: string;
+  isActive?: boolean;
 };
 
 export const updateCardTemplate = async (

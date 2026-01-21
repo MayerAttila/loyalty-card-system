@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
 import LoyaltyCard from "./LoyaltyCard";
@@ -10,18 +11,22 @@ type SavedTemplatesProps = {
   initialTemplates?: CardTemplate[];
   businessId?: string;
   deletingIds?: Set<string>;
+  activatingIds?: Set<string>;
   onEdit?: (template: CardTemplate) => void;
   onCreate?: () => void;
   onDelete?: (template: CardTemplate) => void;
+  onToggleActive?: (template: CardTemplate, nextActive: boolean) => void;
 };
 
 const CardTemplatesPanel = ({
   initialTemplates = [],
   businessId,
   deletingIds,
+  activatingIds,
   onEdit,
   onCreate,
   onDelete,
+  onToggleActive,
 }: SavedTemplatesProps) => {
   const templates = initialTemplates;
 
@@ -64,14 +69,37 @@ const CardTemplatesPanel = ({
               >
                 <div className="mb-3 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-contrast">
-                      {template.title}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-contrast">
+                        {template.title}
+                      </p>
+                      {template.isActive ? (
+                        <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+                          Active
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="text-xs text-contrast/70">
                       {template.maxPoints} stamps
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
+                    {onToggleActive ? (
+                      <ActiveButton
+                        isActive={template.isActive}
+                        onActivate={() => onToggleActive(template, true)}
+                        onDeactivate={() => onToggleActive(template, false)}
+                        disabled={
+                          activatingIds?.has(template.id) ||
+                          deletingIds?.has(template.id)
+                        }
+                        title={
+                          activatingIds?.has(template.id)
+                            ? "Updating..."
+                            : undefined
+                        }
+                      />
+                    ) : null}
                     {onEdit ? (
                       <EditButton onClick={() => onEdit(template)} />
                     ) : null}

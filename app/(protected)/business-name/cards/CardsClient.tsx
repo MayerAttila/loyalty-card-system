@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import CardTemplatesPanel from "./CardTemplatesPanel";
 import CardTemplateEditor from "./CardTemplateEditor";
 import { CardTemplate } from "@/types/cardTemplate";
-import { deleteCardTemplate } from "@/api/client/cardTemplate.api";
+import { deleteCardTemplate, updateCardTemplate } from "@/api/client/cardTemplate.api";
 
 type CardsClientProps = {
   initialTemplates: CardTemplate[];
@@ -22,16 +22,24 @@ const CardsClient = ({
   const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>();
   const [isCreating, setIsCreating] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [activatingIds, setActivatingIds] = useState<Set<string>>(new Set());
 
   const handleTemplateSaved = (template: CardTemplate) => {
     setTemplates((current) => {
       const existingIndex = current.findIndex((item) => item.id === template.id);
-      if (existingIndex === -1) {
-        return [template, ...current];
+      const next =
+        existingIndex === -1
+          ? [template, ...current]
+          : current.map((item) =>
+              item.id === template.id ? template : item
+            );
+      if (!template.isActive) {
+        return next;
       }
-      const next = [...current];
-      next[existingIndex] = template;
-      return next;
+      return next.map((item) => ({
+        ...item,
+        isActive: item.id === template.id,
+      }));
     });
     setSelectedTemplate(template);
     setIsCreating(false);
@@ -64,12 +72,59 @@ const CardsClient = ({
     }
   }, [selectedTemplate?.id]);
 
+  const handleToggleActive = useCallback(
+    async (template: CardTemplate, nextActive: boolean) => {
+      if (template.isActive === nextActive) return;
+      setActivatingIds((prev) => {
+        const next = new Set(prev);
+        next.add(template.id);
+        return next;
+      });
+
+      try {
+        const updated = await updateCardTemplate(template.id, {
+          isActive: nextActive,
+        });
+        setTemplates((prev) => {
+          if (nextActive) {
+            return prev.map((item) => ({
+              ...item,
+              isActive: item.id === updated.id,
+            }));
+          }
+          return prev.map((item) =>
+            item.id === updated.id ? { ...item, isActive: false } : item
+          );
+        });
+        if (selectedTemplate?.id === updated.id) {
+          setSelectedTemplate({ ...selectedTemplate, isActive: updated.isActive });
+        }
+        toast.success(
+          nextActive ? "Active template updated." : "Template deactivated."
+        );
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          nextActive ? "Unable to activate template." : "Unable to deactivate template."
+        );
+      } finally {
+        setActivatingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(template.id);
+          return next;
+        });
+      }
+    },
+    [selectedTemplate]
+  );
+
   return (
     <div className="space-y-6">
       <CardTemplatesPanel
         initialTemplates={templates}
         businessId={businessId}
         deletingIds={deletingIds}
+        activatingIds={activatingIds}
         onEdit={(template) => {
           setSelectedTemplate(template);
           setIsCreating(false);
@@ -79,6 +134,7 @@ const CardsClient = ({
           setIsCreating(true);
         }}
         onDelete={handleDelete}
+        onToggleActive={handleToggleActive}
       />
       {selectedTemplate || isCreating ? (
         <CardTemplateEditor

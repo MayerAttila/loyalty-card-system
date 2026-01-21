@@ -5,6 +5,7 @@ export type CardTemplate = {
   cardColor: string;
   accentColor: string;
   textColor: string;
+  isActive: boolean;
   businessId: string;
   createdAt: string;
   updatedAt: string;
