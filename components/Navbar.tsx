@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "@/api/client/auth.api";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import {
@@ -19,7 +19,9 @@ import {
 
 type Role = "OWNER" | "ADMIN" | "STAFF";
 
-const buildNavItems = (basePath: string): Array<{
+const buildNavItems = (
+  basePath: string,
+): Array<{
   href: string;
   label: string;
   icon: typeof FiBriefcase;
@@ -62,20 +64,43 @@ const buildNavItems = (basePath: string): Array<{
 export default function Navbar({
   currentUserRole,
   businessName,
+  businessId,
+  userName,
+  userRole,
   basePath = "/business-name",
 }: {
   currentUserRole?: Role;
   businessName?: string;
+  businessId?: string;
+  userName?: string | null;
+  userRole?: Role;
   basePath?: string;
 }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const allowedNavItems = buildNavItems(basePath).filter((item) => {
     if (!item.allow) return true;
     if (!currentUserRole) return false;
     return item.allow.includes(currentUserRole);
   });
   const displayBusinessName = businessName?.trim() || "Business";
+  const displayUserName = userName?.trim() || "User";
+  const displayUserRole = userRole ?? currentUserRole;
+  const businessInitials = displayBusinessName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const logoSrc =
+    apiBaseUrl && businessId
+      ? `${apiBaseUrl}/business/id/${businessId}/logo`
+      : "";
+  useEffect(() => {
+    setLogoError(false);
+  }, [logoSrc]);
 
   return (
     <aside
@@ -89,9 +114,37 @@ export default function Navbar({
             collapsed ? "opacity-0" : "opacity-100"
           }`}
         >
-          <h1 className="truncate whitespace-nowrap text-base font-semibold text-brand">
-            {displayBusinessName}
-          </h1>
+          <div
+            className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl ${
+              logoSrc && !logoError
+                ? "bg-transparent"
+                : "border border-accent-3 bg-accent-2"
+            }`}
+          >
+            {logoSrc && !logoError ? (
+              <img
+                src={logoSrc}
+                alt={`${displayBusinessName} logo`}
+                className="h-full w-full object-contain"
+                onError={() => {
+                  setLogoError(true);
+                }}
+              />
+            ) : (
+              <span className="text-xs font-semibold text-contrast/80">
+                {businessInitials || "BN"}
+              </span>
+            )}
+          </div>
+          <div className="min-w-0 flex flex-col justify-center">
+            <p className="truncate text-xs text-contrast/70">
+              {displayUserName}
+              {displayUserRole ? ` • ${displayUserRole}` : ""}
+            </p>
+            <h1 className="truncate whitespace-nowrap text-base font-semibold text-brand">
+              {displayBusinessName}
+            </h1>
+          </div>
         </div>
         <button
           type="button"

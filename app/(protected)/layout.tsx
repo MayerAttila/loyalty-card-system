@@ -41,6 +41,9 @@ export default async function ProtectedLayout({
       <Navbar
         currentUserRole={session.user.role}
         businessName={session.user.businessName}
+        businessId={session.user.businessId}
+        userName={session.user.name}
+        userRole={session.user.role}
         basePath={basePath}
       />
       <main className="flex-1 px-6 py-8">
