@@ -6,8 +6,9 @@ import { createBusiness } from "@/api/client/business.api";
 import { CreateBusinessPayload } from "@/api/client/business.api";
 import { createUser } from "@/api/client/user.api";
 import { useState } from "react";
-import { signIn } from "@/api/client/auth.api";
+import { getSession, signIn } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
+import { toBusinessSlug } from "@/lib/slug";
 
 const BusinessRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +114,21 @@ const BusinessRegistrationForm = () => {
           email: ownerEmail,
           password: ownerPassword,
         });
-        const redirectTo = resolveAppRedirect(result?.url) ?? "/business-name";
+        let redirectTo = resolveAppRedirect(result?.url) ?? "/";
+        const businessSlugFromForm = toBusinessSlug(businessName);
+        if (businessSlugFromForm) {
+          redirectTo = `/${businessSlugFromForm}`;
+        } else {
+          try {
+            const session = await getSession();
+            const businessSlug = toBusinessSlug(session?.user?.businessName);
+            if (businessSlug) {
+              redirectTo = `/${businessSlug}`;
+            }
+          } catch (sessionError) {
+            console.error("session lookup failed", sessionError);
+          }
+        }
         router.push(redirectTo);
       } catch (error) {
         console.error("auto sign-in failed", error);

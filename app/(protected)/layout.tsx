@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { toBusinessSlug } from "@/lib/slug";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,10 +33,16 @@ export default async function ProtectedLayout({
 
   if (!session?.user) redirect("/login");
   if (session.user.approved === false) redirect("/pending-approval");
+  const businessSlug = toBusinessSlug(session.user.businessName);
+  const basePath = businessSlug ? `/${businessSlug}` : "/business-name";
 
   return (
     <div className="flex min-h-screen bg-primary text-contrast">
-      <Navbar currentUserRole={session.user.role} />
+      <Navbar
+        currentUserRole={session.user.role}
+        businessName={session.user.businessName}
+        basePath={basePath}
+      />
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>

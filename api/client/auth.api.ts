@@ -1,8 +1,10 @@
 import { api } from "./axios";
+import { AppSession } from "@/types/session";
 
 export type signInPayload = {
   email: string;
   password: string;
+  callbackUrl?: string;
 };
 
 export type SignInResponse = {
@@ -16,6 +18,7 @@ export type SignOutResponse = {
   url?: string | null;
 };
 
+
 type CsrfResponse = {
   csrfToken: string;
 };
@@ -28,10 +31,7 @@ const getCsrfToken = async () => {
   return res.data.csrfToken;
 };
 
-export const signIn = async function name(payload: {
-  email: string;
-  password: string;
-}) {
+export const signIn = async function name(payload: signInPayload) {
   const csrfToken = await getCsrfToken();
   const body = new URLSearchParams({
     csrfToken,
@@ -39,8 +39,8 @@ export const signIn = async function name(payload: {
     password: payload.password,
     callbackUrl:
       typeof window !== "undefined"
-        ? `${window.location.origin}/business-name`
-        : "/business-name",
+        ? payload.callbackUrl ?? window.location.origin
+        : payload.callbackUrl ?? "/",
     json: "true",
   });
 
@@ -76,4 +76,9 @@ export const signOut = async () => {
   });
 
   return res.data as SignOutResponse;
+};
+
+export const getSession = async () => {
+  const res = await api.get<AppSession>("/auth/session");
+  return res.data ?? null;
 };

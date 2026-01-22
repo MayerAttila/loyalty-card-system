@@ -6,7 +6,8 @@ import { CreateUserPayload, createUser } from "@/api/client/user.api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { signIn } from "@/api/client/auth.api";
+import { getSession, signIn } from "@/api/client/auth.api";
+import { toBusinessSlug } from "@/lib/slug";
 
 const EmployeeRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,8 +113,16 @@ const EmployeeRegistrationForm = () => {
             email: employeeEmail,
             password: employeePassword,
           });
-          const redirectTo =
-            resolveAppRedirect(result?.url) ?? "/business-name";
+          let redirectTo = resolveAppRedirect(result?.url) ?? "/";
+          try {
+            const session = await getSession();
+            const businessSlug = toBusinessSlug(session?.user?.businessName);
+            if (businessSlug) {
+              redirectTo = `/${businessSlug}`;
+            }
+          } catch (sessionError) {
+            console.error("session lookup failed", sessionError);
+          }
           router.push(redirectTo);
           return;
         } catch (error) {

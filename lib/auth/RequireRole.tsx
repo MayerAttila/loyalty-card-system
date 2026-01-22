@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
+import { toBusinessSlug } from "@/lib/slug";
 
 type Role = "OWNER" | "ADMIN" | "STAFF";
 
@@ -15,6 +16,13 @@ export function RequireRole({
 }) {
   const { session, loading } = useSession();
   const router = useRouter();
+  const params = useParams<{ businessSlug?: string }>();
+  const sessionBusinessSlug = toBusinessSlug(session?.user?.businessName);
+  const basePath = params?.businessSlug
+    ? `/${params.businessSlug}`
+    : sessionBusinessSlug
+    ? `/${sessionBusinessSlug}`
+    : "/business-name";
 
   useEffect(() => {
     if (loading) return;
@@ -31,9 +39,9 @@ export function RequireRole({
 
     const role = session.user.role;
     if (!role || !allow.includes(role)) {
-      router.replace("/business-name/unauthorized");
+      router.replace(`${basePath}/unauthorized`);
     }
-  }, [loading, session, router, allow]);
+  }, [allow, basePath, loading, router, session]);
 
   if (loading) return null;
   if (!session?.user) return null;

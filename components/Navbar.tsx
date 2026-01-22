@@ -19,58 +19,63 @@ import {
 
 type Role = "OWNER" | "ADMIN" | "STAFF";
 
-const navItems: Array<{
+const buildNavItems = (basePath: string): Array<{
   href: string;
   label: string;
   icon: typeof FiBriefcase;
   allow?: Role[];
-}> = [
+}> => [
   {
-    href: "/business-name/business",
+    href: `${basePath}/business`,
     label: "Business",
     icon: FiBriefcase,
     allow: ["ADMIN", "OWNER"],
   },
   {
-    href: "/business-name/cards",
+    href: `${basePath}/cards`,
     label: "Cards",
     icon: FiCreditCard,
     allow: ["ADMIN", "OWNER"],
   },
   {
-    href: "/business-name/employees",
+    href: `${basePath}/employees`,
     label: "Employees",
     icon: FiUsers,
     allow: ["ADMIN", "OWNER"],
   },
   {
-    href: "/business-name/customers",
+    href: `${basePath}/customers`,
     label: "Customers",
     icon: FiUser,
     allow: ["ADMIN", "OWNER"],
   },
   {
-    href: "/business-name/stamping-logs",
+    href: `${basePath}/stamping-logs`,
     label: "Logs",
     icon: FiList,
     allow: ["ADMIN", "OWNER"],
   },
-  { href: "/business-name/profile", label: "Profile", icon: FiUser },
-  { href: "/business-name/stamping", label: "Stamping", icon: FiCheckSquare },
+  { href: `${basePath}/profile`, label: "Profile", icon: FiUser },
+  { href: `${basePath}/stamping`, label: "Stamping", icon: FiCheckSquare },
 ];
 
 export default function Navbar({
   currentUserRole,
+  businessName,
+  basePath = "/business-name",
 }: {
   currentUserRole?: Role;
+  businessName?: string;
+  basePath?: string;
 }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-  const allowedNavItems = navItems.filter((item) => {
+  const allowedNavItems = buildNavItems(basePath).filter((item) => {
     if (!item.allow) return true;
     if (!currentUserRole) return false;
     return item.allow.includes(currentUserRole);
   });
+  const displayBusinessName = businessName?.trim() || "Business";
 
   return (
     <aside
@@ -85,7 +90,7 @@ export default function Navbar({
           }`}
         >
           <h1 className="truncate whitespace-nowrap text-base font-semibold text-brand">
-            business-name
+            {displayBusinessName}
           </h1>
         </div>
         <button

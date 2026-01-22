@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import CustomInput from "@/components/CustomInput";
-import { signIn, signInPayload } from "@/api/client/auth.api";
+import { getSession, signIn, signInPayload } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
+import { toBusinessSlug } from "@/lib/slug";
 
 const LoginPage = () => {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -68,7 +69,16 @@ const LoginPage = () => {
       const result = await signIn(payload);
       toast.success("Welcome back!");
       form.reset();
-      const redirectTo = resolveAppRedirect(result?.url) ?? "/business-name";
+      let redirectTo = resolveAppRedirect(result?.url) ?? "/";
+      try {
+        const session = await getSession();
+        const businessSlug = toBusinessSlug(session?.user?.businessName);
+        if (businessSlug) {
+          redirectTo = `/${businessSlug}`;
+        }
+      } catch (sessionError) {
+        console.error("session lookup failed", sessionError);
+      }
       router.push(redirectTo);
     } catch (error) {
       console.log(error);
