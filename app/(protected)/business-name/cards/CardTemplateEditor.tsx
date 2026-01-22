@@ -83,24 +83,19 @@ const CardTemplateEditor = ({
   React.useEffect(() => {
     let isActive = true;
 
-    const checkImage = async (
-      url: string,
-      setAvailable: (value: boolean) => void
-    ) => {
+    const checkImage = (url: string, setAvailable: (value: boolean) => void) => {
       if (!url) {
         setAvailable(false);
         return;
       }
-      try {
-        const response = await fetch(url, { method: "GET" });
-        if (isActive) {
-          setAvailable(response.ok);
-        }
-      } catch {
-        if (isActive) {
-          setAvailable(false);
-        }
-      }
+      const img = new Image();
+      img.onload = () => {
+        if (isActive) setAvailable(true);
+      };
+      img.onerror = () => {
+        if (isActive) setAvailable(false);
+      };
+      img.src = url;
     };
 
     checkImage(logoSrc, setLogoAvailable);

@@ -79,7 +79,6 @@ const LoyaltyCard = ({
                 src={logoSrc}
                 alt={`${businessName} logo`}
                 className="h-7 w-7 object-contain"
-                crossOrigin="use-credentials"
               />
             </div>
           ) : null}
@@ -136,7 +135,6 @@ const LoyaltyCard = ({
                     src={isFilled ? filledStampSrc : emptyStampSrc}
                     alt={isFilled ? "Stamp on" : "Stamp off"}
                     className="h-6 w-6 object-contain"
-                    crossOrigin="use-credentials"
                   />
                 ) : (
                   index + 1
@@ -183,7 +181,6 @@ const LoyaltyCard = ({
                       src={isFilled ? filledStampSrc : emptyStampSrc}
                       alt={isFilled ? "Stamp on" : "Stamp off"}
                       className="h-6 w-6 object-contain"
-                      crossOrigin="use-credentials"
                     />
                   ) : (
                     absoluteIndex + 1
