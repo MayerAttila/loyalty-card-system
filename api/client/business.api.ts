@@ -1,5 +1,6 @@
 import { api } from "./axios";
 import { Business } from "../../types/business";
+import { BusinessStampList } from "../../types/stampImage";
 
 export type CreateBusinessPayload = {
   name: string;
@@ -37,6 +38,10 @@ export const uploadBusinessLogo = async (id: string, file: File) => {
   return data;
 };
 
+export const deleteBusinessLogo = async (id: string) => {
+  await api.delete(`/business/id/${id}/logo`);
+};
+
 export const uploadBusinessStampOn = async (id: string, file: File) => {
   const formData = new FormData();
   formData.append("stampOn", file);
@@ -65,4 +70,16 @@ export const uploadBusinessStampOff = async (id: string, file: File) => {
     }
   );
   return data;
+};
+
+export const getBusinessStamps = async (id: string) => {
+  const { data } = await api.get<BusinessStampList>(`/business/id/${id}/stamps`);
+  return data;
+};
+
+export const deleteBusinessStampImage = async (
+  businessId: string,
+  imageId: string
+) => {
+  await api.delete(`/business/id/${businessId}/stamps/${imageId}`);
 };
