@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { FiTrash2 } from "react-icons/fi";
 import {
   deleteBusinessLogo,
   uploadBusinessLogo,
 } from "@/api/client/business.api";
+import ImageUploadTile from "./ImageUploadTile";
 
 type LogoUploadPanelProps = {
   businessId: string;
@@ -23,6 +25,7 @@ const LogoUploadPanel = ({
   const [logoStatus, setLogoStatus] = useState<"unknown" | "available" | "missing">(
     hasLogo ? "available" : "missing"
   );
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
     apiBaseUrl && businessId
@@ -73,53 +76,46 @@ const LogoUploadPanel = ({
   };
 
   return (
-    <div className="rounded-lg border border-accent-3 bg-primary p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-contrast">Business logo</h3>
-          <p className="text-xs text-contrast/70">
-            PNG, JPG, WEBP, or SVG up to 3MB.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-primary">
-            {logoUploading ? "Uploading..." : "Upload logo"}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/svg+xml"
-              onChange={handleLogoChange}
-              disabled={logoUploading}
-              className="hidden"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={handleLogoDelete}
-            disabled={logoStatus !== "available" || logoUploading}
-            className="inline-flex items-center justify-center rounded-lg border border-accent-3 px-4 py-2 text-xs font-semibold text-contrast/80 disabled:opacity-60"
-          >
-            Delete logo
-          </button>
-        </div>
-      </div>
-      <div className="mt-4 flex items-center gap-4">
-        {logoStatus === "available" && logoSrc ? (
+    <div className="flex items-center gap-3">
+      {logoStatus === "available" && logoSrc ? (
+        <div className="relative h-16 w-16 rounded-lg border border-accent-3 bg-transparent">
           <img
             src={logoSrc}
             alt={`${businessName} logo`}
             onLoad={() => setLogoStatus("available")}
             onError={() => setLogoStatus("missing")}
-            className="h-16 w-16 object-contain bg-transparent"
+            className="h-full w-full object-contain"
           />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-accent-3 bg-contrast/5 text-[10px] text-contrast/60">
-            No logo
-          </div>
-        )}
-        <span className="text-xs text-contrast/70">
-          Upload a square image for best results.
-        </span>
-      </div>
+          <button
+            type="button"
+            onClick={handleLogoDelete}
+            disabled={logoUploading}
+            className="absolute -right-2 -top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-contrast shadow-sm ring-1 ring-accent-3 transition hover:-translate-y-0.5 hover:scale-110 hover:bg-brand focus-visible:-translate-y-0.5 focus-visible:scale-110 focus-visible:bg-brand focus-visible:outline-none disabled:opacity-60"
+            aria-label="Delete logo"
+          >
+            {logoUploading ? "..." : <FiTrash2 size={12} aria-hidden="true" />}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-1">
+          <ImageUploadTile
+            label="Upload logo"
+            onClick={() => logoInputRef.current?.click()}
+            disabled={logoUploading}
+          />
+          <span className="text-[10px] font-semibold text-contrast/60">
+            Upload logo
+          </span>
+        </div>
+      )}
+      <input
+        ref={logoInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        onChange={handleLogoChange}
+        disabled={logoUploading}
+        className="hidden"
+      />
     </div>
   );
 };

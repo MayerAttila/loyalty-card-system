@@ -4,13 +4,13 @@ import React from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { BusinessStampImage } from "@/types/stampImage";
 
-type StampImageTileProps = {
+type ImageTileProps = {
   image: BusinessStampImage;
   onDelete: (imageId: string) => void;
   deleting: boolean;
 };
 
-const StampImageTile = ({ image, onDelete, deleting }: StampImageTileProps) => {
+const ImageTile = ({ image, onDelete, deleting }: ImageTileProps) => {
   return (
     <div className="relative h-16 w-16 rounded-lg border border-accent-3 bg-transparent">
       <img
@@ -31,4 +31,4 @@ const StampImageTile = ({ image, onDelete, deleting }: StampImageTileProps) => {
   );
 };
 
-export default StampImageTile;
+export default ImageTile;

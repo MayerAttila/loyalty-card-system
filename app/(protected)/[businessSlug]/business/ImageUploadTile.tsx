@@ -3,13 +3,13 @@
 import React from "react";
 import { FiPlus } from "react-icons/fi";
 
-type StampUploadTileProps = {
+type ImageUploadTileProps = {
   label: string;
   onClick: () => void;
   disabled?: boolean;
 };
 
-const StampUploadTile = ({ label, onClick, disabled }: StampUploadTileProps) => {
+const ImageUploadTile = ({ label, onClick, disabled }: ImageUploadTileProps) => {
   return (
     <button
       type="button"
@@ -29,4 +29,4 @@ const StampUploadTile = ({ label, onClick, disabled }: StampUploadTileProps) => 
   );
 };
 
-export default StampUploadTile;
+export default ImageUploadTile;

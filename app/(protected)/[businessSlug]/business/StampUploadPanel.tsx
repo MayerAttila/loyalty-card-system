@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import StampImageTile from "./StampImageTile";
-import StampUploadTile from "./StampUploadTile";
+import ImageTile from "./ImageTile";
+import ImageUploadTile from "./ImageUploadTile";
 import {
   deleteBusinessStampImage,
   getBusinessStamps,
@@ -153,14 +153,14 @@ const StampUploadPanel = ({ businessId }: StampUploadPanelProps) => {
             ) : (
               <div className="flex flex-wrap gap-3">
                 {stampOnImages.map((image) => (
-                  <StampImageTile
+                  <ImageTile
                     key={image.id}
                     image={image}
                     onDelete={handleDeleteStamp}
                     deleting={deletingStampIds.includes(image.id)}
                   />
                 ))}
-                <StampUploadTile
+                <ImageUploadTile
                   label="Upload stamp on"
                   onClick={() => stampOnInputRef.current?.click()}
                   disabled={stampOnUploading}
@@ -190,14 +190,14 @@ const StampUploadPanel = ({ businessId }: StampUploadPanelProps) => {
             ) : (
               <div className="flex flex-wrap gap-3">
                 {stampOffImages.map((image) => (
-                  <StampImageTile
+                  <ImageTile
                     key={image.id}
                     image={image}
                     onDelete={handleDeleteStamp}
                     deleting={deletingStampIds.includes(image.id)}
                   />
                 ))}
-                <StampUploadTile
+                <ImageUploadTile
                   label="Upload stamp off"
                   onClick={() => stampOffInputRef.current?.click()}
                   disabled={stampOffUploading}
