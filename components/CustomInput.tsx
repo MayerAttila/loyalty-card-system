@@ -21,6 +21,7 @@ type CustomInputType =
 
 type CustomInputProps = {
   id: string;
+  label?: string;
   placeholder?: string;
   type?: CustomInputType;
   name?: string;
@@ -38,6 +39,7 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
   (
     {
       id,
+      label,
       placeholder,
       type = "text",
       name,
@@ -110,6 +112,14 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
 
     return (
       <div className={`block ${className ?? ""}`}>
+        {label ? (
+          <label
+            htmlFor={id}
+            className="mb-2 block text-xs font-semibold text-contrast/70"
+          >
+            {label}
+          </label>
+        ) : null}
         <div className="flex items-center gap-3 rounded-lg border border-accent-3 bg-primary px-4 py-3 text-contrast focus-within:border-brand">
           {Icon ? <Icon className="text-lg text-contrast/70" /> : null}
           <input

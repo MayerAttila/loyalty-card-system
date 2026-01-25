@@ -5,6 +5,9 @@ export type CardTemplate = {
   cardColor: string;
   accentColor: string;
   textColor: string;
+  useStampImages?: boolean;
+  stampOnImageId?: string | null;
+  stampOffImageId?: string | null;
   isActive: boolean;
   businessId: string;
   createdAt: string;

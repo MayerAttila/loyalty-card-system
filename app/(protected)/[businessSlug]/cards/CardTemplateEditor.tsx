@@ -2,11 +2,16 @@
 
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { createCardTemplate, updateCardTemplate } from "@/api/client/cardTemplate.api";
+import {
+  createCardTemplate,
+  updateCardTemplate,
+} from "@/api/client/cardTemplate.api";
 import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import { useSession } from "@/lib/auth/useSession";
 import LoyaltyCard from "./LoyaltyCard";
+import LogoUploadPanel from "@/components/LogoUploadPanel";
+import StampPanel from "@/components/StampPanel";
 import { CardTemplate } from "@/types/cardTemplate";
 
 type CardTemplateEditorProps = {
@@ -44,21 +49,31 @@ const CardTemplateEditor = ({
   const [accentColor, setAccentColor] = useState(initialAccentColor);
   const [textColor, setTextColor] = useState(initialTextColor);
   const [templateTitle, setTemplateTitle] = useState(
-    selectedTemplate?.title ?? `${initialBusinessName} Card`
+    selectedTemplate?.title ?? `${initialBusinessName} Card`,
   );
   const [saving, setSaving] = useState(false);
-  const [useBusinessLogo, setUseBusinessLogo] = useState(true);
   const [useBusinessStamps, setUseBusinessStamps] = useState(true);
-  const [filledStampKind, setFilledStampKind] = useState<"on" | "off">("on");
-  const [emptyStampKind, setEmptyStampKind] = useState<"on" | "off">("off");
   const [logoAvailable, setLogoAvailable] = useState(false);
+  const [logoVersion, setLogoVersion] = useState(0);
   const [stampOnAvailable, setStampOnAvailable] = useState(false);
   const [stampOffAvailable, setStampOffAvailable] = useState(false);
+  const [stampOnImages, setStampOnImages] = useState<
+    { id: string; url: string }[]
+  >([]);
+  const [stampOffImages, setStampOffImages] = useState<
+    { id: string; url: string }[]
+  >([]);
+  const [selectedStampOnId, setSelectedStampOnId] = useState<string | null>(
+    selectedTemplate?.stampOnImageId ?? null,
+  );
+  const [selectedStampOffId, setSelectedStampOffId] = useState<string | null>(
+    selectedTemplate?.stampOffImageId ?? null,
+  );
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
     apiBaseUrl && businessId
-      ? `${apiBaseUrl}/business/id/${businessId}/logo`
+      ? `${apiBaseUrl}/business/id/${businessId}/logo?v=${logoVersion}`
       : "";
   const stampOnSrc =
     apiBaseUrl && businessId
@@ -68,8 +83,10 @@ const CardTemplateEditor = ({
     apiBaseUrl && businessId
       ? `${apiBaseUrl}/business/id/${businessId}/stamp-off`
       : "";
-  const filledStampSrc = filledStampKind === "on" ? stampOnSrc : stampOffSrc;
-  const emptyStampSrc = emptyStampKind === "on" ? stampOnSrc : stampOffSrc;
+  const selectedStampOnUrl =
+    stampOnImages.find((image) => image.id === selectedStampOnId)?.url ?? "";
+  const selectedStampOffUrl =
+    stampOffImages.find((image) => image.id === selectedStampOffId)?.url ?? "";
 
   React.useEffect(() => {
     if (!selectedTemplate) return;
@@ -79,12 +96,18 @@ const CardTemplateEditor = ({
     setCardColor(selectedTemplate.cardColor);
     setAccentColor(selectedTemplate.accentColor);
     setTextColor(selectedTemplate.textColor);
+    setUseBusinessStamps(selectedTemplate.useStampImages ?? true);
+    setSelectedStampOnId(selectedTemplate.stampOnImageId ?? null);
+    setSelectedStampOffId(selectedTemplate.stampOffImageId ?? null);
   }, [selectedTemplate]);
 
   React.useEffect(() => {
     let isActive = true;
 
-    const checkImage = (url: string, setAvailable: (value: boolean) => void) => {
+    const checkImage = (
+      url: string,
+      setAvailable: (value: boolean) => void,
+    ) => {
       if (!url) {
         setAvailable(false);
         return;
@@ -109,13 +132,10 @@ const CardTemplateEditor = ({
   }, [logoSrc, stampOffSrc, stampOnSrc]);
 
   React.useEffect(() => {
-    if (!logoAvailable) {
-      setUseBusinessLogo(false);
-    }
     if (!stampOnAvailable || !stampOffAvailable) {
       setUseBusinessStamps(false);
     }
-  }, [logoAvailable, stampOffAvailable, stampOnAvailable]);
+  }, [stampOffAvailable, stampOnAvailable]);
 
   const sanitized = useMemo(() => {
     const safeMax = Math.max(4, Math.min(16, maxPoints || 4));
@@ -149,175 +169,71 @@ const CardTemplateEditor = ({
           Card Details
         </h3>
         <div className="mt-4 space-y-4">
-          <CustomInput
-            id="cardTemplateTitle"
-            placeholder="Template name"
-            value={templateTitle}
-            onChange={(event) => setTemplateTitle(event.target.value)}
-          />
-          <CustomInput
-            id="cardBusinessName"
-            placeholder="Business name"
-            value={businessName}
-            onChange={(event) => setBusinessName(event.target.value)}
-          />
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-lg border border-accent-3 bg-primary p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-contrast/70">
-                Logo
-              </h4>
-              <div className="mt-3 rounded-lg border border-accent-3 bg-primary/40 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold text-contrast">
-                      Business logo
-                    </p>
-                    <p className="text-[11px] text-contrast/70">
-                      {logoAvailable ? "Uploaded" : "No logo uploaded"}
-                    </p>
-                  </div>
-                  <div className="flex rounded-lg border border-accent-3 text-[11px] font-semibold">
-                    <button
-                      type="button"
-                      onClick={() => setUseBusinessLogo(true)}
-                      disabled={!logoAvailable}
-                      className={`px-3 py-1 ${
-                        useBusinessLogo && logoAvailable
-                          ? "bg-brand text-primary"
-                          : "text-contrast/70"
-                      }`}
-                    >
-                      Use
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUseBusinessLogo(false)}
-                      className={`px-3 py-1 ${
-                        !useBusinessLogo
-                          ? "bg-brand text-primary"
-                          : "text-contrast/70"
-                      }`}
-                    >
-                      None
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-3 flex h-16 items-center justify-center">
-                  {logoAvailable && logoSrc ? (
-                    <img
-                      src={logoSrc}
-                      alt="Selected logo"
-                      className="h-12 w-12 object-contain"
-                    />
-                  ) : (
-                    <span className="text-[11px] text-contrast/50">No logo</span>
-                  )}
-                </div>
-              </div>
+          <div className="grid items-start gap-4 grid-cols-1 sm:grid-cols-11">
+            <div className="sm:col-span-1">
+              {businessId ? (
+                <LogoUploadPanel
+                  businessId={businessId}
+                  businessName={businessName || "Business"}
+                  hasLogo={logoAvailable}
+                  onLogoChange={() => setLogoVersion((prev) => prev + 1)}
+                />
+              ) : (
+                <div />
+              )}
             </div>
-            <div className="rounded-lg border border-accent-3 bg-primary p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-contrast/70">
-                Stamps
-              </h4>
-              <div className="mt-3 rounded-lg border border-accent-3 bg-primary/40 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold text-contrast">
-                      Stamp images
-                    </p>
-                    <p className="text-[11px] text-contrast/70">
-                      {stampOnAvailable && stampOffAvailable
-                        ? "Stamp on/off set"
-                        : "Upload stamp on/off"}
-                    </p>
-                  </div>
-                  <div className="flex rounded-lg border border-accent-3 text-[11px] font-semibold">
-                    <button
-                      type="button"
-                      onClick={() => setUseBusinessStamps(true)}
-                      disabled={!stampOnAvailable || !stampOffAvailable}
-                      className={`px-3 py-1 ${
-                        useBusinessStamps && stampOnAvailable && stampOffAvailable
-                          ? "bg-brand text-primary"
-                          : "text-contrast/70"
-                      }`}
-                    >
-                      Use
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUseBusinessStamps(false)}
-                      className={`px-3 py-1 ${
-                        !useBusinessStamps
-                          ? "bg-brand text-primary"
-                          : "text-contrast/70"
-                      }`}
-                    >
-                      None
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-3">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-accent-3">
-                    {stampOnAvailable && stampOnSrc ? (
-                      <img
-                        src={stampOnSrc}
-                        alt="Stamp on"
-                        className="h-10 w-10 object-contain"
-                      />
-                    ) : (
-                      <span className="text-[11px] text-contrast/50">On</span>
-                    )}
-                  </div>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-accent-3">
-                    {stampOffAvailable && stampOffSrc ? (
-                      <img
-                        src={stampOffSrc}
-                        alt="Stamp off"
-                        className="h-10 w-10 object-contain"
-                      />
-                    ) : (
-                      <span className="text-[11px] text-contrast/50">Off</span>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <label className="block text-[11px] text-contrast/70">
-                    Filled stamp
-                    <select
-                      className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-3 py-2 text-xs text-contrast outline-none"
-                      value={filledStampKind}
-                      onChange={(event) =>
-                        setFilledStampKind(
-                          event.target.value === "off" ? "off" : "on"
-                        )
-                      }
-                      disabled={!useBusinessStamps || !stampOnAvailable || !stampOffAvailable}
-                    >
-                      <option value="on">Stamp on</option>
-                      <option value="off">Stamp off</option>
-                    </select>
-                  </label>
-                  <label className="block text-[11px] text-contrast/70">
-                    Empty stamp
-                    <select
-                      className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-3 py-2 text-xs text-contrast outline-none"
-                      value={emptyStampKind}
-                      onChange={(event) =>
-                        setEmptyStampKind(
-                          event.target.value === "off" ? "off" : "on"
-                        )
-                      }
-                      disabled={!useBusinessStamps || !stampOnAvailable || !stampOffAvailable}
-                    >
-                      <option value="off">Stamp off</option>
-                      <option value="on">Stamp on</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
+
+            <div className="sm:col-span-5">
+              <CustomInput
+                id="cardTemplateTitle"
+                label="Template name"
+                placeholder="Template name"
+                value={templateTitle}
+                onChange={(event) => setTemplateTitle(event.target.value)}
+              />
+            </div>
+
+            <div className="sm:col-span-5">
+              <CustomInput
+                id="cardBusinessName"
+                label="Business name"
+                placeholder="Business name"
+                value={businessName}
+                onChange={(event) => setBusinessName(event.target.value)}
+              />
             </div>
           </div>
+
+          {businessId ? (
+            <StampPanel
+              businessId={businessId}
+              selectable
+              selectedStampOnId={selectedStampOnId}
+              selectedStampOffId={selectedStampOffId}
+              onSelect={(kind, image) => {
+                if (kind === "on") {
+                  setSelectedStampOnId((prev) =>
+                    prev === image.id ? null : image.id,
+                  );
+                } else {
+                  setSelectedStampOffId((prev) =>
+                    prev === image.id ? null : image.id,
+                  );
+                }
+              }}
+              onStampsLoaded={(stampOn, stampOff) => {
+                setStampOnImages(stampOn);
+                setStampOffImages(stampOff);
+              }}
+              showToggle
+              useStampImages={useBusinessStamps}
+              onToggleUseStampImages={setUseBusinessStamps}
+            />
+          ) : (
+            <p className="mt-3 text-xs text-contrast/60">
+              Select a business to manage stamps.
+            </p>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-xs text-contrast/70">
               Max stamps
@@ -326,9 +242,7 @@ const CardTemplateEditor = ({
                 min={4}
                 max={16}
                 value={maxPoints}
-                onChange={(event) =>
-                  setMaxPoints(Number(event.target.value))
-                }
+                onChange={(event) => setMaxPoints(Number(event.target.value))}
                 className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none"
               />
             </label>
@@ -402,6 +316,9 @@ const CardTemplateEditor = ({
                   cardColor: sanitized.cardColor,
                   accentColor: sanitized.accentColor,
                   textColor: sanitized.textColor,
+                  useStampImages: useBusinessStamps,
+                  stampOnImageId: selectedStampOnId,
+                  stampOffImageId: selectedStampOffId,
                 };
 
                 const saved = selectedTemplate?.id
@@ -416,7 +333,7 @@ const CardTemplateEditor = ({
                 toast.success(
                   selectedTemplate?.id
                     ? "Card template updated."
-                    : "Card template saved."
+                    : "Card template saved.",
                 );
               } catch (error) {
                 console.error(error);
@@ -444,16 +361,16 @@ const CardTemplateEditor = ({
           cardColor={sanitized.cardColor}
           accentColor={sanitized.accentColor}
           textColor={sanitized.textColor}
-          logoSrc={useBusinessLogo && logoAvailable ? logoSrc : undefined}
-          useLogo={useBusinessLogo}
+          logoSrc={logoAvailable ? logoSrc : undefined}
+          useLogo={logoAvailable}
           filledStampSrc={
             useBusinessStamps && stampOnAvailable && stampOffAvailable
-              ? filledStampSrc
+              ? selectedStampOnUrl
               : undefined
           }
           emptyStampSrc={
             useBusinessStamps && stampOnAvailable && stampOffAvailable
-              ? emptyStampSrc
+              ? selectedStampOffUrl
               : undefined
           }
           useStampImages={useBusinessStamps}

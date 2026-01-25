@@ -7,18 +7,20 @@ import {
   deleteBusinessLogo,
   uploadBusinessLogo,
 } from "@/api/client/business.api";
-import ImageUploadTile from "./ImageUploadTile";
+import ImageUploadTile from "@/components/ImageUploadTile";
 
 type LogoUploadPanelProps = {
   businessId: string;
   businessName: string;
   hasLogo?: boolean;
+  onLogoChange?: () => void;
 };
 
 const LogoUploadPanel = ({
   businessId,
   businessName,
   hasLogo,
+  onLogoChange,
 }: LogoUploadPanelProps) => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoVersion, setLogoVersion] = useState(0);
@@ -50,6 +52,7 @@ const LogoUploadPanel = ({
       setLogoVersion((prev) => prev + 1);
       setLogoStatus("available");
       toast.success("Logo updated.");
+      onLogoChange?.();
     } catch (error) {
       console.error(error);
       const message =
@@ -69,6 +72,7 @@ const LogoUploadPanel = ({
       setLogoVersion((prev) => prev + 1);
       setLogoStatus("missing");
       toast.success("Logo deleted.");
+      onLogoChange?.();
     } catch (error) {
       console.error(error);
       toast.error("Unable to delete logo.");

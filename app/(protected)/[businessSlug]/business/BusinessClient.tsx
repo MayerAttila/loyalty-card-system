@@ -5,9 +5,9 @@ import { toast } from "react-toastify";
 import { updateBusiness } from "@/api/client/business.api";
 import { Business } from "@/types/business";
 import Button from "@/components/Button";
-import LogoUploadPanel from "./LogoUploadPanel";
+import LogoUploadPanel from "@/components/LogoUploadPanel";
 import LocationSelectorPanel from "./LocationSelectorPanel";
-import StampUploadPanel from "./StampUploadPanel";
+import StampPanel from "@/components/StampPanel";
 
 type BusinessClientProps = {
   initialBusiness: Business;
@@ -117,7 +117,7 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
           disabled={saving}
         />
       </section>
-      <StampUploadPanel businessId={initialBusiness.id} />
+      <StampPanel businessId={initialBusiness.id} />
     </form>
   );
 };

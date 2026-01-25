@@ -9,6 +9,9 @@ export type CreateCardTemplatePayload = {
   accentColor: string;
   textColor: string;
   isActive?: boolean;
+  useStampImages?: boolean;
+  stampOnImageId?: string | null;
+  stampOffImageId?: string | null;
 };
 
 export const createCardTemplate = async (
@@ -32,6 +35,9 @@ export type UpdateCardTemplatePayload = {
   accentColor?: string;
   textColor?: string;
   isActive?: boolean;
+  useStampImages?: boolean;
+  stampOnImageId?: string | null;
+  stampOffImageId?: string | null;
 };
 
 export const updateCardTemplate = async (
