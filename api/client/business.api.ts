@@ -17,7 +17,14 @@ export const createBusiness = async (payload: {
 
 export const updateBusiness = async (
   id: string,
-  payload: { name: string; address?: string }
+  payload: {
+    name: string;
+    address?: string | null;
+    locationPlaceId?: string | null;
+    locationAddress?: string | null;
+    locationLat?: number | null;
+    locationLng?: number | null;
+  }
 ) => {
   const { data } = await api.patch<Business>(`/business/id/${id}`, payload);
   return data;

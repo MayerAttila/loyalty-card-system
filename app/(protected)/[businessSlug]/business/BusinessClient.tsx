@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { updateBusiness } from "@/api/client/business.api";
-import CustomInput from "@/components/CustomInput";
 import { Business } from "@/types/business";
 import LogoUploadPanel from "./LogoUploadPanel";
 import LocationSelectorPanel from "./LocationSelectorPanel";
@@ -15,15 +14,34 @@ type BusinessClientProps = {
 
 const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
   const [name, setName] = useState(initialBusiness.name ?? "");
-  const [address, setAddress] = useState(initialBusiness.address ?? "");
+  const [location, setLocation] = useState({
+    locationPlaceId: initialBusiness.locationPlaceId ?? null,
+    locationAddress: initialBusiness.locationAddress ?? null,
+    locationLat: initialBusiness.locationLat ?? null,
+    locationLng: initialBusiness.locationLng ?? null,
+  });
   const [saving, setSaving] = useState(false);
 
   const hasChanges = useMemo(() => {
     return (
       name.trim() !== (initialBusiness.name ?? "").trim() ||
-      address.trim() !== (initialBusiness.address ?? "").trim()
+      location.locationPlaceId !== (initialBusiness.locationPlaceId ?? null) ||
+      location.locationAddress !== (initialBusiness.locationAddress ?? null) ||
+      location.locationLat !== (initialBusiness.locationLat ?? null) ||
+      location.locationLng !== (initialBusiness.locationLng ?? null)
     );
-  }, [address, initialBusiness.address, initialBusiness.name, name]);
+  }, [
+    initialBusiness.locationAddress,
+    initialBusiness.locationLat,
+    initialBusiness.locationLng,
+    initialBusiness.locationPlaceId,
+    initialBusiness.name,
+    location.locationAddress,
+    location.locationLat,
+    location.locationLng,
+    location.locationPlaceId,
+    name,
+  ]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,10 +54,18 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
     try {
       const updated = await updateBusiness(initialBusiness.id, {
         name: name.trim(),
-        address: address.trim() || undefined,
+        locationPlaceId: location.locationPlaceId,
+        locationAddress: location.locationAddress,
+        locationLat: location.locationLat,
+        locationLng: location.locationLng,
       });
       setName(updated.name ?? "");
-      setAddress(updated.address ?? "");
+      setLocation({
+        locationPlaceId: updated.locationPlaceId ?? null,
+        locationAddress: updated.locationAddress ?? null,
+        locationLat: updated.locationLat ?? null,
+        locationLng: updated.locationLng ?? null,
+      });
       toast.success("Business updated.");
     } catch (error) {
       console.error(error);
@@ -56,19 +82,26 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
           <div className="flex items-start gap-4">
             <LogoUploadPanel
               businessId={initialBusiness.id}
-              businessName={initialBusiness.name ?? "Business"}
+              businessName={name || "Business"}
               hasLogo={initialBusiness.hasLogo}
             />
             <div>
-            <p className="text-xs uppercase tracking-wide text-contrast/60">
-              Business profile
-            </p>
-            <h2 className="text-xl font-semibold text-brand">
-              {initialBusiness.name ?? "Business"}
-            </h2>
-            <p className="mt-2 text-sm text-contrast/80">
-              Keep your name and address current so customers recognize you.
-            </p>
+              <p className="text-xs uppercase tracking-wide text-contrast/60">
+                Business profile
+              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  id="businessName"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Business name"
+                  disabled={saving}
+                  className="h-10 w-full rounded-lg border border-accent-3 bg-primary px-4 text-sm font-semibold text-brand outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+                />
+              </div>
+              <p className="mt-2 text-sm text-contrast/80">
+                Keep your name current so customers recognize you.
+              </p>
             </div>
           </div>
           <button
@@ -79,26 +112,13 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
             {saving ? "Saving..." : "Save changes"}
           </button>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <CustomInput
-            id="businessName"
-            placeholder="Business name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-            disabled={saving}
-          />
-          <CustomInput
-            id="businessAddress"
-            placeholder="Address"
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            disabled={saving}
-          />
-          <div className="md:col-span-2">
-            <LocationSelectorPanel />
-          </div>
-        </div>
+      </section>
+      <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+        <LocationSelectorPanel
+          location={location}
+          onChange={setLocation}
+          disabled={saving}
+        />
       </section>
       <StampUploadPanel businessId={initialBusiness.id} />
     </form>
