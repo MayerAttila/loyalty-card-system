@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { QRCodeSVG } from "qrcode.react";
+import Button from "@/components/Button";
 
 type CustomerInviteCardProps = {
   businessId: string;
@@ -29,8 +30,9 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
             Share this QR code so customers can register.
           </p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="neutral"
           onClick={async () => {
             if (!joinUrl) return;
             try {
@@ -42,10 +44,10 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
             }
           }}
           disabled={!joinUrl}
-          className="rounded-lg border border-accent-3 px-4 py-2 text-xs font-semibold text-contrast/80 disabled:opacity-60"
+          size="sm"
         >
           Copy invite link
-        </button>
+        </Button>
       </div>
       <div className="mt-4 flex items-center gap-4">
         <div className="rounded-lg border border-accent-3 bg-white p-3">

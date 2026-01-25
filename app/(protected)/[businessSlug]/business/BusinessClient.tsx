@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { updateBusiness } from "@/api/client/business.api";
 import { Business } from "@/types/business";
+import Button from "@/components/Button";
 import LogoUploadPanel from "./LogoUploadPanel";
 import LocationSelectorPanel from "./LocationSelectorPanel";
 import StampUploadPanel from "./StampUploadPanel";
@@ -104,13 +105,9 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
               </p>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={!hasChanges || saving}
-            className="inline-flex items-center justify-center rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
-          >
+          <Button type="submit" disabled={!hasChanges || saving}>
             {saving ? "Saving..." : "Save changes"}
-          </button>
+          </Button>
         </div>
       </section>
       <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">

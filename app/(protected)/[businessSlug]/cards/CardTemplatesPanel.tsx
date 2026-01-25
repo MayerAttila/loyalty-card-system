@@ -4,6 +4,7 @@ import React from "react";
 import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
+import Button from "@/components/Button";
 import LoyaltyCard from "./LoyaltyCard";
 import { CardTemplate } from "@/types/cardTemplate";
 
@@ -40,14 +41,14 @@ const CardTemplatesPanel = ({
           </p>
         </div>
         {onCreate ? (
-          <button
+          <Button
             type="button"
             onClick={onCreate}
             disabled={!businessId}
-            className="rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-primary disabled:opacity-60"
+            size="sm"
           >
             New template
-          </button>
+          </Button>
         ) : null}
       </div>
 

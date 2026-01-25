@@ -1,3 +1,5 @@
+import Button from "@/components/Button";
+
 const AddToWalletForm = () => {
   return (
     <div className="space-y-4">
@@ -10,12 +12,9 @@ const AddToWalletForm = () => {
       <div className="rounded-lg border border-accent-3 bg-accent-1/50 p-4 text-sm text-contrast/80">
         Wallet save link will appear here once the card is created.
       </div>
-      <button
-        type="button"
-        className="w-full rounded-lg border border-accent-4 px-4 py-3 text-sm font-semibold text-contrast"
-      >
+      <Button type="button" variant="neutral" className="w-full">
         Add to Google Wallet
-      </button>
+      </Button>
     </div>
   );
 };

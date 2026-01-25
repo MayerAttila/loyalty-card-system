@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { getSession, signIn, signInPayload } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
@@ -121,12 +122,7 @@ const LoginPage = () => {
               errorText={errors.password}
               onChange={() => clearFieldError("password")}
             />
-            <button
-              type="submit"
-              className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-            >
-              Log in
-            </button>
+            <Button type="submit">Log in</Button>
           </form>
           <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
             <span className="text-contrast/70">New here?</span>

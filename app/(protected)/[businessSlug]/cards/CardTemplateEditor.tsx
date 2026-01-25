@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { createCardTemplate, updateCardTemplate } from "@/api/client/cardTemplate.api";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { useSession } from "@/lib/auth/useSession";
 import LoyaltyCard from "./LoyaltyCard";
 import { CardTemplate } from "@/types/cardTemplate";
@@ -377,15 +378,11 @@ const CardTemplateEditor = ({
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
           {onCancel ? (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg border border-accent-3 px-4 py-3 text-sm font-semibold text-contrast/80"
-            >
+            <Button variant="neutral" onClick={onCancel}>
               Cancel
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button
             type="button"
             disabled={saving || !templateTitle.trim() || !businessId}
             onClick={async () => {
@@ -428,14 +425,13 @@ const CardTemplateEditor = ({
                 setSaving(false);
               }
             }}
-            className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
           >
             {saving
               ? "Saving..."
               : selectedTemplate?.id
                 ? "Update template"
                 : "Save template"}
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">

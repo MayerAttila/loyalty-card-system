@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/api/client/axios";
+import Button from "@/components/Button";
 
 type SessionResponse = null | {
   user?: { id?: string; email?: string; name?: string };
@@ -46,23 +47,19 @@ export default function Admin() {
         </p>
 
         <div className="mt-6 flex items-center gap-3">
-          <button
-            onClick={fetchSession}
-            disabled={loading}
-            className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
-          >
+          <Button onClick={fetchSession} disabled={loading}>
             {loading ? "Checking..." : "Check session"}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={async () => {
               await api.post("/auth/signout");
               setSession(null);
             }}
-            className="rounded-lg border border-accent-3 px-4 py-3 text-sm font-semibold"
+            variant="neutral"
           >
             Logout
-          </button>
+          </Button>
         </div>
 
         {error && (

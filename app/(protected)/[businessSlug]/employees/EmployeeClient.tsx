@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState } from "react";
 import { toast } from "react-toastify";
+import Button from "@/components/Button";
 import {
   deleteUser,
   sendEmployeeInvite,
@@ -142,13 +143,9 @@ const EmployeeClient = ({
             Manage your team and remove access when needed.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsInviteOpen(true)}
-          className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-        >
+        <Button type="button" onClick={() => setIsInviteOpen(true)}>
           Invite employee
-        </button>
+        </Button>
       </div>
       <EmployeesTable
         users={users}

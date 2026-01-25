@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
 import Stepper, { StepperTheme } from "./Stepper";
 
@@ -107,23 +108,22 @@ const JoinPage = () => {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <button
+            <Button
               type="button"
-              className="rounded-lg border border-accent-4 px-4 py-3 text-sm font-semibold text-contrast disabled:opacity-50"
+              variant="neutral"
               onClick={() => requestStep(activeStep - 1)}
               disabled={activeStep === 0 || isAnimating}
             >
               Back
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
-              className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-50"
               onClick={() => requestStep(activeStep + 1)}
               disabled={activeStep === steps.length - 1 || isAnimating}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       </section>

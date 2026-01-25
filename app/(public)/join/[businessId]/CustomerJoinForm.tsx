@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { createCustomer } from "@/api/client/customer.api";
 
 type CustomerJoinFormProps = {
@@ -90,13 +91,9 @@ const CustomerJoinForm = ({ businessId, businessName }: CustomerJoinFormProps) =
         required
         disabled={submitting}
       />
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
-      >
+      <Button type="submit" disabled={submitting} className="w-full">
         {submitting ? "Submitting..." : "Join business"}
-      </button>
+      </Button>
     </form>
   );
 };

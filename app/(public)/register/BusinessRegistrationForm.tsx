@@ -1,6 +1,7 @@
 "use client";
 
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { toast } from "react-toastify";
 import { createBusiness } from "@/api/client/business.api";
 import { CreateBusinessPayload } from "@/api/client/business.api";
@@ -193,13 +194,9 @@ const BusinessRegistrationForm = () => {
             onChange={() => clearFieldError("ownerPasswordConfirm")}
           />
         </div>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="md:col-span-2 rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-        >
+        <Button type="submit" disabled={isSubmitting} className="md:col-span-2">
           {isSubmitting ? "Creating Business..." : "Create Business Account"}
-        </button>
+        </Button>
       </form>
     </div>
   );

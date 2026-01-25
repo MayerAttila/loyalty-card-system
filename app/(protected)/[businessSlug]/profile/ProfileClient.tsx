@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { updateUserProfile } from "@/api/client/user.api";
 import { useSession } from "@/lib/auth/useSession";
 
@@ -100,16 +101,15 @@ const ProfileClient = ({
             <p className="mt-2 text-base text-contrast">{email}</p>
           </div>
           <div className="md:col-span-2 flex justify-end">
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setIsEditing(true);
                 setErrors({});
               }}
-              className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
             >
               Edit profile
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -141,26 +141,22 @@ const ProfileClient = ({
             }}
           />
           <div className="md:col-span-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
+            <Button
               type="button"
+              variant="neutral"
               onClick={() => {
                 setIsEditing(false);
                 setName(originalName);
                 setEmail(originalEmail);
                 setErrors({});
               }}
-              className="rounded-lg border border-accent-3 px-4 py-3 text-sm font-semibold text-contrast/80"
               disabled={isSaving}
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
-            >
+            </Button>
+            <Button type="submit" disabled={isSaving}>
               {isSaving ? "Saving..." : "Save changes"}
-            </button>
+            </Button>
           </div>
         </form>
       )}

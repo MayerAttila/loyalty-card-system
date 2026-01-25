@@ -2,6 +2,7 @@
 
 import React from "react";
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 
 type InviteEmployeeModalProps = {
   isOpen: boolean;
@@ -61,21 +62,18 @@ const InviteEmployeeModal = ({
             onChange={(event) => onEmailChange(event.target.value)}
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
+            <Button
               type="button"
+              variant="neutral"
               onClick={onClose}
-              className="rounded-lg border border-accent-3 px-4 py-2 text-sm font-semibold text-contrast/80"
               disabled={isSubmitting}
+              size="sm"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary disabled:opacity-60"
-            >
+            </Button>
+            <Button type="submit" disabled={isSubmitting} size="sm">
               {isSubmitting ? "Sending invite..." : "Send invite"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

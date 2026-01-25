@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Button from "@/components/Button";
 
 type BusinessLocation = {
   locationPlaceId: string | null;
@@ -250,8 +251,9 @@ const LocationSelectorPanel = ({
             disabled={disabled || !apiKey}
             className="w-full rounded-lg border border-accent-3 bg-contrast/5 px-3 py-2 text-sm text-contrast outline-none placeholder:text-contrast/50"
           />
-          <button
-            type="button"
+          <Button
+            variant="neutral"
+            size="sm"
             onClick={() =>
               onChange({
                 locationPlaceId: null,
@@ -261,10 +263,10 @@ const LocationSelectorPanel = ({
               })
             }
             disabled={disabled || !hasLocation}
-            className="h-10 whitespace-nowrap rounded-lg border border-accent-3 px-3 text-xs font-semibold text-contrast/70 disabled:opacity-60"
+            className="whitespace-nowrap"
           >
             Clear location
-          </button>
+          </Button>
         </div>
         {hasLocation ? null : (
           <div className="rounded-lg border border-accent-3 bg-contrast/5 px-3 py-2 text-xs text-contrast/60">

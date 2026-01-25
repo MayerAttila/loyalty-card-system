@@ -1,6 +1,7 @@
 "use client";
 
 import CustomInput from "@/components/CustomInput";
+import Button from "@/components/Button";
 import { toast } from "react-toastify";
 import { CreateUserPayload, createUser } from "@/api/client/user.api";
 import { useState } from "react";
@@ -195,13 +196,9 @@ const EmployeeRegistrationForm = () => {
             onChange={() => clearFieldError("employeePasswordConfirm")}
           />
         </div>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="md:col-span-2 rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-primary"
-        >
+        <Button type="submit" disabled={isSubmitting} className="md:col-span-2">
           {isSubmitting ? "Creating Employee..." : "Create Employee Account"}
-        </button>
+        </Button>
       </form>
     </div>
   );
