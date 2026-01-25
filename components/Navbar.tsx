@@ -65,6 +65,7 @@ export default function Navbar({
   currentUserRole,
   businessName,
   businessId,
+  businessHasLogo,
   userName,
   userRole,
   basePath = "/business-name",
@@ -72,6 +73,7 @@ export default function Navbar({
   currentUserRole?: Role;
   businessName?: string;
   businessId?: string;
+  businessHasLogo?: boolean;
   userName?: string | null;
   userRole?: Role;
   basePath?: string;
@@ -95,7 +97,7 @@ export default function Navbar({
     .join("");
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
-    apiBaseUrl && businessId
+    apiBaseUrl && businessId && businessHasLogo !== false
       ? `${apiBaseUrl}/business/id/${businessId}/logo`
       : "";
   useEffect(() => {

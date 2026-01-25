@@ -42,6 +42,7 @@ export default async function ProtectedLayout({
         currentUserRole={session.user.role}
         businessName={session.user.businessName}
         businessId={session.user.businessId}
+        businessHasLogo={session.user.businessHasLogo}
         userName={session.user.name}
         userRole={session.user.role}
         basePath={basePath}

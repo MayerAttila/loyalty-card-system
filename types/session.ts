@@ -7,6 +7,7 @@ export type AppSession = {
     approved?: boolean;
     businessId?: string;
     businessName?: string;
+    businessHasLogo?: boolean;
   };
   expires?: string;
 } | null;
