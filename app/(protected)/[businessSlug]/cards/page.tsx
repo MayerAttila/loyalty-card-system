@@ -16,6 +16,7 @@ const CardsPage = async () => {
         initialTemplates={templates}
         businessId={businessId}
         initialBusinessName={session?.user?.businessName}
+        initialHasLogo={session?.user?.businessHasLogo}
       />
     </RequireRole>
   );

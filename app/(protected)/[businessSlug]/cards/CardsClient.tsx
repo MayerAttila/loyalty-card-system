@@ -11,12 +11,14 @@ type CardsClientProps = {
   initialTemplates: CardTemplate[];
   businessId?: string;
   initialBusinessName?: string;
+  initialHasLogo?: boolean;
 };
 
 const CardsClient = ({
   initialTemplates,
   businessId,
   initialBusinessName,
+  initialHasLogo,
 }: CardsClientProps) => {
   const [templates, setTemplates] = useState<CardTemplate[]>(initialTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>();
@@ -140,6 +142,7 @@ const CardsClient = ({
         <CardTemplateEditor
           key={selectedTemplate?.id ?? "new-template"}
           initialBusinessName={initialBusinessName}
+          initialHasLogo={initialHasLogo}
           businessId={businessId}
           selectedTemplate={selectedTemplate}
           onTemplateSaved={handleTemplateSaved}

@@ -21,6 +21,7 @@ type CardTemplateEditorProps = {
   initialCardColor?: string;
   initialAccentColor?: string;
   initialTextColor?: string;
+  initialHasLogo?: boolean;
   businessId?: string;
   selectedTemplate?: CardTemplate;
   onTemplateSaved?: (template: CardTemplate) => void;
@@ -34,6 +35,7 @@ const CardTemplateEditor = ({
   initialCardColor = "#121826",
   initialAccentColor = "#f59e0b",
   initialTextColor = "#f8fafc",
+  initialHasLogo = false,
   businessId: businessIdProp,
   selectedTemplate,
   onTemplateSaved,
@@ -53,7 +55,7 @@ const CardTemplateEditor = ({
   );
   const [saving, setSaving] = useState(false);
   const [useBusinessStamps, setUseBusinessStamps] = useState(true);
-  const [logoAvailable, setLogoAvailable] = useState(false);
+  const [logoAvailable, setLogoAvailable] = useState(initialHasLogo);
   const [logoVersion, setLogoVersion] = useState(0);
   const [stampOnAvailable, setStampOnAvailable] = useState(false);
   const [stampOffAvailable, setStampOffAvailable] = useState(false);
