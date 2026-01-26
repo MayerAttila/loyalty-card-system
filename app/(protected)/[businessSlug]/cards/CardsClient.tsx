@@ -58,7 +58,7 @@ const CardsClient = ({
     });
 
     try {
-      await deleteCardTemplate(template.id);
+      await deleteCardTemplate(template.id, true);
       setTemplates((prev) => prev.filter((item) => item.id !== template.id));
       if (selectedTemplate?.id === template.id) {
         setSelectedTemplate(undefined);

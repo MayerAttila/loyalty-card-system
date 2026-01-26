@@ -15,7 +15,8 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setAppOrigin(window.location.origin);
+      const configuredOrigin = process.env.NEXT_PUBLIC_APP_ORIGIN;
+      setAppOrigin(configuredOrigin || window.location.origin);
     }
   }, []);
 

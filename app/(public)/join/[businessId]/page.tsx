@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
 import Stepper, { StepperTheme } from "./Stepper";
+import { createCustomer } from "@/api/client/customer.api";
+import { getGoogleWalletSaveLink } from "@/api/client/userCard.api";
+import { toast } from "react-toastify";
 
 const steps = [
   { key: "details", label: "Details", description: "Enter your information" },
@@ -16,8 +20,15 @@ const steps = [
 ];
 
 const JoinPage = () => {
+  const params = useParams<{ businessId?: string | string[] }>();
   const [activeStep, setActiveStep] = useState(0);
   const [pendingStep, setPendingStep] = useState<number | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [saveUrl, setSaveUrl] = useState<string | undefined>();
+  const [walletError, setWalletError] = useState<string | undefined>();
 
   const isAnimating = pendingStep !== null;
 
@@ -47,6 +58,66 @@ const JoinPage = () => {
     if (next < 0 || next > steps.length - 1) return;
     if (next === activeStep) return;
     setPendingStep(next);
+  };
+
+  const handleJoinSubmit = async () => {
+    if (submitting) return;
+
+    const businessId = Array.isArray(params?.businessId)
+      ? params?.businessId[0]
+      : params?.businessId;
+
+    if (!businessId) {
+      toast.error("Missing business link.");
+      return;
+    }
+    if (!customerName.trim()) {
+      toast.error("Name is required.");
+      return;
+    }
+    if (!customerEmail.trim()) {
+      toast.error("Email is required.");
+      return;
+    }
+
+    setSubmitting(true);
+    setWalletError(undefined);
+    setSaveUrl(undefined);
+
+    try {
+      const result = await createCustomer({
+        name: customerName.trim(),
+        email: customerEmail.trim(),
+        businessId,
+      });
+
+      setWalletLoading(true);
+      const cardId = result?.cardId;
+      if (!cardId) {
+        setWalletError("No loyalty card found for this customer.");
+        toast.error("No loyalty card found for this customer.");
+        setWalletLoading(false);
+        requestStep(1);
+        return;
+      }
+
+      const wallet = await getGoogleWalletSaveLink(cardId);
+      setSaveUrl(wallet?.saveUrl);
+      if (!wallet?.saveUrl) {
+        setWalletError("Unable to generate Wallet link.");
+        toast.error("Unable to generate Wallet link.");
+      }
+      requestStep(1);
+    } catch (error) {
+      console.error(error);
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? (error instanceof Error ? error.message : "Unable to register.");
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+      setWalletLoading(false);
+    }
   };
 
   return (
@@ -80,7 +151,13 @@ const JoinPage = () => {
 
           <div className="rounded-lg border border-accent-3 bg-primary p-6">
             {activeStep === 0 ? (
-              <div className="space-y-4">
+              <form
+                className="space-y-4"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void handleJoinSubmit();
+                }}
+              >
                 <div>
                   <h2 className="text-lg font-semibold">
                     Step 1: Your details
@@ -94,16 +171,26 @@ const JoinPage = () => {
                     id="customerName"
                     type="text"
                     placeholder="Full name"
+                    value={customerName}
+                    onChange={(event) => setCustomerName(event.target.value)}
+                    disabled={submitting}
                   />
                   <CustomInput
                     id="customerEmail"
                     type="email"
                     placeholder="Email address"
+                    value={customerEmail}
+                    onChange={(event) => setCustomerEmail(event.target.value)}
+                    disabled={submitting}
                   />
                 </div>
-              </div>
+              </form>
             ) : (
-              <AddToWalletForm />
+              <AddToWalletForm
+                saveUrl={saveUrl}
+                loading={walletLoading}
+                errorMessage={walletError}
+              />
             )}
           </div>
 
@@ -119,8 +206,18 @@ const JoinPage = () => {
 
             <Button
               type="button"
-              onClick={() => requestStep(activeStep + 1)}
-              disabled={activeStep === steps.length - 1 || isAnimating}
+              onClick={() => {
+                if (activeStep === 0) {
+                  void handleJoinSubmit();
+                  return;
+                }
+                requestStep(activeStep + 1);
+              }}
+              disabled={
+                activeStep === steps.length - 1 ||
+                isAnimating ||
+                submitting
+              }
             >
               Next
             </Button>

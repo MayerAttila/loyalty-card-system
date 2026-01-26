@@ -8,5 +8,8 @@ export type CreateCustomerPayload = {
 
 export const createCustomer = async (payload: CreateCustomerPayload) => {
   const { data } = await api.post("/customer", payload);
-  return data;
+  return data as {
+    customer: { id: string; name: string; email: string; businessId: string };
+    cardId: string | null;
+  };
 };
