@@ -5,7 +5,10 @@ import { toast } from "react-toastify";
 import CardTemplatesPanel from "./CardTemplatesPanel";
 import CardTemplateEditor from "./CardTemplateEditor";
 import { CardTemplate } from "@/types/cardTemplate";
-import { deleteCardTemplate, updateCardTemplate } from "@/api/client/cardTemplate.api";
+import {
+  deleteCardTemplate,
+  updateCardTemplate,
+} from "@/api/client/cardTemplate.api";
 
 type CardsClientProps = {
   initialTemplates: CardTemplate[];
@@ -125,6 +128,7 @@ const CardsClient = ({
       <CardTemplatesPanel
         initialTemplates={templates}
         businessId={businessId}
+        initialHasLogo={initialHasLogo}
         deletingIds={deletingIds}
         activatingIds={activatingIds}
         onEdit={(template) => {

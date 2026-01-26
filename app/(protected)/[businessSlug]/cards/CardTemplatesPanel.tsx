@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
@@ -11,6 +11,7 @@ import { CardTemplate } from "@/types/cardTemplate";
 type SavedTemplatesProps = {
   initialTemplates?: CardTemplate[];
   businessId?: string;
+  initialHasLogo?: boolean;
   deletingIds?: Set<string>;
   activatingIds?: Set<string>;
   onEdit?: (template: CardTemplate) => void;
@@ -22,6 +23,7 @@ type SavedTemplatesProps = {
 const CardTemplatesPanel = ({
   initialTemplates = [],
   businessId,
+  initialHasLogo,
   deletingIds,
   activatingIds,
   onEdit,
@@ -30,6 +32,32 @@ const CardTemplatesPanel = ({
   onToggleActive,
 }: SavedTemplatesProps) => {
   const templates = initialTemplates;
+  const [logoAvailable, setLogoAvailable] = useState(Boolean(initialHasLogo));
+  const [logoVersion] = useState(0);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const logoSrc =
+    apiBaseUrl && businessId
+      ? `${apiBaseUrl}/business/id/${businessId}/logo?v=${logoVersion}`
+      : "";
+
+  useEffect(() => {
+    if (!logoSrc) {
+      setLogoAvailable(false);
+      return;
+    }
+    let isActive = true;
+    const img = new Image();
+    img.onload = () => {
+      if (isActive) setLogoAvailable(true);
+    };
+    img.onerror = () => {
+      if (isActive) setLogoAvailable(false);
+    };
+    img.src = logoSrc;
+    return () => {
+      isActive = false;
+    };
+  }, [logoSrc]);
 
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
@@ -122,6 +150,8 @@ const CardTemplatesPanel = ({
                   cardColor={template.cardColor}
                   accentColor={template.accentColor}
                   textColor={template.textColor}
+                  logoSrc={logoAvailable ? logoSrc : undefined}
+                  useLogo={logoAvailable}
                   className="max-w-full"
                 />
               </div>
