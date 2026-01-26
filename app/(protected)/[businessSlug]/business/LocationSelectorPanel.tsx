@@ -23,7 +23,9 @@ const DEFAULT_ZOOM = 12;
 
 const loadGoogleMaps = (apiKey: string) => {
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("Google Maps can only load in the browser."));
+    return Promise.reject(
+      new Error("Google Maps can only load in the browser."),
+    );
   }
 
   const googleFromWindow = (window as { google?: any }).google;
@@ -36,8 +38,7 @@ const loadGoogleMaps = (apiKey: string) => {
       const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
-      script.onload = () =>
-        resolve((window as { google?: any }).google);
+      script.onload = () => resolve((window as { google?: any }).google);
       script.onerror = () =>
         reject(new Error("Unable to load the Google Maps script."));
       document.head.appendChild(script);
@@ -118,12 +119,10 @@ const LocationSelectorPanel = ({
         }
 
         if (!autocompleteInstance.current) {
-          autocompleteInstance.current = new googleMaps.maps.places.Autocomplete(
-            inputRef.current,
-            {
+          autocompleteInstance.current =
+            new googleMaps.maps.places.Autocomplete(inputRef.current, {
               fields: ["place_id", "formatted_address", "geometry"],
-            }
-          );
+            });
           autocompleteInstance.current.addListener("place_changed", () => {
             const place = autocompleteInstance.current?.getPlace();
             const geometry = place?.geometry?.location;
@@ -171,7 +170,7 @@ const LocationSelectorPanel = ({
                     place_id?: string;
                     types?: string[];
                   }>,
-                  status: string
+                  status: string,
                 ) => {
                   if (status !== "OK" || !results?.length) {
                     setInputValue(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
@@ -194,13 +193,13 @@ const LocationSelectorPanel = ({
                           "subpremise",
                           "establishment",
                           "point_of_interest",
-                        ].includes(type)
-                      )
+                        ].includes(type),
+                      ),
                     ) ?? results[0];
                   const formattedAddress = preferred?.formatted_address ?? "";
 
                   setInputValue(
-                    formattedAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+                    formattedAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
                   );
                   setLoadError(null);
                   onChange({
@@ -209,9 +208,9 @@ const LocationSelectorPanel = ({
                     locationLat: lat,
                     locationLng: lng,
                   });
-                }
+                },
               );
-            }
+            },
           );
         }
       })
@@ -237,7 +236,10 @@ const LocationSelectorPanel = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3">
-        <label className="text-xs font-semibold text-contrast/70" htmlFor="locationSearch">
+        <label
+          className="text-xs font-semibold text-contrast/70"
+          htmlFor="locationSearch"
+        >
           Search for an address
         </label>
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
@@ -268,14 +270,7 @@ const LocationSelectorPanel = ({
             Clear location
           </Button>
         </div>
-        {hasLocation ? null : (
-          <div className="rounded-lg border border-accent-3 bg-contrast/5 px-3 py-2 text-xs text-contrast/60">
-            No location selected
-          </div>
-        )}
-        {loadError ? (
-          <p className="text-xs text-red-400">{loadError}</p>
-        ) : null}
+        {loadError ? <p className="text-xs text-red-400">{loadError}</p> : null}
       </div>
 
       <div className="flex items-center gap-2">
