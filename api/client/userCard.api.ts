@@ -21,6 +21,7 @@ export type StampCardResult = {
   stampCount: number;
   maxPoints: number;
   completed: boolean;
+  addedStamps?: number;
   walletUpdated?: boolean;
   walletUpdateError?: unknown;
 };
@@ -35,7 +36,9 @@ export const getGoogleWalletSaveLink = async (cardId: string) => {
   return data as GoogleWalletSaveLink;
 };
 
-export const stampCard = async (cardId: string) => {
-  const { data } = await api.post(`/user-loyalty-card/id/${cardId}/stamp`);
+export const stampCard = async (cardId: string, addedStamps = 1) => {
+  const { data } = await api.post(`/user-loyalty-card/id/${cardId}/stamp`, {
+    addedStamps,
+  });
   return data as StampCardResult;
 };

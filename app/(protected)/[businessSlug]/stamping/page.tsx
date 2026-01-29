@@ -8,6 +8,7 @@ import CustomInput from "@/components/CustomInput";
 
 const StampingPage = () => {
   const [cardId, setCardId] = useState("");
+  const [stampAmount, setStampAmount] = useState("1");
   const [result, setResult] = useState<StampCardResult | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,9 +19,15 @@ const StampingPage = () => {
       return;
     }
 
+    const parsedAmount = Number.parseInt(stampAmount.trim(), 10);
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast.error("Enter a valid stamp amount (1 or more).");
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await stampCard(trimmed);
+      const data = await stampCard(trimmed, parsedAmount);
       setResult(data);
       toast.success("Stamp applied.");
     } catch (error) {
@@ -47,15 +54,25 @@ const StampingPage = () => {
       </p>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end">
-        <CustomInput
-          id="card-id"
-          label="Card ID"
-          placeholder="Paste card ID from the QR code"
-          value={cardId}
-          onChange={(event) => setCardId(event.target.value)}
-          helperText="You can find this in the QR code payload on the customer card."
-          className="w-full"
-        />
+        <div className="flex flex-1 flex-col gap-4 sm:flex-row">
+          <CustomInput
+            id="card-id"
+            label="Card ID"
+            placeholder="Paste card ID from the QR code"
+            value={cardId}
+            onChange={(event) => setCardId(event.target.value)}
+            helperText="You can find this in the QR code payload on the customer card."
+            className="w-full"
+          />
+          <CustomInput
+            id="stamp-amount"
+            label="Stamps to add"
+            placeholder="1"
+            value={stampAmount}
+            onChange={(event) => setStampAmount(event.target.value)}
+            className="w-full sm:max-w-[200px]"
+          />
+        </div>
         <Button onClick={handleStamp} disabled={loading}>
           {loading ? "Stamping..." : "Stamp card"}
         </Button>
@@ -71,6 +88,11 @@ const StampingPage = () => {
           <p className="mt-3 text-sm text-contrast">
             {result.stampCount}/{result.maxPoints} stamps
           </p>
+          {result.addedStamps ? (
+            <p className="mt-1 text-xs text-contrast/60">
+              +{result.addedStamps} added
+            </p>
+          ) : null}
           {result.walletUpdated === false ? (
             <p className="mt-2 text-xs text-brand">
               Stamp saved, but Google Wallet failed to update.
