@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import DataTable, { type DataTableColumn } from "@/components/DataTable";
-import { getStampingLogs, type StampingLogEntry } from "@/api/client/stampingLog.api";
+import SearchBar from "@/components/SearchBar";
+import type { StampingLogEntry } from "@/types/stampingLog";
 
 const formatDateTime = (value: unknown) => {
   if (!value) return "";
@@ -11,42 +12,17 @@ const formatDateTime = (value: unknown) => {
   return date.toLocaleString();
 };
 
-const StampingLogsClient = () => {
-  const [logs, setLogs] = useState<StampingLogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const normalizeStr = (value: unknown) =>
+  String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getStampingLogs(200);
-        if (active) setLogs(data);
-      } catch (err) {
-        if (!active) return;
-        const message =
-          typeof err === "object" &&
-          err !== null &&
-          "response" in err &&
-          (err as { response?: { data?: { message?: string } } }).response?.data
-            ?.message
-            ? (err as { response?: { data?: { message?: string } } }).response
-                ?.data?.message
-            : "Unable to load stamping logs.";
-        setError(message ?? "Unable to load stamping logs.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      active = false;
-    };
-  }, []);
+const StampingLogsClient = ({ logs }: { logs: StampingLogEntry[] }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
 
   const columns = useMemo<DataTableColumn<StampingLogEntry>[]>(
     () => [
@@ -108,29 +84,80 @@ const StampingLogsClient = () => {
     []
   );
 
-  if (loading) {
-    return <p className="mt-4 text-sm text-contrast/70">Loading logs...</p>;
-  }
+  const searchData = useMemo(
+    () =>
+      logs.map((log) => ({
+        customerName: log.customer.name,
+        customerEmail: log.customer.email,
+        staffName: log.stampedBy.name,
+        staffEmail: log.stampedBy.email,
+        staffRole: log.stampedBy.role,
+      })),
+    [logs]
+  );
 
-  if (error) {
-    return (
-      <p className="mt-4 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
-        {error}
-      </p>
-    );
-  }
+  const filteredLogs = useMemo(() => {
+    if (!searchQuery) return logs;
+
+    const q = normalizeStr(searchQuery);
+    const searchIn = (value: unknown) => normalizeStr(value).includes(q);
+
+    return logs.filter((log) => {
+      const fields = {
+        customerName: log.customer.name,
+        customerEmail: log.customer.email,
+        staffName: log.stampedBy.name,
+        staffEmail: log.stampedBy.email,
+        staffRole: log.stampedBy.role,
+      };
+
+      if (searchAccessor && searchAccessor in fields) {
+        return searchIn(fields[searchAccessor as keyof typeof fields]);
+      }
+
+      return Object.values(fields).some(searchIn);
+    });
+  }, [logs, searchAccessor, searchQuery]);
 
   return (
-    <div className="mt-6">
-      <DataTable
-        data={logs}
-        columns={columns}
-        storageKey="stamping-logs"
-        emptyMessage="No stamps recorded yet."
-        defaultSortKey="stampedAt"
-        defaultSortDirection="desc"
-      />
-    </div>
+    <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-brand">Logs</h2>
+          <p className="mt-2 text-sm text-contrast/80">
+            Review redemption history, stamp activity, and system events.
+          </p>
+        </div>
+        <div className="w-full md:max-w-sm">
+          <SearchBar
+            data={searchData}
+            searchKeys={[
+              "customerName",
+              "customerEmail",
+              "staffName",
+              "staffEmail",
+              "staffRole",
+            ]}
+            placeholder="Search customer or staff"
+            onSearchChange={({ query, accessor }) => {
+              setSearchQuery(query);
+              setSearchAccessor(accessor);
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <DataTable
+          data={filteredLogs}
+          columns={columns}
+          storageKey="stamping-logs"
+          emptyMessage="No stamps recorded yet."
+          defaultSortKey="stampedAt"
+          defaultSortDirection="desc"
+        />
+      </div>
+    </section>
   );
 };
 

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
+import SearchBar from "@/components/SearchBar";
 import {
   deleteUser,
   sendEmployeeInvite,
@@ -29,6 +30,8 @@ const EmployeeClient = ({
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
 
   const handleToggleApproval = useCallback(
     async (userId: string, approved: boolean) => {
@@ -134,21 +137,71 @@ const EmployeeClient = ({
     }
   };
 
+  const searchData = useMemo(
+    () =>
+      users.map((user) => ({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      })),
+    [users]
+  );
+
+  const normalizeStr = (value: unknown) =>
+    String(value ?? "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery) return users;
+    const q = normalizeStr(searchQuery);
+    const searchIn = (value: unknown) => normalizeStr(value).includes(q);
+    const fields = (user: User) => ({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+
+    return users.filter((user) => {
+      const data = fields(user);
+      if (searchAccessor && searchAccessor in data) {
+        return searchIn(data[searchAccessor as keyof typeof data]);
+      }
+      return Object.values(data).some(searchIn);
+    });
+  }, [searchQuery, searchAccessor, users]);
+
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-brand">Employees</h2>
           <p className="mt-2 text-sm text-contrast/80">
             Manage your team and remove access when needed.
           </p>
         </div>
-        <Button type="button" onClick={() => setIsInviteOpen(true)}>
-          Invite employee
-        </Button>
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center">
+          <div className="w-full md:w-72">
+            <SearchBar
+              data={searchData}
+              searchKeys={["name", "email", "role"]}
+              placeholder="Search employees"
+              onSearchChange={({ query, accessor }) => {
+                setSearchQuery(query);
+                setSearchAccessor(accessor);
+              }}
+            />
+          </div>
+          <Button type="button" onClick={() => setIsInviteOpen(true)}>
+            Invite employee
+          </Button>
+        </div>
       </div>
       <EmployeesTable
-        users={users}
+        users={filteredUsers}
         updatingIds={updatingIds}
         currentUserRole={currentUserRole}
         onToggleApproval={handleToggleApproval}
