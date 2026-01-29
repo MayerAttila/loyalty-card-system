@@ -1,4 +1,5 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
+import StampingLogsClient from "./StampingLogsClient";
 
 const StampingLogsPage = () => {
   return (
@@ -8,6 +9,7 @@ const StampingLogsPage = () => {
         <p className="mt-2 text-sm text-contrast/80">
           Review redemption history, stamp activity, and system events.
         </p>
+        <StampingLogsClient />
       </section>
     </RequireRole>
   );
