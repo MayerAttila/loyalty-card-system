@@ -58,3 +58,22 @@ export const deleteCardTemplate = async (id: string, force = false) => {
   );
   return data;
 };
+
+export const generateHeroImage = async (
+  id: string,
+  count = 0,
+  options?: { maxPoints?: number; stampRows?: number }
+) => {
+  const params = new URLSearchParams();
+  params.set("count", String(count));
+  if (options?.maxPoints !== undefined) {
+    params.set("maxPoints", String(options.maxPoints));
+  }
+  if (options?.stampRows !== undefined) {
+    params.set("stampRows", String(options.stampRows));
+  }
+  const { data } = await api.post<{ url: string }>(
+    `/card-template/id/${id}/hero-image?${params.toString()}`
+  );
+  return data;
+};

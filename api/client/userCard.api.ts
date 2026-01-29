@@ -22,6 +22,7 @@ export type StampCardResult = {
   maxPoints: number;
   completed: boolean;
   addedStamps?: number;
+  rewardsEarned?: number;
   walletUpdated?: boolean;
   walletUpdateError?: unknown;
 };

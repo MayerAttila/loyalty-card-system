@@ -353,31 +353,31 @@ const CardTemplateEditor = ({
           </Button>
         </div>
       </div>
-      <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
-        <LoyaltyCard
-          businessName={sanitized.businessName}
-          ownerName={sanitized.ownerName}
-          maxPoints={sanitized.maxPoints}
-          filledPoints={sanitized.filledPoints}
-          rewardsCollected={sanitized.rewardsCollected}
-          cardColor={sanitized.cardColor}
-          accentColor={sanitized.accentColor}
-          textColor={sanitized.textColor}
-          logoSrc={logoAvailable ? logoSrc : undefined}
-          useLogo={logoAvailable}
-          filledStampSrc={
-            useBusinessStamps && stampOnAvailable && stampOffAvailable
-              ? selectedStampOnUrl
-              : undefined
-          }
-          emptyStampSrc={
-            useBusinessStamps && stampOnAvailable && stampOffAvailable
-              ? selectedStampOffUrl
-              : undefined
-          }
-          useStampImages={useBusinessStamps}
-        />
-      </div>
+        <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
+          <LoyaltyCard
+            businessName={sanitized.businessName}
+            ownerName={sanitized.ownerName}
+            maxPoints={sanitized.maxPoints}
+            filledPoints={sanitized.filledPoints}
+            rewardsCollected={sanitized.rewardsCollected}
+            cardColor={sanitized.cardColor}
+            accentColor={sanitized.accentColor}
+            textColor={sanitized.textColor}
+            logoSrc={logoAvailable ? logoSrc : undefined}
+            useLogo={logoAvailable}
+            filledStampSrc={
+              useBusinessStamps && stampOnAvailable && stampOffAvailable
+                ? selectedStampOnUrl
+                : undefined
+            }
+            emptyStampSrc={
+              useBusinessStamps && stampOnAvailable && stampOffAvailable
+                ? selectedStampOffUrl
+                : undefined
+            }
+            useStampImages={useBusinessStamps}
+          />
+        </div>
     </div>
   );
 };

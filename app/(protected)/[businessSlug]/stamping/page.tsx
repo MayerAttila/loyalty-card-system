@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { stampCard, type StampCardResult } from "@/api/client/userCard.api";
 import Button from "@/components/Button";
 import CustomInput from "@/components/CustomInput";
+import RewardNotice from "@/components/RewardNotice";
 
 const StampingPage = () => {
   const [cardId, setCardId] = useState("");
@@ -93,6 +94,7 @@ const StampingPage = () => {
               +{result.addedStamps} added
             </p>
           ) : null}
+          <RewardNotice rewardsEarned={result.rewardsEarned ?? 0} />
           {result.walletUpdated === false ? (
             <p className="mt-2 text-xs text-brand">
               Stamp saved, but Google Wallet failed to update.

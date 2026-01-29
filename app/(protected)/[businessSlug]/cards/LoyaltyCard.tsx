@@ -16,6 +16,7 @@ type LoyaltyCardProps = {
   filledStampSrc?: string;
   emptyStampSrc?: string;
   useStampImages?: boolean;
+  stampRows?: number;
   className?: string;
 };
 
@@ -33,11 +34,13 @@ const LoyaltyCard = ({
   filledStampSrc,
   emptyStampSrc,
   useStampImages = false,
+  stampRows = 2,
   className = "",
 }: LoyaltyCardProps) => {
   const safeMax = Math.max(4, Math.min(16, maxPoints));
   const safeFilled = Math.min(Math.max(0, filledPoints), safeMax);
-  const shouldSplitRows = safeMax > 6;
+  const safeRows = Math.max(1, Math.min(2, stampRows));
+  const shouldSplitRows = safeRows > 1;
   const firstRowCount = shouldSplitRows ? Math.ceil(safeMax / 2) : safeMax;
   const secondRowCount = shouldSplitRows ? safeMax - firstRowCount : 0;
   const stamps = Array.from({ length: safeMax });
