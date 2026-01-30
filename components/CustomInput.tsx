@@ -3,13 +3,16 @@
 import React, { forwardRef, useMemo, useState } from "react";
 import {
   MdAlternateEmail,
+  MdLanguage,
   MdLock,
+  MdLocationOn,
   MdPerson,
   MdPhone,
   MdSearch,
   MdVisibility,
   MdVisibilityOff,
 } from "react-icons/md";
+import { BsShop } from "react-icons/bs";
 
 type CustomInputType =
   | "text"
@@ -17,6 +20,9 @@ type CustomInputType =
   | "password"
   | "name"
   | "tel"
+  | "business"
+  | "address"
+  | "website"
   | "search";
 
 type CustomInputProps = {
@@ -85,6 +91,27 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             inputType: "tel",
             inputMode: "tel" as const,
             autoCompleteValue: "tel",
+          };
+        case "website":
+          return {
+            icon: MdLanguage,
+            inputType: "url",
+            inputMode: "url" as const,
+            autoCompleteValue: "url",
+          };
+        case "business":
+          return {
+            icon: BsShop,
+            inputType: "text",
+            inputMode: "text" as const,
+            autoCompleteValue: "organization",
+          };
+        case "address":
+          return {
+            icon: MdLocationOn,
+            inputType: "text",
+            inputMode: "text" as const,
+            autoCompleteValue: "street-address",
           };
         case "search":
           return {

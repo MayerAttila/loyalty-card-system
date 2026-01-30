@@ -5,11 +5,13 @@ import { BusinessStampList } from "../../types/stampImage";
 export type CreateBusinessPayload = {
   name: string;
   address?: string;
+  website?: string;
 };
 
 export const createBusiness = async (payload: {
   name: string;
   address?: string;
+  website?: string;
 }) => {
   const { data } = await api.post<Business>("/business", payload);
   return data;
@@ -20,6 +22,7 @@ export const updateBusiness = async (
   payload: {
     name: string;
     address?: string | null;
+    website?: string | null;
     locationPlaceId?: string | null;
     locationAddress?: string | null;
     locationLat?: number | null;

@@ -152,19 +152,19 @@ const BusinessRegistrationForm = () => {
       <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
         <CustomInput
           id="businessName"
-          type="text"
+          type="business"
           placeholder="Business name"
           errorText={errors.businessName}
           onChange={() => clearFieldError("businessName")}
         />
         <CustomInput
           id="businessAddress"
-          type="text"
+          type="address"
           placeholder="Business address (optional)"
         />
         <CustomInput
           id="ownerName"
-          type="text"
+          type="name"
           placeholder="Owner full name"
           errorText={errors.ownerName}
           onChange={() => clearFieldError("ownerName")}

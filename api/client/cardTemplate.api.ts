@@ -12,6 +12,7 @@ export type CreateCardTemplatePayload = {
   useStampImages?: boolean;
   stampOnImageId?: string | null;
   stampOffImageId?: string | null;
+  includeLocation?: boolean;
 };
 
 export const createCardTemplate = async (
@@ -38,6 +39,7 @@ export type UpdateCardTemplatePayload = {
   useStampImages?: boolean;
   stampOnImageId?: string | null;
   stampOffImageId?: string | null;
+  includeLocation?: boolean;
 };
 
 export const updateCardTemplate = async (
