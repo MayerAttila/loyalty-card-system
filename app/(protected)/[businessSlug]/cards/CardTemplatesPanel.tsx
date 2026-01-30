@@ -5,12 +5,13 @@ import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
 import Button from "@/components/Button";
-import LoyaltyCard from "./LoyaltyCard";
+import WalletCardPreview from "./WalletCardPreview";
 import { CardTemplate } from "@/types/cardTemplate";
 
 type SavedTemplatesProps = {
   initialTemplates?: CardTemplate[];
   businessId?: string;
+  businessName?: string;
   initialHasLogo?: boolean;
   deletingIds?: Set<string>;
   activatingIds?: Set<string>;
@@ -23,6 +24,7 @@ type SavedTemplatesProps = {
 const CardTemplatesPanel = ({
   initialTemplates = [],
   businessId,
+  businessName,
   initialHasLogo,
   deletingIds,
   activatingIds,
@@ -141,15 +143,13 @@ const CardTemplatesPanel = ({
                     ) : null}
                   </div>
                 </div>
-                <LoyaltyCard
-                  businessName={template.title}
-                  ownerName="Preview"
+                <WalletCardPreview
+                  issuerName={businessName ?? "Business Name"}
+                  programName={template.title}
                   maxPoints={template.maxPoints}
                   filledPoints={Math.min(3, template.maxPoints)}
                   rewardsCollected={0}
                   cardColor={template.cardColor}
-                  accentColor={template.accentColor}
-                  textColor={template.textColor}
                   logoSrc={logoAvailable ? logoSrc : undefined}
                   useLogo={logoAvailable}
                   className="max-w-full"

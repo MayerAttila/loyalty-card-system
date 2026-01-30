@@ -9,7 +9,7 @@ import {
 import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import { useSession } from "@/lib/auth/useSession";
-import LoyaltyCard from "./LoyaltyCard";
+import WalletCardPreview from "./WalletCardPreview";
 import LogoUploadPanel from "@/components/LogoUploadPanel";
 import StampPanel from "@/components/StampPanel";
 import { CardTemplate } from "@/types/cardTemplate";
@@ -19,8 +19,6 @@ type CardTemplateEditorProps = {
   initialMaxPoints?: number;
   initialFilledPoints?: number;
   initialCardColor?: string;
-  initialAccentColor?: string;
-  initialTextColor?: string;
   initialHasLogo?: boolean;
   businessId?: string;
   selectedTemplate?: CardTemplate;
@@ -33,8 +31,6 @@ const CardTemplateEditor = ({
   initialMaxPoints = 10,
   initialFilledPoints = 3,
   initialCardColor = "#121826",
-  initialAccentColor = "#f59e0b",
-  initialTextColor = "#f8fafc",
   initialHasLogo = false,
   businessId: businessIdProp,
   selectedTemplate,
@@ -48,8 +44,6 @@ const CardTemplateEditor = ({
   const [filledPoints, setFilledPoints] = useState(initialFilledPoints);
   const rewardsCollected = 1;
   const [cardColor, setCardColor] = useState(initialCardColor);
-  const [accentColor, setAccentColor] = useState(initialAccentColor);
-  const [textColor, setTextColor] = useState(initialTextColor);
   const [templateTitle, setTemplateTitle] = useState(
     selectedTemplate?.title ?? `${initialBusinessName} Card`,
   );
@@ -96,8 +90,6 @@ const CardTemplateEditor = ({
     setMaxPoints(selectedTemplate.maxPoints);
     setFilledPoints(Math.min(3, selectedTemplate.maxPoints));
     setCardColor(selectedTemplate.cardColor);
-    setAccentColor(selectedTemplate.accentColor);
-    setTextColor(selectedTemplate.textColor);
     setUseBusinessStamps(selectedTemplate.useStampImages ?? true);
     setSelectedStampOnId(selectedTemplate.stampOnImageId ?? null);
     setSelectedStampOffId(selectedTemplate.stampOffImageId ?? null);
@@ -151,17 +143,13 @@ const CardTemplateEditor = ({
       filledPoints: safeFilled,
       rewardsCollected: safeRewards,
       cardColor,
-      accentColor,
-      textColor,
     };
   }, [
-    accentColor,
     businessName,
     cardColor,
     filledPoints,
     maxPoints,
     rewardsCollected,
-    textColor,
   ]);
 
   return (
@@ -272,24 +260,6 @@ const CardTemplateEditor = ({
                 className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-accent-3 bg-primary p-1"
               />
             </label>
-            <label className="block text-xs text-contrast/70">
-              Accent color
-              <input
-                type="color"
-                value={accentColor}
-                onChange={(event) => setAccentColor(event.target.value)}
-                className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-accent-3 bg-primary p-1"
-              />
-            </label>
-            <label className="block text-xs text-contrast/70">
-              Text color
-              <input
-                type="color"
-                value={textColor}
-                onChange={(event) => setTextColor(event.target.value)}
-                className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-accent-3 bg-primary p-1"
-              />
-            </label>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
@@ -316,8 +286,6 @@ const CardTemplateEditor = ({
                   title: templateTitle.trim(),
                   maxPoints: sanitized.maxPoints,
                   cardColor: sanitized.cardColor,
-                  accentColor: sanitized.accentColor,
-                  textColor: sanitized.textColor,
                   useStampImages: useBusinessStamps,
                   stampOnImageId: selectedStampOnId,
                   stampOffImageId: selectedStampOffId,
@@ -354,15 +322,13 @@ const CardTemplateEditor = ({
         </div>
       </div>
         <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
-          <LoyaltyCard
-            businessName={sanitized.businessName}
-            ownerName={sanitized.ownerName}
+          <WalletCardPreview
+            issuerName={sanitized.businessName}
+            programName={templateTitle}
             maxPoints={sanitized.maxPoints}
             filledPoints={sanitized.filledPoints}
             rewardsCollected={sanitized.rewardsCollected}
             cardColor={sanitized.cardColor}
-            accentColor={sanitized.accentColor}
-            textColor={sanitized.textColor}
             logoSrc={logoAvailable ? logoSrc : undefined}
             useLogo={logoAvailable}
             filledStampSrc={

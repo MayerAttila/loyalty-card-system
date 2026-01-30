@@ -128,6 +128,7 @@ const CardsClient = ({
       <CardTemplatesPanel
         initialTemplates={templates}
         businessId={businessId}
+        businessName={initialBusinessName}
         initialHasLogo={initialHasLogo}
         deletingIds={deletingIds}
         activatingIds={activatingIds}

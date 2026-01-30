@@ -6,8 +6,6 @@ export type CreateCardTemplatePayload = {
   businessId: string;
   maxPoints: number;
   cardColor: string;
-  accentColor: string;
-  textColor: string;
   isActive?: boolean;
   useStampImages?: boolean;
   stampOnImageId?: string | null;
@@ -33,8 +31,6 @@ export type UpdateCardTemplatePayload = {
   title?: string;
   maxPoints?: number;
   cardColor?: string;
-  accentColor?: string;
-  textColor?: string;
   isActive?: boolean;
   useStampImages?: boolean;
   stampOnImageId?: string | null;

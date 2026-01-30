@@ -3,8 +3,6 @@ export type CardTemplate = {
   title: string;
   maxPoints: number;
   cardColor: string;
-  accentColor: string;
-  textColor: string;
   useStampImages?: boolean;
   stampOnImageId?: string | null;
   stampOffImageId?: string | null;
