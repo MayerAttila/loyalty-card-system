@@ -9,6 +9,8 @@ import {
   deleteCardTemplate,
   updateCardTemplate,
 } from "@/api/client/cardTemplate.api";
+import Button from "@/components/Button";
+import ActiveButton from "@/components/ActiveButton";
 
 type CardsClientProps = {
   initialTemplates: CardTemplate[];
@@ -28,6 +30,13 @@ const CardsClient = ({
   const [isCreating, setIsCreating] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [activatingIds, setActivatingIds] = useState<Set<string>>(new Set());
+  const hasTemplates = templates.length > 0;
+  const hasActiveTemplate = templates.some((template) => template.isActive);
+
+  const startCreate = () => {
+    setSelectedTemplate(undefined);
+    setIsCreating(true);
+  };
 
   const handleTemplateSaved = (template: CardTemplate) => {
     setTemplates((current) => {
@@ -46,7 +55,7 @@ const CardsClient = ({
         isActive: item.id === template.id,
       }));
     });
-    setSelectedTemplate(template);
+    setSelectedTemplate(undefined);
     setIsCreating(false);
   };
 
@@ -125,24 +134,60 @@ const CardsClient = ({
 
   return (
     <div className="space-y-6">
-      <CardTemplatesPanel
-        initialTemplates={templates}
-        businessId={businessId}
-        businessName={initialBusinessName}
-        initialHasLogo={initialHasLogo}
-        deletingIds={deletingIds}
-        activatingIds={activatingIds}
-        onEdit={(template) => {
-          setSelectedTemplate(template);
-          setIsCreating(false);
-        }}
-        onCreate={() => {
-          setSelectedTemplate(undefined);
-          setIsCreating(true);
-        }}
-        onDelete={handleDelete}
-        onToggleActive={handleToggleActive}
-      />
+      {!hasTemplates ? (
+        <section className="rounded-xl border border-accent-3 bg-primary/60 p-5">
+          <h3 className="text-lg font-semibold text-brand">
+            Create your first loyalty card
+          </h3>
+          <p className="mt-2 text-sm text-contrast/80">
+            Upload a logo and stamps in the Business tab, then create a template
+            here to start issuing cards.
+          </p>
+          <div className="mt-4">
+            <Button type="button" onClick={startCreate}>
+              Create template
+            </Button>
+          </div>
+        </section>
+      ) : (
+        <>
+          {!hasActiveTemplate ? (
+            <section className="rounded-xl border border-accent-3 bg-primary/60 p-5">
+              <h3 className="text-lg font-semibold text-brand">
+                No active template yet
+              </h3>
+              <p className="mt-2 text-sm text-contrast/80">
+                Activate one of your templates so new customers receive a card
+                automatically.
+              </p>
+              <div className="mt-3 flex items-center gap-2 text-xs text-contrast/70">
+                <ActiveButton
+                  isActive={false}
+                  onActivate={() => undefined}
+                  disabled
+                  title="Activate template"
+                />
+                <span>Use this toggle to set an active template.</span>
+              </div>
+            </section>
+          ) : null}
+          <CardTemplatesPanel
+            initialTemplates={templates}
+            businessId={businessId}
+            businessName={initialBusinessName}
+            initialHasLogo={initialHasLogo}
+            deletingIds={deletingIds}
+            activatingIds={activatingIds}
+            onEdit={(template) => {
+              setSelectedTemplate(template);
+              setIsCreating(false);
+            }}
+            onCreate={startCreate}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+          />
+        </>
+      )}
       {selectedTemplate || isCreating ? (
         <CardTemplateEditor
           key={selectedTemplate?.id ?? "new-template"}

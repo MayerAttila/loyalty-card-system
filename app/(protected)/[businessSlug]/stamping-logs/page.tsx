@@ -2,6 +2,7 @@ import { RequireRole } from "@/lib/auth/RequireRole";
 import StampingLogsClient from "./StampingLogsClient";
 import { getStampingLogs } from "@/api/server/stampingLog.api";
 import type { StampingLogEntry } from "@/types/stampingLog";
+import HelpCard from "@/components/HelpCard";
 
 const StampingLogsPage = async () => {
   let logs: StampingLogEntry[] = [];
@@ -13,7 +14,15 @@ const StampingLogsPage = async () => {
 
   return (
     <RequireRole allow={["ADMIN", "OWNER"]}>
-      <StampingLogsClient logs={logs} />
+      <div className="space-y-6">
+        {logs.length === 0 ? (
+          <HelpCard
+            title="No stamping activity yet"
+            description="Logs will appear as soon as staff apply stamps."
+          />
+        ) : null}
+        <StampingLogsClient logs={logs} />
+      </div>
     </RequireRole>
   );
 };

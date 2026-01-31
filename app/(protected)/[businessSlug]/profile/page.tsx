@@ -1,11 +1,19 @@
 import { getSession } from "@/api/server/auth.api";
 import ProfileClient from "./ProfileClient";
+import EmptyState from "@/components/EmptyState";
 
 const ProfilePage = async () => {
   const session = await getSession();
 
   if (!session?.user?.id) {
-    return <p>Missing profile data.</p>;
+    return (
+      <EmptyState
+        title="Profile unavailable"
+        description="We couldn't load your profile details."
+        actionLabel="Go to login"
+        actionHref="/login"
+      />
+    );
   }
 
   return (

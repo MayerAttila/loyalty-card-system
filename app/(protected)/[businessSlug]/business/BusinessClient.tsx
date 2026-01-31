@@ -24,6 +24,9 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
     locationLng: initialBusiness.locationLng ?? null,
   });
   const [saving, setSaving] = useState(false);
+  const needsLogo = !initialBusiness.hasLogo;
+  const needsLocation =
+    initialBusiness.locationLat === null || initialBusiness.locationLng === null;
 
   const hasChanges = useMemo(() => {
     return (
@@ -85,6 +88,21 @@ const BusinessClient = ({ initialBusiness }: BusinessClientProps) => {
 
   return (
     <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+      {needsLogo || needsLocation ? (
+        <section className="rounded-xl border border-accent-3 bg-primary/60 p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-contrast/60">
+            Quick setup tips
+          </p>
+          <ul className="mt-3 space-y-1 text-sm text-contrast/80">
+            {needsLogo ? <li>Upload a logo to brand your customer cards.</li> : null}
+            {needsLocation ? (
+              <li>
+                Add your business location so Wallet cards can show directions.
+              </li>
+            ) : null}
+          </ul>
+        </section>
+      ) : null}
       <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-4">
