@@ -4,11 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
+import SubscriptionTiers from "./SubscriptionTiers";
 import {
-  createCheckoutSession,
   createPortalSession,
+  cancelSubscription,
+  cancelSubscriptionNow,
+  resetSubscriptionForTesting,
   getBillingStatus,
   type BillingStatus,
+  startTrialNoCard,
 } from "@/api/client/billing.api";
 
 const MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? "";
@@ -61,38 +65,10 @@ const BillingClient = () => {
   }, [status?.stripePriceId]);
 
   const isActive =
-    status?.status === "active" || status?.status === "trialing";
-
-  const handleSubscribe = async (
-    priceId: string,
-    withTrial = false,
-    requireCard = true
-  ) => {
-    if (!priceId) {
-      toast.error("Missing price configuration.");
-      return;
-    }
-    setActionLoading(true);
-    try {
-      const { url } = await createCheckoutSession({
-        priceId,
-        successUrl: billingUrl,
-        cancelUrl: billingUrl,
-        withTrial,
-        requireCard,
-      });
-      if (url) {
-        window.location.href = url;
-        return;
-      }
-      toast.error("Stripe checkout URL missing.");
-    } catch (error) {
-      console.error(error);
-      toast.error("Unable to start checkout.");
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    status?.status === "active" ||
+    status?.status === "trialing" ||
+    status?.status === "trial";
+  const canCancel = isActive && !status?.cancelAtPeriodEnd;
 
   const handleManageBilling = async () => {
     setActionLoading(true);
@@ -124,14 +100,82 @@ const BillingClient = () => {
               Manage your subscription and payment details.
             </p>
           </div>
-          <Button
-            type="button"
-            onClick={handleManageBilling}
-            disabled={actionLoading || !status?.stripeCustomerId}
-            variant="neutral"
-          >
-            Manage billing
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              onClick={handleManageBilling}
+              disabled={actionLoading || !status?.stripeCustomerId}
+              variant="neutral"
+            >
+              Manage billing
+            </Button>
+            <Button
+              type="button"
+              variant="neutral"
+              onClick={async () => {
+                if (!canCancel) return;
+                setActionLoading(true);
+                try {
+                  await cancelSubscription();
+                  const updated = await getBillingStatus();
+                  setStatus(updated);
+                  toast.success("Cancellation scheduled.");
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Unable to cancel subscription.");
+                } finally {
+                  setActionLoading(false);
+                }
+              }}
+              disabled={actionLoading || !canCancel}
+            >
+              Cancel plan
+            </Button>
+            <Button
+              type="button"
+              variant="neutral"
+              onClick={async () => {
+                if (!isActive) return;
+                setActionLoading(true);
+                try {
+                  await cancelSubscriptionNow();
+                  const updated = await getBillingStatus();
+                  setStatus(updated);
+                  toast.success("Subscription canceled immediately.");
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Unable to cancel immediately.");
+                } finally {
+                  setActionLoading(false);
+                }
+              }}
+              disabled={actionLoading || !isActive}
+            >
+              Test
+            </Button>
+            <Button
+              type="button"
+              variant="neutral"
+              onClick={async () => {
+                if (actionLoading) return;
+                setActionLoading(true);
+                try {
+                  await resetSubscriptionForTesting();
+                  const updated = await getBillingStatus();
+                  setStatus(updated);
+                  toast.success("Subscription history reset.");
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Unable to reset subscription.");
+                } finally {
+                  setActionLoading(false);
+                }
+              }}
+              disabled={actionLoading}
+            >
+              Test (reset)
+            </Button>
+          </div>
         </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -166,68 +210,37 @@ const BillingClient = () => {
         </div>
       </div>
 
-      <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-contrast">
-              Start free trial
-            </h3>
-            <p className="mt-2 text-sm text-contrast/70">
-              {TRIAL_DAYS}-day trial. No card required. Add a card before the trial ends to keep access.
-            </p>
-          </div>
-          <Button
-            type="button"
-            onClick={() => handleSubscribe(MONTHLY_PRICE_ID, true, false)}
-            disabled={actionLoading || isActive}
-          >
-            Start free trial
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-          <h3 className="text-lg font-semibold text-contrast">Monthly</h3>
-          <p className="mt-2 text-sm text-contrast/70">
-            €7.99 per month.
-          </p>
-          <div className="mt-4">
-            <Button
-              type="button"
-              onClick={() => handleSubscribe(MONTHLY_PRICE_ID)}
-              disabled={
-                actionLoading ||
-                (isActive && status?.stripePriceId === MONTHLY_PRICE_ID)
-              }
-            >
-              {status?.stripePriceId === MONTHLY_PRICE_ID && isActive
-                ? "Current plan"
-                : "Subscribe monthly"}
-            </Button>
-          </div>
-        </div>
-        <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-          <h3 className="text-lg font-semibold text-contrast">Annual</h3>
-          <p className="mt-2 text-sm text-contrast/70">
-            €79.99 per year.
-          </p>
-          <div className="mt-4">
-            <Button
-              type="button"
-              onClick={() => handleSubscribe(ANNUAL_PRICE_ID)}
-              disabled={
-                actionLoading ||
-                (isActive && status?.stripePriceId === ANNUAL_PRICE_ID)
-              }
-            >
-              {status?.stripePriceId === ANNUAL_PRICE_ID && isActive
-                ? "Current plan"
-                : "Subscribe annually"}
-            </Button>
-          </div>
-        </div>
-      </div>
+      <SubscriptionTiers
+        trialDays={TRIAL_DAYS}
+        actionLoading={actionLoading}
+        isActive={isActive}
+        status={status}
+        monthlyPriceId={MONTHLY_PRICE_ID}
+        annualPriceId={ANNUAL_PRICE_ID}
+        onStartTrial={async () => {
+          if (actionLoading) return;
+          setActionLoading(true);
+          try {
+            await startTrialNoCard();
+            const updated = await getBillingStatus();
+            setStatus(updated);
+            toast.success("Trial started.");
+          } catch (error) {
+            console.error(error);
+            toast.error("Unable to start trial.");
+          } finally {
+            setActionLoading(false);
+          }
+        }}
+        onSubscribeMonthly={() => {
+          if (!params?.businessSlug) return;
+          window.location.href = `/${params.businessSlug}/billing/checkout?plan=monthly`;
+        }}
+        onSubscribeAnnual={() => {
+          if (!params?.businessSlug) return;
+          window.location.href = `/${params.businessSlug}/billing/checkout?plan=annual`;
+        }}
+      />
     </section>
   );
 };

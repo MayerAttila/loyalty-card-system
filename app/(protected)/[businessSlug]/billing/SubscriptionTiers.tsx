@@ -1,0 +1,119 @@
+import React from "react";
+import SubscriptionCard from "./SubscriptionCard";
+import Button from "@/components/Button";
+import type { BillingStatus } from "@/api/client/billing.api";
+
+type SubscriptionTiersProps = {
+  trialDays: number;
+  actionLoading: boolean;
+  isActive: boolean;
+  status: BillingStatus | null;
+  monthlyPriceId: string;
+  annualPriceId: string;
+  onStartTrial: () => void;
+  onSubscribeMonthly: () => void;
+  onSubscribeAnnual: () => void;
+};
+
+const SubscriptionTiers = ({
+  trialDays,
+  actionLoading,
+  isActive,
+  status,
+  monthlyPriceId,
+  annualPriceId,
+  onStartTrial,
+  onSubscribeMonthly,
+  onSubscribeAnnual,
+}: SubscriptionTiersProps) => {
+  return (
+    <div className="grid gap-6 md:grid-cols-3">
+      <SubscriptionCard
+        title="Free trial"
+        price={`${trialDays} days`}
+        interval="no card required"
+        description="Try the full product before adding payment details."
+        features={[
+          "Full access during trial",
+          "No payment required",
+          "Cancel anytime",
+        ]}
+        badge={status?.status === "trial" ? "Active trial" : undefined}
+        action={
+          <Button
+            type="button"
+            onClick={onStartTrial}
+            disabled={actionLoading || status?.status === "trial"}
+          >
+            {status?.status === "trial"
+              ? "Trial active"
+              : "Start free trial"}
+          </Button>
+        }
+      />
+      <SubscriptionCard
+        title="Monthly"
+        price="€7.99"
+        interval="per month"
+        description="Flexible monthly plan for smaller teams."
+        features={[
+          "Cancel anytime",
+          "All core loyalty features",
+          "Email support",
+        ]}
+        badge={
+          status?.stripePriceId === monthlyPriceId && isActive
+            ? "Current plan"
+            : undefined
+        }
+        action={
+          <Button
+            type="button"
+            onClick={onSubscribeMonthly}
+            disabled={
+              actionLoading ||
+              (isActive && status?.stripePriceId === monthlyPriceId)
+            }
+          >
+            {status?.stripePriceId === monthlyPriceId && isActive
+              ? "Current plan"
+              : "Subscribe monthly"}
+          </Button>
+        }
+      />
+      <SubscriptionCard
+        title="Annual"
+        price="€79.99"
+        interval="per year"
+        description="Save with annual billing for growing teams."
+        features={[
+          "2 months free vs monthly",
+          "Priority support",
+          "All core loyalty features",
+        ]}
+        highlighted
+        badge={
+          status?.stripePriceId === annualPriceId && isActive
+            ? "Current plan"
+            : "Best value"
+        }
+        action={
+          <Button
+            type="button"
+            onClick={onSubscribeAnnual}
+            disabled={
+              actionLoading ||
+              (isActive && status?.stripePriceId === annualPriceId)
+            }
+          >
+            {status?.stripePriceId === annualPriceId && isActive
+              ? "Current plan"
+              : "Subscribe annually"}
+          </Button>
+        }
+      />
+    </div>
+  );
+};
+
+export default SubscriptionTiers;
