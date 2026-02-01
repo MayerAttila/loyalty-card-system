@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
-import Stepper, { StepperTheme } from "./Stepper";
+import Stepper, { StepperTheme } from "@/components/Stepper";
 import { createCustomer } from "@/api/client/customer.api";
 import { getGoogleWalletSaveLink } from "@/api/client/userCard.api";
 import { toast } from "react-toastify";

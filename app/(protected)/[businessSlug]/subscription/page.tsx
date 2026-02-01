@@ -3,7 +3,7 @@ import BillingClient from "./BillingClient";
 
 const BillingPage = () => {
   return (
-    <RequireRole allow={["ADMIN", "OWNER"]}>
+    <RequireRole allow={["OWNER"]}>
       <BillingClient />
     </RequireRole>
   );

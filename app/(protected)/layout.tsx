@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
+import RequireBilling from "@/lib/billing/RequireBilling";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -48,7 +49,9 @@ export default async function ProtectedLayout({
         basePath={basePath}
       />
       <main className="flex-1 px-6 py-8">
-        <div className="mx-auto max-w-6xl">{children}</div>
+        <div className="mx-auto max-w-6xl">
+          <RequireBilling>{children}</RequireBilling>
+        </div>
       </main>
     </div>
   );

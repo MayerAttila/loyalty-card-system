@@ -11,7 +11,11 @@ import { getSession, signIn } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
 
-const BusinessRegistrationForm = () => {
+type BusinessRegistrationFormProps = {
+  onRegistered?: (businessSlug: string | null) => void;
+};
+
+const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const router = useRouter();
@@ -94,7 +98,6 @@ const BusinessRegistrationForm = () => {
 
     const payload: CreateBusinessPayload = {
       name: businessName,
-      address: String(formData.get("businessAddress") ?? "") || undefined,
     };
 
     try {
@@ -117,6 +120,10 @@ const BusinessRegistrationForm = () => {
         });
         let redirectTo = resolveAppRedirect(result?.url) ?? "/";
         const businessSlugFromForm = toBusinessSlug(businessName);
+        if (onRegistered) {
+          onRegistered(businessSlugFromForm);
+          return;
+        }
         if (businessSlugFromForm) {
           redirectTo = `/${businessSlugFromForm}`;
         } else {
@@ -158,11 +165,6 @@ const BusinessRegistrationForm = () => {
           onChange={() => clearFieldError("businessName")}
         />
         <CustomInput
-          id="businessAddress"
-          type="address"
-          placeholder="Business address (optional)"
-        />
-        <CustomInput
           id="ownerName"
           type="name"
           placeholder="Owner full name"
@@ -175,6 +177,7 @@ const BusinessRegistrationForm = () => {
           placeholder="Owner email"
           errorText={errors.ownerEmail}
           onChange={() => clearFieldError("ownerEmail")}
+          className="md:col-span-2"
         />
         <div className="md:col-span-2">
           <CustomInput

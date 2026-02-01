@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
-import SubscriptionTiers from "./SubscriptionTiers";
+import SubscriptionTiers from "@/components/SubscriptionTiers";
+import BillingCheckout from "@/components/BillingCheckout";
 import {
   createPortalSession,
   cancelSubscription,
-  cancelSubscriptionNow,
   resetSubscriptionForTesting,
   getBillingStatus,
   type BillingStatus,
@@ -31,11 +31,15 @@ const BillingClient = () => {
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<"monthly" | "annual" | null>(
+    null
+  );
+  const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
 
   const basePath = params?.businessSlug ? `/${params.businessSlug}` : "";
   const billingUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}${basePath}/billing`
+      ? `${window.location.origin}${basePath}/subscription`
       : "";
 
   useEffect(() => {
@@ -69,6 +73,8 @@ const BillingClient = () => {
     status?.status === "trialing" ||
     status?.status === "trial";
   const canCancel = isActive && !status?.cancelAtPeriodEnd;
+  const hasPaidSubscription =
+    status?.status === "active" && Boolean(status?.stripeSubscriptionId);
 
   const handleManageBilling = async () => {
     setActionLoading(true);
@@ -95,20 +101,22 @@ const BillingClient = () => {
       <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-brand">Billing</h2>
+            <h2 className="text-xl font-semibold text-brand">Subscription</h2>
             <p className="mt-2 text-sm text-contrast/80">
               Manage your subscription and payment details.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              onClick={handleManageBilling}
-              disabled={actionLoading || !status?.stripeCustomerId}
-              variant="neutral"
-            >
+            {hasPaidSubscription ? (
+              <Button
+                type="button"
+                onClick={handleManageBilling}
+                disabled={actionLoading || !status?.stripeCustomerId}
+                variant="neutral"
+              >
               Manage billing
-            </Button>
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="neutral"
@@ -135,28 +143,6 @@ const BillingClient = () => {
               type="button"
               variant="neutral"
               onClick={async () => {
-                if (!isActive) return;
-                setActionLoading(true);
-                try {
-                  await cancelSubscriptionNow();
-                  const updated = await getBillingStatus();
-                  setStatus(updated);
-                  toast.success("Subscription canceled immediately.");
-                } catch (error) {
-                  console.error(error);
-                  toast.error("Unable to cancel immediately.");
-                } finally {
-                  setActionLoading(false);
-                }
-              }}
-              disabled={actionLoading || !isActive}
-            >
-              Test
-            </Button>
-            <Button
-              type="button"
-              variant="neutral"
-              onClick={async () => {
                 if (actionLoading) return;
                 setActionLoading(true);
                 try {
@@ -174,6 +160,13 @@ const BillingClient = () => {
               disabled={actionLoading}
             >
               Test (reset)
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setShowUpgradeOptions((prev) => !prev)}
+              disabled={actionLoading}
+            >
+              {showUpgradeOptions ? "Hide upgrade options" : "Upgrade subscription"}
             </Button>
           </div>
         </div>
@@ -210,37 +203,49 @@ const BillingClient = () => {
         </div>
       </div>
 
-      <SubscriptionTiers
-        trialDays={TRIAL_DAYS}
-        actionLoading={actionLoading}
-        isActive={isActive}
-        status={status}
-        monthlyPriceId={MONTHLY_PRICE_ID}
-        annualPriceId={ANNUAL_PRICE_ID}
-        onStartTrial={async () => {
-          if (actionLoading) return;
-          setActionLoading(true);
-          try {
-            await startTrialNoCard();
-            const updated = await getBillingStatus();
-            setStatus(updated);
-            toast.success("Trial started.");
-          } catch (error) {
-            console.error(error);
-            toast.error("Unable to start trial.");
-          } finally {
-            setActionLoading(false);
-          }
-        }}
-        onSubscribeMonthly={() => {
-          if (!params?.businessSlug) return;
-          window.location.href = `/${params.businessSlug}/billing/checkout?plan=monthly`;
-        }}
-        onSubscribeAnnual={() => {
-          if (!params?.businessSlug) return;
-          window.location.href = `/${params.businessSlug}/billing/checkout?plan=annual`;
-        }}
-      />
+      {showUpgradeOptions ? (
+        <>
+          <SubscriptionTiers
+            trialDays={TRIAL_DAYS}
+            actionLoading={actionLoading}
+            isActive={isActive}
+            status={status}
+            monthlyPriceId={MONTHLY_PRICE_ID}
+            annualPriceId={ANNUAL_PRICE_ID}
+            selectedPlan={checkoutPlan}
+            onStartTrial={async () => {
+              if (actionLoading) return;
+              setActionLoading(true);
+              try {
+                await startTrialNoCard();
+                const updated = await getBillingStatus();
+                setStatus(updated);
+                toast.success("Trial started.");
+              } catch (error) {
+                console.error(error);
+                toast.error("Unable to start trial.");
+              } finally {
+                setActionLoading(false);
+              }
+            }}
+            onSubscribeMonthly={() => {
+              setCheckoutPlan("monthly");
+            }}
+            onSubscribeAnnual={() => {
+              setCheckoutPlan("annual");
+            }}
+          />
+
+          {checkoutPlan ? (
+            <BillingCheckout
+              plan={checkoutPlan}
+              showPlanSelector={false}
+              showBack={false}
+              onClose={() => setCheckoutPlan(null)}
+            />
+          ) : null}
+        </>
+      ) : null}
     </section>
   );
 };

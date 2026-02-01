@@ -1,5 +1,5 @@
 import React from "react";
-import SubscriptionCard from "./SubscriptionCard";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import Button from "@/components/Button";
 import type { BillingStatus } from "@/api/client/billing.api";
 
@@ -10,6 +10,7 @@ type SubscriptionTiersProps = {
   status: BillingStatus | null;
   monthlyPriceId: string;
   annualPriceId: string;
+  selectedPlan?: "trial" | "monthly" | "annual" | null;
   onStartTrial: () => void;
   onSubscribeMonthly: () => void;
   onSubscribeAnnual: () => void;
@@ -22,6 +23,7 @@ const SubscriptionTiers = ({
   status,
   monthlyPriceId,
   annualPriceId,
+  selectedPlan,
   onStartTrial,
   onSubscribeMonthly,
   onSubscribeAnnual,
@@ -39,6 +41,7 @@ const SubscriptionTiers = ({
           "Cancel anytime",
         ]}
         badge={status?.status === "trial" ? "Active trial" : undefined}
+        highlighted={selectedPlan === "trial"}
         action={
           <Button
             type="button"
@@ -66,6 +69,7 @@ const SubscriptionTiers = ({
             ? "Current plan"
             : undefined
         }
+        highlighted={selectedPlan === "monthly"}
         action={
           <Button
             type="button"
@@ -91,7 +95,7 @@ const SubscriptionTiers = ({
           "Priority support",
           "All core loyalty features",
         ]}
-        highlighted
+        highlighted={selectedPlan === "annual"}
         badge={
           status?.stripePriceId === annualPriceId && isActive
             ? "Current plan"
