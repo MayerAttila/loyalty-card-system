@@ -11,7 +11,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
-import { createSubscriptionIntent } from "@/api/client/billing.api";
+import { createSubscriptionIntentAction } from "@/lib/subscription/actions";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
@@ -59,7 +59,7 @@ const CheckoutForm = ({
   );
 };
 
-const BillingCheckout = ({
+const SubscriptionCheckout = ({
   plan,
   onClose,
   showBack = true,
@@ -91,7 +91,7 @@ const BillingCheckout = ({
     }
     setLoading(true);
     try {
-      const data = await createSubscriptionIntent({
+      const data = await createSubscriptionIntentAction({
         priceId,
         withTrial: false,
       });
@@ -230,4 +230,4 @@ const BillingCheckout = ({
   );
 };
 
-export default BillingCheckout;
+export default SubscriptionCheckout;

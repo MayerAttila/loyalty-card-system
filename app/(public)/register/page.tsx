@@ -5,7 +5,7 @@ import BusinessRegistrationForm from "./BusinessRegistrationForm";
 import Stepper from "@/components/Stepper";
 import Button from "@/components/Button";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
-import BillingCheckout from "@/components/BillingCheckout";
+import SubscriptionCheckout from "@/components/SubscriptionCheckout";
 
 const steps = [
   { key: "info", label: "Info" },
@@ -109,7 +109,7 @@ const RegisterPage = () => {
             />
 
             {checkoutPlan ? (
-              <BillingCheckout
+              <SubscriptionCheckout
                 plan={checkoutPlan}
                 showPlanSelector={false}
                 showBack={false}

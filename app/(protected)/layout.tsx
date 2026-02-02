@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
-import RequireBilling from "@/lib/billing/RequireBilling";
+import RequireSubscription from "@/lib/subscription/RequireSubscription";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -50,7 +50,7 @@ export default async function ProtectedLayout({
       />
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-6xl">
-          <RequireBilling>{children}</RequireBilling>
+          <RequireSubscription>{children}</RequireSubscription>
         </div>
       </main>
     </div>

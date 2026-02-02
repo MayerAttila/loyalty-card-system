@@ -5,15 +5,15 @@ import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
-import BillingCheckout from "@/components/BillingCheckout";
+import SubscriptionCheckout from "@/components/SubscriptionCheckout";
+import type { SubscriptionStatus } from "@/types/subscription";
 import {
-  createPortalSession,
-  cancelSubscription,
-  resetSubscriptionForTesting,
-  getBillingStatus,
-  type BillingStatus,
-  startTrialNoCard,
-} from "@/api/client/billing.api";
+  createPortalSessionAction,
+  cancelSubscriptionAction,
+  resetSubscriptionForTestingAction,
+  getSubscriptionStatusAction,
+  startTrialNoCardAction,
+} from "@/lib/subscription/actions";
 
 const MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? "";
 const ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL ?? "";
@@ -26,9 +26,9 @@ const formatDate = (value?: string | null) => {
   return date.toLocaleDateString();
 };
 
-const BillingClient = () => {
+const SubscriptionClient = () => {
   const params = useParams<{ businessSlug?: string }>();
-  const [status, setStatus] = useState<BillingStatus | null>(null);
+  const [status, setStatus] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<"monthly" | "annual" | null>(
@@ -37,7 +37,7 @@ const BillingClient = () => {
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
 
   const basePath = params?.businessSlug ? `/${params.businessSlug}` : "";
-  const billingUrl =
+  const subscriptionUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}${basePath}/subscription`
       : "";
@@ -45,13 +45,13 @@ const BillingClient = () => {
   useEffect(() => {
     let isActive = true;
     setLoading(true);
-    getBillingStatus()
+    getSubscriptionStatusAction()
       .then((data) => {
         if (isActive) setStatus(data);
       })
       .catch((error) => {
         console.error(error);
-        toast.error("Unable to load billing status.");
+        toast.error("Unable to load subscription status.");
       })
       .finally(() => {
         if (isActive) setLoading(false);
@@ -76,10 +76,10 @@ const BillingClient = () => {
   const hasPaidSubscription =
     status?.status === "active" && Boolean(status?.stripeSubscriptionId);
 
-  const handleManageBilling = async () => {
+  const handleManageSubscription = async () => {
     setActionLoading(true);
     try {
-      const { url } = await createPortalSession({ returnUrl: billingUrl });
+      const { url } = await createPortalSessionAction({ returnUrl: subscriptionUrl });
       if (url) {
         window.location.href = url;
         return;
@@ -87,7 +87,7 @@ const BillingClient = () => {
       toast.error("Stripe portal URL missing.");
     } catch (error) {
       console.error(error);
-      toast.error("Unable to open billing portal.");
+      toast.error("Unable to open subscription portal.");
     } finally {
       setActionLoading(false);
     }
@@ -110,11 +110,11 @@ const BillingClient = () => {
             {hasPaidSubscription ? (
               <Button
                 type="button"
-                onClick={handleManageBilling}
+                onClick={handleManageSubscription}
                 disabled={actionLoading || !status?.stripeCustomerId}
                 variant="neutral"
               >
-              Manage billing
+              Manage subscription
               </Button>
             ) : null}
             <Button
@@ -124,8 +124,8 @@ const BillingClient = () => {
                 if (!canCancel) return;
                 setActionLoading(true);
                 try {
-                  await cancelSubscription();
-                  const updated = await getBillingStatus();
+                  await cancelSubscriptionAction();
+                  const updated = await getSubscriptionStatusAction();
                   setStatus(updated);
                   toast.success("Cancellation scheduled.");
                 } catch (error) {
@@ -146,8 +146,8 @@ const BillingClient = () => {
                 if (actionLoading) return;
                 setActionLoading(true);
                 try {
-                  await resetSubscriptionForTesting();
-                  const updated = await getBillingStatus();
+                  await resetSubscriptionForTestingAction();
+                  const updated = await getSubscriptionStatusAction();
                   setStatus(updated);
                   toast.success("Subscription history reset.");
                 } catch (error) {
@@ -217,8 +217,8 @@ const BillingClient = () => {
               if (actionLoading) return;
               setActionLoading(true);
               try {
-                await startTrialNoCard();
-                const updated = await getBillingStatus();
+                await startTrialNoCardAction();
+                const updated = await getSubscriptionStatusAction();
                 setStatus(updated);
                 toast.success("Trial started.");
               } catch (error) {
@@ -237,7 +237,7 @@ const BillingClient = () => {
           />
 
           {checkoutPlan ? (
-            <BillingCheckout
+            <SubscriptionCheckout
               plan={checkoutPlan}
               showPlanSelector={false}
               showBack={false}
@@ -250,4 +250,4 @@ const BillingClient = () => {
   );
 };
 
-export default BillingClient;
+export default SubscriptionClient;

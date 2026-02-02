@@ -1,13 +1,13 @@
 import React from "react";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import Button from "@/components/Button";
-import type { BillingStatus } from "@/api/client/billing.api";
+import type { SubscriptionStatus } from "@/types/subscription";
 
 type SubscriptionTiersProps = {
   trialDays: number;
   actionLoading: boolean;
   isActive: boolean;
-  status: BillingStatus | null;
+  status: SubscriptionStatus | null;
   monthlyPriceId: string;
   annualPriceId: string;
   selectedPlan?: "trial" | "monthly" | "annual" | null;
@@ -28,6 +28,8 @@ const SubscriptionTiers = ({
   onSubscribeMonthly,
   onSubscribeAnnual,
 }: SubscriptionTiersProps) => {
+  const isPaidActive = status?.status === "active" || status?.status === "trialing";
+
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <SubscriptionCard
@@ -65,7 +67,7 @@ const SubscriptionTiers = ({
           "Email support",
         ]}
         badge={
-          status?.stripePriceId === monthlyPriceId && isActive
+          status?.stripePriceId === monthlyPriceId && isPaidActive
             ? "Current plan"
             : undefined
         }
@@ -76,10 +78,10 @@ const SubscriptionTiers = ({
             onClick={onSubscribeMonthly}
             disabled={
               actionLoading ||
-              (isActive && status?.stripePriceId === monthlyPriceId)
+              (isPaidActive && status?.stripePriceId === monthlyPriceId)
             }
           >
-            {status?.stripePriceId === monthlyPriceId && isActive
+            {status?.stripePriceId === monthlyPriceId && isPaidActive
               ? "Current plan"
               : "Subscribe monthly"}
           </Button>
@@ -89,7 +91,7 @@ const SubscriptionTiers = ({
         title="Annual"
         price="€79.99"
         interval="per year"
-        description="Save with annual billing for growing teams."
+        description="Save with annual subscription for growing teams."
         features={[
           "2 months free vs monthly",
           "Priority support",
@@ -97,7 +99,7 @@ const SubscriptionTiers = ({
         ]}
         highlighted={selectedPlan === "annual"}
         badge={
-          status?.stripePriceId === annualPriceId && isActive
+          status?.stripePriceId === annualPriceId && isPaidActive
             ? "Current plan"
             : "Best value"
         }
@@ -107,10 +109,10 @@ const SubscriptionTiers = ({
             onClick={onSubscribeAnnual}
             disabled={
               actionLoading ||
-              (isActive && status?.stripePriceId === annualPriceId)
+              (isPaidActive && status?.stripePriceId === annualPriceId)
             }
           >
-            {status?.stripePriceId === annualPriceId && isActive
+            {status?.stripePriceId === annualPriceId && isPaidActive
               ? "Current plan"
               : "Subscribe annually"}
           </Button>

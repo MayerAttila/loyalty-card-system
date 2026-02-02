@@ -1,12 +1,12 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
-import BillingClient from "./BillingClient";
+import SubscriptionClient from "./SubscriptionClient";
 
-const BillingPage = () => {
+const SubscriptionPage = () => {
   return (
     <RequireRole allow={["OWNER"]}>
-      <BillingClient />
+      <SubscriptionClient />
     </RequireRole>
   );
 };
 
-export default BillingPage;
+export default SubscriptionPage;
