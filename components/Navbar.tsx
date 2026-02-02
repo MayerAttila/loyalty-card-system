@@ -15,6 +15,7 @@ import {
   FiList,
   FiLogOut,
   FiUser,
+  FiUserCheck,
   FiUsers,
 } from "react-icons/fi";
 
@@ -49,7 +50,7 @@ const buildNavItems = (
   {
     href: `${basePath}/customers`,
     label: "Customers",
-    icon: FiUser,
+    icon: FiUserCheck,
     allow: ["ADMIN", "OWNER"],
   },
   {
