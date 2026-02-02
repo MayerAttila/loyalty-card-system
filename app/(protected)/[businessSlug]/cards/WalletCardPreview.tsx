@@ -3,8 +3,8 @@
 import React from "react";
 
 type WalletCardPreviewProps = {
-  issuerName: string;
-  programName: string;
+  text1: string;
+  text2: string;
   maxPoints: number;
   filledPoints?: number;
   rewardsCollected?: number;
@@ -18,8 +18,8 @@ type WalletCardPreviewProps = {
 };
 
 const WalletCardPreview = ({
-  issuerName,
-  programName,
+  text1,
+  text2,
   maxPoints,
   filledPoints = 0,
   rewardsCollected = 0,
@@ -74,20 +74,20 @@ const WalletCardPreview = ({
       className={`w-full max-w-[320px] rounded-[28px] p-5 shadow-[0_18px_35px_rgba(0,0,0,0.25)] ${className}`}
       style={{ backgroundColor: cardColor, color: textColor }}
     >
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide">
+      <div className="flex items-center gap-2 text-xs tracking-wide">
         {useLogo && logoSrc ? (
           <img
             src={logoSrc}
-            alt={`${issuerName} logo`}
+            alt={`${text1} logo`}
             className="h-6 w-6 rounded-full object-contain"
           />
         ) : null}
         <span className="truncate" style={{ color: withAlpha(textColor, 0.85) }}>
-          {issuerName}
+          {text1}
         </span>
       </div>
       <h3 className="mt-1 text-xl font-semibold leading-tight">
-        {programName}
+        {text2}
       </h3>
 
       <div className="mt-5 space-y-2">

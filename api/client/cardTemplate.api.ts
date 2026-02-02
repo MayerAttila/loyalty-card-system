@@ -2,8 +2,10 @@ import { api } from "./axios";
 import { CardTemplate } from "@/types/cardTemplate";
 
 export type CreateCardTemplatePayload = {
-  title: string;
+  template: string;
   businessId: string;
+  text1?: string | null;
+  text2?: string | null;
   maxPoints: number;
   cardColor: string;
   isActive?: boolean;
@@ -28,7 +30,9 @@ export const getCardTemplatesByBusinessId = async (businessId: string) => {
 };
 
 export type UpdateCardTemplatePayload = {
-  title?: string;
+  template?: string;
+  text1?: string | null;
+  text2?: string | null;
   maxPoints?: number;
   cardColor?: string;
   isActive?: boolean;

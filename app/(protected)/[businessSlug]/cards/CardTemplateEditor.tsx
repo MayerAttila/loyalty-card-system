@@ -39,13 +39,15 @@ const CardTemplateEditor = ({
 }: CardTemplateEditorProps) => {
   const { session } = useSession();
   const businessId = businessIdProp ?? session?.user?.businessId;
-  const [businessName, setBusinessName] = useState(initialBusinessName);
+  const [businessName] = useState(initialBusinessName);
+  const [text1, setText1] = useState(selectedTemplate?.text1 ?? "");
+  const [text2, setText2] = useState(selectedTemplate?.text2 ?? "");
   const [maxPoints, setMaxPoints] = useState(initialMaxPoints);
   const [filledPoints, setFilledPoints] = useState(initialFilledPoints);
   const rewardsCollected = 1;
   const [cardColor, setCardColor] = useState(initialCardColor);
-  const [templateTitle, setTemplateTitle] = useState(
-    selectedTemplate?.title ?? `${initialBusinessName} Card`,
+  const [templateName, setTemplateName] = useState(
+    selectedTemplate?.template ?? `${initialBusinessName} Card`,
   );
   const [saving, setSaving] = useState(false);
   const [useBusinessStamps, setUseBusinessStamps] = useState(true);
@@ -86,7 +88,9 @@ const CardTemplateEditor = ({
 
   React.useEffect(() => {
     if (!selectedTemplate) return;
-    setTemplateTitle(selectedTemplate.title);
+    setTemplateName(selectedTemplate.template);
+    setText1(selectedTemplate.text1 ?? "");
+    setText2(selectedTemplate.text2 ?? "");
     setMaxPoints(selectedTemplate.maxPoints);
     setFilledPoints(Math.min(3, selectedTemplate.maxPoints));
     setCardColor(selectedTemplate.cardColor);
@@ -139,6 +143,8 @@ const CardTemplateEditor = ({
     return {
       businessName: businessName.trim() || "Business Name",
       ownerName: "Card holder",
+      text1: text1.trim(),
+      text2: text2.trim(),
       maxPoints: safeMax,
       filledPoints: safeFilled,
       rewardsCollected: safeRewards,
@@ -146,6 +152,9 @@ const CardTemplateEditor = ({
     };
   }, [
     businessName,
+    text1,
+    text2,
+    templateName,
     cardColor,
     filledPoints,
     maxPoints,
@@ -173,24 +182,30 @@ const CardTemplateEditor = ({
               )}
             </div>
 
-            <div className="sm:col-span-5">
-              <CustomInput
-                id="cardTemplateTitle"
-                label="Template name"
-                placeholder="Template name"
-                value={templateTitle}
-                onChange={(event) => setTemplateTitle(event.target.value)}
-              />
-            </div>
-
-            <div className="sm:col-span-5">
-              <CustomInput
-                id="cardBusinessName"
-                label="Business name"
-                placeholder="Business name"
-                value={businessName}
-                onChange={(event) => setBusinessName(event.target.value)}
-              />
+            <div className="sm:col-span-10">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <CustomInput
+                  id="cardTemplateTitle"
+                  label="Template name"
+                  placeholder="Template name"
+                  value={templateName}
+                  onChange={(event) => setTemplateName(event.target.value)}
+                />
+                <CustomInput
+                  id="cardIssuerName"
+                  label="Text 1"
+                  placeholder="Text 1"
+                  value={text1}
+                  onChange={(event) => setText1(event.target.value)}
+                />
+                <CustomInput
+                  id="cardProgramName"
+                  label="Text 2"
+                  placeholder="Text 2"
+                  value={text2}
+                  onChange={(event) => setText2(event.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -270,20 +285,22 @@ const CardTemplateEditor = ({
           ) : null}
           <Button
             type="button"
-            disabled={saving || !templateTitle.trim() || !businessId}
+            disabled={saving || !templateName.trim() || !businessId}
             onClick={async () => {
               if (!businessId) {
                 toast.error("No business selected.");
                 return;
               }
-              if (!templateTitle.trim()) {
+              if (!templateName.trim()) {
                 toast.error("Template name is required.");
                 return;
               }
               setSaving(true);
               try {
                 const payload = {
-                  title: templateTitle.trim(),
+                  template: templateName.trim(),
+                  text1: text1.trim() || null,
+                  text2: text2.trim() || null,
                   maxPoints: sanitized.maxPoints,
                   cardColor: sanitized.cardColor,
                   useStampImages: useBusinessStamps,
@@ -302,8 +319,8 @@ const CardTemplateEditor = ({
                 onTemplateSaved?.(saved);
                 toast.success(
                   selectedTemplate?.id
-                    ? "Card template updated."
-                    : "Card template saved.",
+                  ? "Card template updated."
+                  : "Card template saved.",
                 );
               } catch (error) {
                 console.error(error);
@@ -323,8 +340,8 @@ const CardTemplateEditor = ({
       </div>
         <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
           <WalletCardPreview
-            issuerName={sanitized.businessName}
-            programName={templateTitle}
+            text1={sanitized.text1}
+            text2={sanitized.text2}
             maxPoints={sanitized.maxPoints}
             filledPoints={sanitized.filledPoints}
             rewardsCollected={sanitized.rewardsCollected}

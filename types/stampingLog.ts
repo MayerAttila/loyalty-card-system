@@ -21,7 +21,7 @@ export type StampingLogEntry = {
   };
   cardTemplate: {
     id: string;
-    title: string;
+    template: string;
     maxPoints: number;
   };
 };

@@ -1,6 +1,8 @@
 export type CardTemplate = {
   id: string;
-  title: string;
+  template: string;
+  text1?: string | null;
+  text2?: string | null;
   maxPoints: number;
   cardColor: string;
   useStampImages?: boolean;

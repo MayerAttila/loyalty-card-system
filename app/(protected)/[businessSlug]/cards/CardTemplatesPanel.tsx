@@ -102,13 +102,8 @@ const CardTemplatesPanel = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-contrast">
-                        {template.title}
+                        {template.template}
                       </p>
-                      {template.isActive ? (
-                        <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
-                          Active
-                        </span>
-                      ) : null}
                     </div>
                     <p className="text-xs text-contrast/70">
                       {template.maxPoints} stamps
@@ -138,14 +133,14 @@ const CardTemplatesPanel = ({
                       <DeleteButton
                         onConfirm={() => onDelete(template)}
                         disabled={deletingIds?.has(template.id)}
-                        ariaLabel={`Delete ${template.title}`}
+                        ariaLabel={`Delete ${template.template}`}
                       />
                     ) : null}
                   </div>
                 </div>
                 <WalletCardPreview
-                  issuerName={businessName ?? "Business Name"}
-                  programName={template.title}
+                  text1={template.text1 ?? ""}
+                  text2={template.text2 ?? ""}
                   maxPoints={template.maxPoints}
                   filledPoints={Math.min(3, template.maxPoints)}
                   rewardsCollected={0}
