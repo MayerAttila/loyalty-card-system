@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
 import BusinessRegistrationForm from "./BusinessRegistrationForm";
 import Stepper from "@/components/Stepper";
 import Button from "@/components/Button";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
 import SubscriptionCheckout from "@/components/SubscriptionCheckout";
+import { startTrialNoCard } from "@/api/client/subscription.api";
 
 const steps = [
   { key: "info", label: "Info" },
@@ -31,6 +33,7 @@ const RegisterPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [pendingStep, setPendingStep] = useState<number | null>(null);
   const [businessSlug, setBusinessSlug] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<"monthly" | "annual" | null>(
     null
   );
@@ -88,15 +91,25 @@ const RegisterPage = () => {
 
             <SubscriptionTiers
               trialDays={30}
-              actionLoading={false}
+              actionLoading={actionLoading}
               isActive={false}
               status={null}
               monthlyPriceId=""
               annualPriceId=""
               selectedPlan={checkoutPlan ?? null}
-              onStartTrial={() => {
-                if (!businessSlug) return;
-                window.location.href = `/${businessSlug}/subscription`;
+              onStartTrial={async () => {
+                if (!businessSlug || actionLoading) return;
+                setActionLoading(true);
+                try {
+                  await startTrialNoCard();
+                  toast.success("Trial started.");
+                  window.location.href = `/${businessSlug}`;
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Unable to start trial.");
+                } finally {
+                  setActionLoading(false);
+                }
               }}
               onSubscribeMonthly={() => {
                 if (!businessSlug) return;
