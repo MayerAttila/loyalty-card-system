@@ -40,16 +40,19 @@ const CardTemplateEditor = ({
   const { session } = useSession();
   const businessId = businessIdProp ?? session?.user?.businessId;
   const [businessName] = useState(initialBusinessName);
-  const [text1, setText1] = useState(selectedTemplate?.text1 ?? "");
-  const [text2, setText2] = useState(selectedTemplate?.text2 ?? "");
+  const [text1, setText1] = useState(
+    selectedTemplate?.text1 ?? initialBusinessName
+  );
+  const [text2, setText2] = useState(selectedTemplate?.text2 ?? "Stamps");
   const [maxPoints, setMaxPoints] = useState(initialMaxPoints);
   const [filledPoints, setFilledPoints] = useState(initialFilledPoints);
   const rewardsCollected = 1;
   const [cardColor, setCardColor] = useState(initialCardColor);
   const [templateName, setTemplateName] = useState(
-    selectedTemplate?.template ?? `${initialBusinessName} Card`,
+    selectedTemplate?.template ?? "",
   );
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [useBusinessStamps, setUseBusinessStamps] = useState(true);
   const [logoAvailable, setLogoAvailable] = useState(initialHasLogo);
   const [logoVersion, setLogoVersion] = useState(0);
@@ -189,21 +192,39 @@ const CardTemplateEditor = ({
                   label="Template name"
                   placeholder="Template name"
                   value={templateName}
-                  onChange={(event) => setTemplateName(event.target.value)}
+                  errorText={errors.templateName}
+                  onChange={(event) => {
+                    setTemplateName(event.target.value);
+                    if (errors.templateName) {
+                      setErrors((prev) => ({ ...prev, templateName: undefined }));
+                    }
+                  }}
                 />
                 <CustomInput
                   id="cardIssuerName"
                   label="Text 1"
                   placeholder="Text 1"
                   value={text1}
-                  onChange={(event) => setText1(event.target.value)}
+                  errorText={errors.text1}
+                  onChange={(event) => {
+                    setText1(event.target.value);
+                    if (errors.text1) {
+                      setErrors((prev) => ({ ...prev, text1: undefined }));
+                    }
+                  }}
                 />
                 <CustomInput
                   id="cardProgramName"
                   label="Text 2"
                   placeholder="Text 2"
                   value={text2}
-                  onChange={(event) => setText2(event.target.value)}
+                  errorText={errors.text2}
+                  onChange={(event) => {
+                    setText2(event.target.value);
+                    if (errors.text2) {
+                      setErrors((prev) => ({ ...prev, text2: undefined }));
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -285,14 +306,25 @@ const CardTemplateEditor = ({
           ) : null}
           <Button
             type="button"
-            disabled={saving || !templateName.trim() || !businessId}
+            disabled={saving || !businessId}
             onClick={async () => {
               if (!businessId) {
                 toast.error("No business selected.");
                 return;
               }
+              const nextErrors: Partial<Record<string, string>> = {};
               if (!templateName.trim()) {
-                toast.error("Template name is required.");
+                nextErrors.templateName = "Template name is required.";
+              }
+              if (!text1.trim()) {
+                nextErrors.text1 = "Text 1 is required.";
+              }
+              if (!text2.trim()) {
+                nextErrors.text2 = "Text 2 is required.";
+              }
+              if (Object.keys(nextErrors).length > 0) {
+                setErrors(nextErrors);
+                toast.error("Please fill in the required fields.");
                 return;
               }
               setSaving(true);
@@ -317,6 +349,7 @@ const CardTemplateEditor = ({
 
                 window.dispatchEvent(new CustomEvent("card-template-saved"));
                 onTemplateSaved?.(saved);
+                setErrors({});
                 toast.success(
                   selectedTemplate?.id
                   ? "Card template updated."
