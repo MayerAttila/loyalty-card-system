@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
 import Button from "@/components/Button";
 import WalletCardPreview from "./WalletCardPreview";
 import { CardTemplate } from "@/types/cardTemplate";
+import { getBusinessStamps } from "@/api/client/business.api";
 
 type SavedTemplatesProps = {
   initialTemplates?: CardTemplate[];
@@ -36,6 +37,8 @@ const CardTemplatesPanel = ({
   const templates = initialTemplates;
   const [logoAvailable, setLogoAvailable] = useState(Boolean(initialHasLogo));
   const [logoVersion] = useState(0);
+  const [stampOnMap, setStampOnMap] = useState<Record<string, string>>({});
+  const [stampOffMap, setStampOffMap] = useState<Record<string, string>>({});
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
     apiBaseUrl && businessId
@@ -60,6 +63,57 @@ const CardTemplatesPanel = ({
       isActive = false;
     };
   }, [logoSrc]);
+
+  useEffect(() => {
+    if (!businessId) {
+      setStampOnMap({});
+      setStampOffMap({});
+      return;
+    }
+
+    let isMounted = true;
+    getBusinessStamps(businessId)
+      .then((data) => {
+        if (!isMounted) return;
+        const nextOn: Record<string, string> = {};
+        const nextOff: Record<string, string> = {};
+        data.stampOn.forEach((image) => {
+          nextOn[image.id] = image.url;
+        });
+        data.stampOff.forEach((image) => {
+          nextOff[image.id] = image.url;
+        });
+        setStampOnMap(nextOn);
+        setStampOffMap(nextOff);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setStampOnMap({});
+        setStampOffMap({});
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [businessId]);
+
+  const stampUrlsByTemplate = useMemo(
+    () =>
+      templates.reduce<Record<string, { on?: string; off?: string }>>(
+        (acc, template) => {
+          const on = template.stampOnImageId
+            ? stampOnMap[template.stampOnImageId]
+            : undefined;
+          const off = template.stampOffImageId
+            ? stampOffMap[template.stampOffImageId]
+            : undefined;
+          acc[template.id] = { on, off };
+          return acc;
+        },
+        {}
+      ),
+    [stampOffMap, stampOnMap, templates]
+  );
 
   return (
     <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
@@ -147,6 +201,9 @@ const CardTemplatesPanel = ({
                   cardColor={template.cardColor}
                   logoSrc={logoAvailable ? logoSrc : undefined}
                   useLogo={logoAvailable}
+                  filledStampSrc={stampUrlsByTemplate[template.id]?.on}
+                  emptyStampSrc={stampUrlsByTemplate[template.id]?.off}
+                  useStampImages={template.useStampImages}
                   className="max-w-full"
                 />
               </div>

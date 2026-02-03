@@ -56,8 +56,6 @@ const CardTemplateEditor = ({
   const [useBusinessStamps, setUseBusinessStamps] = useState(true);
   const [logoAvailable, setLogoAvailable] = useState(initialHasLogo);
   const [logoVersion, setLogoVersion] = useState(0);
-  const [stampOnAvailable, setStampOnAvailable] = useState(false);
-  const [stampOffAvailable, setStampOffAvailable] = useState(false);
   const [stampOnImages, setStampOnImages] = useState<
     { id: string; url: string }[]
   >([]);
@@ -75,14 +73,6 @@ const CardTemplateEditor = ({
   const logoSrc =
     apiBaseUrl && businessId
       ? `${apiBaseUrl}/business/id/${businessId}/logo?v=${logoVersion}`
-      : "";
-  const stampOnSrc =
-    apiBaseUrl && businessId
-      ? `${apiBaseUrl}/business/id/${businessId}/stamp-on`
-      : "";
-  const stampOffSrc =
-    apiBaseUrl && businessId
-      ? `${apiBaseUrl}/business/id/${businessId}/stamp-off`
       : "";
   const selectedStampOnUrl =
     stampOnImages.find((image) => image.id === selectedStampOnId)?.url ?? "";
@@ -124,19 +114,10 @@ const CardTemplateEditor = ({
     };
 
     checkImage(logoSrc, setLogoAvailable);
-    checkImage(stampOnSrc, setStampOnAvailable);
-    checkImage(stampOffSrc, setStampOffAvailable);
-
     return () => {
       isActive = false;
     };
-  }, [logoSrc, stampOffSrc, stampOnSrc]);
-
-  React.useEffect(() => {
-    if (!stampOnAvailable || !stampOffAvailable) {
-      setUseBusinessStamps(false);
-    }
-  }, [stampOffAvailable, stampOnAvailable]);
+  }, [logoSrc]);
 
   const sanitized = useMemo(() => {
     const safeMax = Math.max(4, Math.min(16, maxPoints || 4));
@@ -382,14 +363,10 @@ const CardTemplateEditor = ({
             logoSrc={logoAvailable ? logoSrc : undefined}
             useLogo={logoAvailable}
             filledStampSrc={
-              useBusinessStamps && stampOnAvailable && stampOffAvailable
-                ? selectedStampOnUrl
-                : undefined
+              useBusinessStamps && selectedStampOnUrl ? selectedStampOnUrl : undefined
             }
             emptyStampSrc={
-              useBusinessStamps && stampOnAvailable && stampOffAvailable
-                ? selectedStampOffUrl
-                : undefined
+              useBusinessStamps && selectedStampOffUrl ? selectedStampOffUrl : undefined
             }
             useStampImages={useBusinessStamps}
           />
