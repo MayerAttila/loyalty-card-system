@@ -34,10 +34,12 @@ const WalletCardPreview = ({
   const safeMax = Math.max(4, Math.min(16, maxPoints));
   const safeFilled = Math.min(Math.max(0, filledPoints), safeMax);
   const stamps = Array.from({ length: safeMax });
-  const firstRowCount = Math.ceil(safeMax / 2);
+  const firstRowCount = safeMax <= 5 ? safeMax : Math.ceil(safeMax / 2);
   const secondRowCount = safeMax - firstRowCount;
   const shouldUseStampImages =
     useStampImages && Boolean(filledStampSrc) && Boolean(emptyStampSrc);
+  const stampSizeClass = shouldUseStampImages ? "h-16 w-16" : "h-8 w-8";
+  const imageSizeClass = shouldUseStampImages ? "h-16 w-16" : "h-6 w-6";
 
   const getContrastTextColor = (hexColor: string) => {
     const normalized = hexColor.trim().replace("#", "");
@@ -91,13 +93,19 @@ const WalletCardPreview = ({
       </h3>
 
       <div className="mt-5 space-y-2">
-        <div className="flex flex-wrap justify-between gap-2">
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${firstRowCount}, minmax(0, 1fr))`,
+            justifyItems: "center",
+          }}
+        >
           {stamps.slice(0, firstRowCount).map((_, index) => {
             const isFilled = index < safeFilled;
             return (
               <div
                 key={`stamp-${index}`}
-                className="flex h-8 w-8 items-center justify-center text-xs font-semibold"
+                className={`flex ${stampSizeClass} items-center justify-center text-xs font-semibold`}
                 style={{
                   backgroundColor: shouldUseStampImages
                     ? "transparent"
@@ -112,7 +120,7 @@ const WalletCardPreview = ({
                   <img
                     src={isFilled ? filledStampSrc : emptyStampSrc}
                     alt={isFilled ? "Stamp on" : "Stamp off"}
-                    className="h-6 w-6 object-contain"
+                    className={`${imageSizeClass} object-contain`}
                   />
                 ) : (
                   <span style={{ color: withAlpha(textColor, 0.85) }}>
@@ -124,14 +132,20 @@ const WalletCardPreview = ({
           })}
         </div>
         {secondRowCount > 0 ? (
-          <div className="flex flex-wrap justify-between gap-2">
+          <div
+            className="grid gap-2"
+            style={{
+              gridTemplateColumns: `repeat(${secondRowCount}, minmax(0, 1fr))`,
+              justifyItems: "center",
+            }}
+          >
             {stamps.slice(firstRowCount).map((_, index) => {
               const absoluteIndex = firstRowCount + index;
               const isFilled = absoluteIndex < safeFilled;
               return (
                 <div
                   key={`stamp-${absoluteIndex}`}
-                  className="flex h-8 w-8 items-center justify-center text-xs font-semibold"
+                  className={`flex ${stampSizeClass} items-center justify-center text-xs font-semibold`}
                   style={{
                     backgroundColor: shouldUseStampImages
                       ? "transparent"
@@ -149,7 +163,7 @@ const WalletCardPreview = ({
                     <img
                       src={isFilled ? filledStampSrc : emptyStampSrc}
                       alt={isFilled ? "Stamp on" : "Stamp off"}
-                      className="h-6 w-6 object-contain"
+                      className={`${imageSizeClass} object-contain`}
                     />
                   ) : (
                     <span style={{ color: withAlpha(textColor, 0.85) }}>
