@@ -77,7 +77,9 @@ const CustomersClient = ({ customers }: CustomersClientProps) => {
           />
         </div>
       </div>
-      <CustomersTable customers={filteredCustomers} />
+      <div className="mt-4">
+        <CustomersTable customers={filteredCustomers} />
+      </div>
     </section>
   );
 };

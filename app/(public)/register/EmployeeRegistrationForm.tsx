@@ -135,7 +135,16 @@ const EmployeeRegistrationForm = () => {
       router.push("/pending-approval");
     } catch (error) {
       console.error("createUser failed", error);
-      toast.error("Unable to create employee account.");
+      const message =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : "Unable to create employee account.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

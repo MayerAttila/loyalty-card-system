@@ -216,13 +216,15 @@ const DataTable = <T,>({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-hidden rounded-xl border border-accent-3 bg-primary/40 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
+      <div className="overflow-x-auto">
       <table className="min-w-full table-fixed text-left text-sm text-contrast">
         <thead className="border-b border-accent-3 text-xs uppercase tracking-wide text-contrast/70">
           <tr>
             {columns.map((column) => {
               const isRightAligned = column.align === "right";
               const width = columnWidths[column.key] ?? DEFAULT_WIDTH;
+              const isLast = column.key === columns[columns.length - 1]?.key;
 
               return (
                 <th
@@ -246,11 +248,15 @@ const DataTable = <T,>({
                   ) : (
                     column.label
                   )}
-                  <div
-                    className="absolute right-0 top-0 h-full w-3 cursor-col-resize"
-                    onMouseDown={(event) => startResize(column.key, event)}
-                  />
-                  <div className="pointer-events-none absolute right-0 top-1/2 h-5 w-px -translate-y-1/2 bg-accent-4/70" />
+                  {!isLast ? (
+                    <>
+                      <div
+                        className="absolute right-0 top-0 h-full w-3 cursor-col-resize"
+                        onMouseDown={(event) => startResize(column.key, event)}
+                      />
+                      <div className="pointer-events-none absolute right-0 top-1/2 h-5 w-px -translate-y-1/2 bg-accent-4/70" />
+                    </>
+                  ) : null}
                 </th>
               );
             })}
@@ -268,7 +274,14 @@ const DataTable = <T,>({
             </tr>
           ) : (
             sortedData.map((row, index) => (
-              <tr key={`row-${index}`} className="border-b border-accent-3/60">
+              <tr
+                key={`row-${index}`}
+                className={`border-b border-accent-3/60 transition-colors ${
+                  index % 2 === 0
+                    ? "bg-primary/40"
+                    : "bg-accent-1/50"
+                } hover:bg-accent-2/60`}
+              >
                 {columns.map((column) => {
                   const value = (row as Record<string, unknown>)[column.key];
                   const isRightAligned = column.align === "right";
@@ -291,6 +304,7 @@ const DataTable = <T,>({
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

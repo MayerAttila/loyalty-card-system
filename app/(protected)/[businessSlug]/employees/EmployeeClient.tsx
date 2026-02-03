@@ -200,14 +200,16 @@ const EmployeeClient = ({
           </Button>
         </div>
       </div>
-      <EmployeesTable
-        users={filteredUsers}
-        updatingIds={updatingIds}
-        currentUserRole={currentUserRole}
-        onToggleApproval={handleToggleApproval}
-        onUpdateRole={handleRoleUpdate}
-        onDelete={handleDelete}
-      />
+      <div className="mt-4">
+        <EmployeesTable
+          users={filteredUsers}
+          updatingIds={updatingIds}
+          currentUserRole={currentUserRole}
+          onToggleApproval={handleToggleApproval}
+          onUpdateRole={handleRoleUpdate}
+          onDelete={handleDelete}
+        />
+      </div>
       <InviteEmployeeModal
         isOpen={isInviteOpen}
         isSubmitting={isInviting}

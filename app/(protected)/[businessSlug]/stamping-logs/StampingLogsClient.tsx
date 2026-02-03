@@ -147,7 +147,7 @@ const StampingLogsClient = ({ logs }: { logs: StampingLogEntry[] }) => {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <DataTable
           data={filteredLogs}
           columns={columns}
