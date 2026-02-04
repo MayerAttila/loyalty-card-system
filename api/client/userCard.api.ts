@@ -27,6 +27,22 @@ export type StampCardResult = {
   walletUpdateError?: unknown;
 };
 
+export type CardDetails = {
+  id: string;
+  customer?: { name: string; email: string };
+  template?: { template: string; maxPoints: number; cardColor?: string };
+  customerLoyaltyCardCycles?: Array<{
+    stampCount: number;
+    cycleNumber: number;
+    completedAt?: string | null;
+  }>;
+};
+
+export const getCardById = async (cardId: string) => {
+  const { data } = await api.get(`/user-loyalty-card/id/${cardId}`);
+  return data as CardDetails;
+};
+
 export const getCardsByCustomerId = async (customerId: string) => {
   const { data } = await api.get(`/user-loyalty-card/customer/${customerId}`);
   return data as CustomerCard[];
