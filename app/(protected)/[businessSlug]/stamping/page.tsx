@@ -6,12 +6,14 @@ import { stampCard, type StampCardResult } from "@/api/client/userCard.api";
 import Button from "@/components/Button";
 import CustomInput from "@/components/CustomInput";
 import RewardNotice from "@/components/RewardNotice";
+import ScannerModal from "./ScannerModal";
 
 const StampingPage = () => {
   const [cardId, setCardId] = useState("");
   const [stampAmount, setStampAmount] = useState("1");
   const [result, setResult] = useState<StampCardResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const handleStamp = async () => {
     const trimmed = cardId.trim();
@@ -74,16 +76,25 @@ const StampingPage = () => {
             className="w-full sm:max-w-[200px]"
           />
         </div>
-        <Button onClick={handleStamp} disabled={loading}>
-          {loading ? "Stamping..." : "Stamp card"}
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button
+            variant="neutral"
+            onClick={() => setScannerOpen(true)}
+            disabled={loading}
+          >
+            Scan QR
+          </Button>
+          <Button onClick={handleStamp} disabled={loading}>
+            {loading ? "Stamping..." : "Stamp card"}
+          </Button>
+        </div>
       </div>
 
       {result ? (
         <div className="mt-6 rounded-lg border border-accent-3 bg-primary p-4 text-sm text-contrast">
           <p className="font-semibold text-contrast">Stamp applied</p>
           <p className="mt-2 text-contrast/70">
-            {result.customerName} • {result.customerEmail}
+            {result.customerName} ? {result.customerEmail}
           </p>
           <p className="mt-2 text-contrast/70">{result.cardTitle}</p>
           <p className="mt-3 text-sm text-contrast">
@@ -111,6 +122,12 @@ const StampingPage = () => {
           ) : null}
         </div>
       ) : null}
+
+      <ScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScan={(value) => setCardId(value)}
+      />
     </section>
   );
 };

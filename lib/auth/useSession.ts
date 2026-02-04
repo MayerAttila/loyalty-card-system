@@ -3,8 +3,9 @@
 import useSWR from "swr";
 import { AppSession } from "@/types/session";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
-const SESSION_URL = baseURL + "/auth/session";
+const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const SESSION_URL =
+  !baseURL || baseURL === "/" ? "/auth/session" : `${baseURL}/auth/session`;
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: "include" });

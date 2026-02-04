@@ -1,9 +1,12 @@
 import "server-only";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL =
+  process.env.API_PROXY_TARGET ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "";
 
-if (!API_URL) {
-  throw new Error("Missing API_URL");
+if (!API_URL || API_URL === "/") {
+  throw new Error("Missing API_PROXY_TARGET or NEXT_PUBLIC_API_URL");
 }
 
 type ApiFetchOptions = RequestInit & {
