@@ -88,6 +88,7 @@ export default function Navbar({
 }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const allowedNavItems = buildNavItems(basePath).filter((item) => {
     if (!item.allow) return true;
@@ -113,11 +114,28 @@ export default function Navbar({
   }, [logoSrc]);
 
   return (
-    <aside
-      className={`flex min-h-screen flex-col border-r border-accent-3 bg-accent-1 transition-all duration-200 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
-    >
+    <>
+      {!mobileOpen ? (
+        <button
+          type="button"
+          aria-label="Open menu"
+          onClick={() => setMobileOpen(true)}
+          className="fixed left-4 top-4 z-[60] rounded-lg border border-accent-4 bg-accent-1 p-2 text-contrast shadow md:hidden"
+        >
+          <FiChevronRight className="h-4 w-4" />
+        </button>
+      ) : null}
+      {mobileOpen ? (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      ) : null}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-accent-3 bg-accent-1 transition-transform duration-200 md:static md:min-h-screen md:translate-x-0 md:transition-[width] md:duration-200 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } ${collapsed ? "md:w-16" : "md:w-64"}`}
+      >
       <div className="flex items-center justify-between px-4 py-5">
         <div
           className={`flex min-w-0 items-center gap-3 overflow-hidden transition-all ${
@@ -160,13 +178,21 @@ export default function Navbar({
           type="button"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={() => setCollapsed((prev) => !prev)}
-          className="rounded-lg border border-accent-4 p-2 text-contrast transition hover:bg-accent-2"
+          className="hidden rounded-lg border border-accent-4 p-2 text-contrast transition hover:bg-accent-2 md:inline-flex"
         >
           {collapsed ? (
             <FiChevronRight className="h-4 w-4" />
           ) : (
             <FiChevronLeft className="h-4 w-4" />
           )}
+        </button>
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setMobileOpen(false)}
+          className="rounded-lg border border-accent-4 p-2 text-contrast transition hover:bg-accent-2 md:hidden"
+        >
+          <FiChevronLeft className="h-4 w-4" />
         </button>
       </div>
 
@@ -217,6 +243,7 @@ export default function Navbar({
           {!collapsed && <span className="whitespace-nowrap">Sign out</span>}
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
