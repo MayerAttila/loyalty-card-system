@@ -23,7 +23,7 @@ const SubscriptionCard = ({
 }: SubscriptionCardProps) => {
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border px-6 py-7 ${
+      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border px-6 py-7 ${
         highlighted
           ? "border-brand/60 bg-gradient-to-br from-accent-1 via-accent-1/80 to-primary/70 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.7)]"
           : "border-accent-3 bg-accent-1"
@@ -54,7 +54,7 @@ const SubscriptionCard = ({
         ))}
       </ul>
 
-      <div className="mt-6">{action}</div>
+      <div className="mt-auto pt-6">{action}</div>
     </section>
   );
 };
