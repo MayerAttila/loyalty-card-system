@@ -17,7 +17,13 @@ const PricingTeaser = () => {
           price="30 days"
           interval="no card required"
           description="Try the full product before adding payment details."
-          features={["Full access during trial", "No payment required", "Cancel anytime"]}
+          features={[
+            "Full access during trial",
+            "Custom card branding",
+            "Staff invitations",
+            "Stamping history logs",
+            "Google Wallet cards",
+          ]}
           action={
             <Link
               className="block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
@@ -32,7 +38,14 @@ const PricingTeaser = () => {
           price="EUR 7.99"
           interval="per month"
           description="Flexible monthly plan for smaller teams."
-          features={["Cancel anytime", "All core loyalty features", "Email support"]}
+          features={[
+            "Custom card branding",
+            "Staff invitations",
+            "Stamping history logs",
+            "Google Wallet cards",
+            "Apple Wallet (Coming soon)",
+            "Customer notifications (Coming soon)",
+          ]}
           action={
             <Link
               className="block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
@@ -47,7 +60,15 @@ const PricingTeaser = () => {
           price="EUR 79.99"
           interval="per year"
           description="Save with annual subscription for growing teams."
-          features={["2 months free vs monthly", "Priority support", "All core loyalty features"]}
+          features={[
+            "Custom card branding",
+            "Staff invitations",
+            "Stamping history logs",
+            "Google Wallet cards",
+            "Apple Wallet (Coming soon)",
+            "Customer notifications (Coming soon)",
+            "2 months free vs monthly",
+          ]}
           badge="Best value"
           highlighted
           action={

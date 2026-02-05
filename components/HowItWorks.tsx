@@ -39,7 +39,7 @@ const steps = [
 const HowItWorks = () => {
   return (
     <section className="mt-16">
-      <div className="rounded-2xl border border-accent-3 bg-accent-2 p-8">
+      <div className="rounded-2xl border border-accent-3 bg-accent-1 p-8">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold text-contrast">How it works</h2>
           <p className="mt-2 text-sm text-contrast/80">
@@ -85,14 +85,14 @@ const HowItWorks = () => {
                 index % 3 === 0
                   ? "md:-translate-x-24"
                   : index % 3 === 1
-                  ? "md:translate-x-20"
-                  : "md:-translate-x-6";
+                    ? "md:translate-x-20"
+                    : "md:-translate-x-6";
 
               return (
                 <div
                   key={step.title}
-                className={`mx-auto flex w-full max-w-full rounded-2xl border border-accent-3 bg-accent-1 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] transition-transform md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
-              >
+                  className={`mx-auto flex w-full max-w-full rounded-2xl border border-accent-3 bg-accent-2 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] transition-transform md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
+                >
                   <div className="absolute right-5 top-4 text-3xl font-semibold text-brand/80 md:block hidden">
                     {index + 1}
                   </div>
@@ -100,14 +100,14 @@ const HowItWorks = () => {
                     <div className="flex items-center justify-center">
                       {step.icon}
                     </div>
-                  <div>
-                    <p className="text-lg font-semibold text-contrast md:text-left text-center">
-                      {step.title}
-                    </p>
-                    <p className="mt-2 text-base text-contrast/75 md:text-left text-center">
-                      {step.description}
-                    </p>
-                  </div>
+                    <div>
+                      <p className="text-lg font-semibold text-contrast md:text-left text-center">
+                        {step.title}
+                      </p>
+                      <p className="mt-2 text-base text-contrast/75 md:text-left text-center">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );

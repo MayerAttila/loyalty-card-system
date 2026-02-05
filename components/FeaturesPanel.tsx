@@ -33,23 +33,38 @@ const FeaturesPanel = () => {
 
   return (
     <section className="rounded-2xl border border-accent-3 bg-accent-1 p-6">
-      <p className="text-xs uppercase tracking-wide text-contrast/60">
-        What you get
-      </p>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        {features.map((feature) => (
-          <div
-            key={feature.title}
-            className="rounded-xl border border-accent-3 bg-primary/40 p-4"
-          >
-            <p className="text-sm font-semibold text-contrast">
-              {feature.title}
-            </p>
-            <p className="mt-2 text-xs text-contrast/70">
-              {feature.description}
-            </p>
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="md:w-1/2">
+          <div className="mt-5 grid gap-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="rounded-xl border border-accent-3 bg-primary/40 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold text-brand">
+                      {feature.title}
+                    </p>
+                    <p className="text-sm text-contrast/70">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div className="hidden md:block md:h-full">
+          <div className="flex h-full items-start">
+            <img
+              src="/what-you-get.png"
+              alt="Loyalty card preview"
+              className="h-full w-full object-contain object-top"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

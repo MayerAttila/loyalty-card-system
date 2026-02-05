@@ -43,7 +43,7 @@ const FaqSection = () => {
 
   return (
     <section className="mt-16">
-      <div className="rounded-2xl border border-accent-3 bg-accent-2 p-8">
+      <div className="rounded-2xl border border-accent-3 bg-accent-1 p-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-contrast">
             Frequently Asked Questions
@@ -75,7 +75,9 @@ const FaqSection = () => {
                 </div>
                 <div
                   className={`grid transition-all duration-300 ${
-                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    isOpen
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0"
                   }`}
                 >
                   <div className="overflow-hidden">
