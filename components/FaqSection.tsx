@@ -1,55 +1,92 @@
+"use client";
+
+import { useState } from "react";
+import { AiOutlinePlus } from "react-icons/ai";
+
+const faqs = [
+  {
+    question: "How fast can I launch?",
+    answer: "Most businesses set up their card in under 15 minutes.",
+  },
+  {
+    question: "Do I need special hardware?",
+    answer: "No. Any phone or tablet can scan QR codes and stamp cards.",
+  },
+  {
+    question: "What do customers need?",
+    answer: "Just their phone to save the card and show the QR code.",
+  },
+  {
+    question: "Can I customize stamps and rewards?",
+    answer: "Yes. You control stamp count, reward rules, and visuals.",
+  },
+  {
+    question: "Can I invite staff?",
+    answer: "Yes. Add team members and manage roles anytime.",
+  },
+  {
+    question: "Does it work with Google Wallet?",
+    answer: "Yes. Customers can save their card directly to Google Wallet.",
+  },
+  {
+    question: "Can I cancel anytime?",
+    answer: "Yes. Cancel at the end of your billing period from Stripe.",
+  },
+  {
+    question: "Do you offer annual pricing?",
+    answer: "Yes. Annual plans are discounted compared to monthly.",
+  },
+];
+
 const FaqSection = () => {
-  const faqs = [
-    {
-      question: "How fast can I launch?",
-      answer: "Most businesses set up their card in under 15 minutes.",
-    },
-    {
-      question: "Do I need special hardware?",
-      answer: "No. Any phone or tablet can scan QR codes and stamp cards.",
-    },
-    {
-      question: "What do customers need?",
-      answer: "Just their phone to save the card and show the QR code.",
-    },
-    {
-      question: "Can I customize stamps and rewards?",
-      answer: "Yes. You control stamp count, reward rules, and visuals.",
-    },
-    {
-      question: "Can I invite staff?",
-      answer: "Yes. Add team members and manage roles anytime.",
-    },
-    {
-      question: "Does it work with Google Wallet?",
-      answer: "Yes. Customers can save their card directly to Google Wallet.",
-    },
-    {
-      question: "Can I cancel anytime?",
-      answer: "Yes. Cancel at the end of your billing period from Stripe.",
-    },
-    {
-      question: "Do you offer annual pricing?",
-      answer: "Yes. Annual plans are discounted compared to monthly.",
-    },
-  ];
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <section className="mt-16">
-      <div className="rounded-2xl border border-accent-3 bg-accent-1 p-8">
-        <h2 className="text-2xl font-semibold text-contrast">FAQ</h2>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {faqs.map((faq) => (
-            <div
-              key={faq.question}
-              className="rounded-xl border border-accent-3 bg-primary/40 p-4"
-            >
-              <p className="text-sm font-semibold text-contrast">
-                {faq.question}
-              </p>
-              <p className="mt-2 text-xs text-contrast/70">{faq.answer}</p>
-            </div>
-          ))}
+      <div className="rounded-2xl border border-accent-3 bg-accent-2 p-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-contrast">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-2 text-sm text-contrast/70">
+            Still have questions? Reach out and we will help.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <button
+                key={faq.question}
+                type="button"
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+                className="w-full rounded-2xl border border-accent-3 bg-primary/40 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-lg font-semibold text-contrast">
+                    {faq.question}
+                  </span>
+                  <AiOutlinePlus
+                    className={`text-3xl text-brand transition-transform duration-200 ${
+                      isOpen ? "rotate-45" : ""
+                    }`}
+                  />
+                </div>
+                <div
+                  className={`grid transition-all duration-300 ${
+                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <p className="mt-3 text-base text-contrast/75">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
