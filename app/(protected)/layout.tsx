@@ -12,7 +12,6 @@ export default async function ProtectedLayout({
   const session = await getSession();
 
   if (!session?.user) redirect("/login");
-  if (session.user.approved === false) redirect("/pending-approval");
   const businessSlug = toBusinessSlug(session.user.businessName);
   const basePath = businessSlug ? `/${businessSlug}` : "/business-name";
 

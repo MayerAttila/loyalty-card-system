@@ -4,13 +4,11 @@ import React from "react";
 import { User } from "@/types/user";
 import DataTable, { DataTableColumn } from "@/components/DataTable";
 import DeleteButton from "@/components/DeleteButton";
-import ApproveButton from "./ApproveButton";
 
 type EmployeesTableProps = {
   users: User[];
   updatingIds: Set<string>;
   currentUserRole?: User["role"];
-  onToggleApproval: (userId: string, approved: boolean) => void;
   onUpdateRole: (userId: string, role: User["role"]) => void;
   onDelete: (userId: string) => void;
 };
@@ -19,7 +17,6 @@ const EmployeesTable = ({
   users,
   updatingIds,
   currentUserRole,
-  onToggleApproval,
   onUpdateRole,
   onDelete,
 }: EmployeesTableProps) => {
@@ -95,28 +92,6 @@ const EmployeesTable = ({
           </select>
         );
       },
-    },
-    {
-      key: "approved",
-      label: "Approved",
-      sortable: true,
-      width: 200,
-      render: (_, row) => (
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-contrast/80">
-            {row.approved ? "Yes" : "No"}
-          </span>
-          {row.role !== "OWNER" &&
-            (currentUserRole !== "ADMIN" || row.role === "STAFF") && (
-            <ApproveButton
-              approved={row.approved}
-              disabled={updatingIds.has(row.id)}
-              onClick={() => onToggleApproval(row.id, !row.approved)}
-            />
-          )}
-        </div>
-      ),
-      sortValue: (row) => (row.approved ? 1 : 0),
     },
     {
       key: "actions",

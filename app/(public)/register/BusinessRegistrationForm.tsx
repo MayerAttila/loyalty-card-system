@@ -108,7 +108,6 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
         password: ownerPassword,
         businessId: business.id,
         role: "OWNER",
-        approved: true,
       });
       setErrors({});
       form.reset();

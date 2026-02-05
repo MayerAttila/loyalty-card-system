@@ -96,7 +96,6 @@ const EmployeeRegistrationForm = () => {
       email: employeeEmail,
       password: employeePassword,
       businessId,
-      ...(isInviteRegistration ? { approved: true } : {}),
     };
 
     try {
@@ -104,7 +103,7 @@ const EmployeeRegistrationForm = () => {
       const user = await createUser(payload);
       setErrors({});
       form.reset();
-      if (user?.approved) {
+      {
         toast.success("Employee account created! Signing you in...");
         try {
           const result = await signIn({
@@ -130,9 +129,6 @@ const EmployeeRegistrationForm = () => {
           return;
         }
       }
-
-      toast.success("Employee account created!");
-      router.push("/pending-approval");
     } catch (error) {
       console.error("createUser failed", error);
       const message =

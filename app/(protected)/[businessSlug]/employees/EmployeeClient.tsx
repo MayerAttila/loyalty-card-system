@@ -7,7 +7,6 @@ import SearchBar from "@/components/SearchBar";
 import {
   deleteUser,
   sendEmployeeInvite,
-  updateUserApproval,
   updateUserRole,
 } from "@/api/client/user.api";
 import { User } from "@/types/user";
@@ -33,35 +32,6 @@ const EmployeeClient = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
 
-  const handleToggleApproval = useCallback(
-    async (userId: string, approved: boolean) => {
-      setUpdatingIds((prev) => {
-        const next = new Set(prev);
-        next.add(userId);
-        return next;
-      });
-
-      try {
-        const updated = await updateUserApproval(userId, approved);
-        setUsers((prev) =>
-          prev.map((user) => (user.id === userId ? updated : user))
-        );
-        toast.success(
-          approved ? "Employee approved." : "Employee unapproved."
-        );
-      } catch (error) {
-        console.error(error);
-        toast.error("Unable to update approval status.");
-      } finally {
-        setUpdatingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(userId);
-          return next;
-        });
-      }
-    },
-    []
-  );
 
   const handleRoleUpdate = useCallback(async (userId: string, role: User["role"]) => {
     setUpdatingIds((prev) => {
@@ -201,14 +171,13 @@ const EmployeeClient = ({
         </div>
       </div>
       <div className="mt-4">
-        <EmployeesTable
-          users={filteredUsers}
-          updatingIds={updatingIds}
-          currentUserRole={currentUserRole}
-          onToggleApproval={handleToggleApproval}
-          onUpdateRole={handleRoleUpdate}
-          onDelete={handleDelete}
-        />
+      <EmployeesTable
+        users={filteredUsers}
+        updatingIds={updatingIds}
+        currentUserRole={currentUserRole}
+        onUpdateRole={handleRoleUpdate}
+        onDelete={handleDelete}
+      />
       </div>
       <InviteEmployeeModal
         isOpen={isInviteOpen}

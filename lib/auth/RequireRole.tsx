@@ -32,11 +32,6 @@ export function RequireRole({
       return;
     }
 
-    if (session.user.approved === false) {
-      router.replace("/pending-approval");
-      return;
-    }
-
     const role = session.user.role;
     if (!role || !allow.includes(role)) {
       router.replace(`${basePath}/unauthorized`);
