@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import EmployeeRegistrationForm from "../register/EmployeeRegistrationForm";
 
 const JoinBusinessPage = () => {
@@ -18,7 +19,9 @@ const JoinBusinessPage = () => {
           </p>
         </header>
 
-        <EmployeeRegistrationForm />
+        <Suspense fallback={<div className="text-contrast/70">Loading...</div>}>
+          <EmployeeRegistrationForm />
+        </Suspense>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
           <span className="text-contrast/70">Already have an account?</span>
