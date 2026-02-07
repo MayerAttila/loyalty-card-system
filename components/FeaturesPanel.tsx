@@ -12,8 +12,7 @@ const FeaturesPanel = () => {
     },
     {
       title: "Track stamping history",
-      description:
-        "See every stamp and redemption with a full activity log.",
+      description: "See every stamp and redemption with a full activity log.",
     },
     {
       title: "Google Wallet ready",
@@ -26,20 +25,19 @@ const FeaturesPanel = () => {
     },
     {
       title: "Customer notifications (Coming soon)",
-      description:
-        "Send reminders and reward updates to bring customers back.",
+      description: "Send reminders and reward updates to bring customers back.",
     },
   ];
 
   return (
-    <section className="rounded-2xl border border-accent-3 bg-accent-1 p-6">
+    <section className="glass-card p-6">
       <div className="flex flex-col gap-6 md:flex-row md:items-start">
         <div className="md:w-1/2">
           <div className="mt-5 grid gap-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-xl border border-accent-3 bg-primary/40 p-4"
+                className="rounded-xl border border-accent-2 bg-primary/10 p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="space-y-1">

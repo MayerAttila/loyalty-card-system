@@ -39,11 +39,11 @@ const faqs = [
 ];
 
 const FaqSection = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="mt-16">
-      <div className="rounded-2xl border border-accent-3 bg-accent-1 p-8">
+      <div className="glass-card p-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-contrast">
             Frequently Asked Questions
@@ -61,7 +61,7 @@ const FaqSection = () => {
                 key={faq.question}
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="w-full rounded-2xl border border-accent-3 bg-primary/40 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)]"
+                className="w-full rounded-2xl border border-accent-3/60 bg-primary/25 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)] backdrop-blur-md"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-lg font-semibold text-contrast">

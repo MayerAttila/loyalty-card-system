@@ -11,7 +11,7 @@ export default function RootLayout({
 }>) {
   return (
     <div className="relative">
-      <BackgroundFog showBounds />
+      <BackgroundFog />
       <div className="relative z-10">
         <MainHeader />
         <TopBrandWave />

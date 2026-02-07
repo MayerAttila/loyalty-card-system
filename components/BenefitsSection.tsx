@@ -12,8 +12,7 @@ const BenefitsSection = () => {
     },
     {
       title: "Modern wallet integration",
-      description:
-        "Let customers save their card to Google Wallet instantly.",
+      description: "Let customers save their card to Google Wallet instantly.",
       icon: <HiOutlineDeviceMobile className="h-8 w-8 text-brand" />,
     },
     {
@@ -23,15 +22,14 @@ const BenefitsSection = () => {
     },
     {
       title: "Direct customer notifications",
-      description:
-        "Send reward updates and reminders to bring customers back.",
+      description: "Send reward updates and reminders to bring customers back.",
       icon: <FiBell className="h-8 w-8 text-brand" />,
     },
   ];
 
   return (
     <section className="mt-16">
-      <div className="rounded-2xl border border-accent-3 bg-accent-1 p-8">
+      <div className="glass-card p-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-contrast">
             Why choose us?
