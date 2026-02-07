@@ -1,4 +1,9 @@
-import { FiUserPlus, FiEdit3, FiUsers, FiGift } from "react-icons/fi";
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { FiUserPlus, FiUsers, FiGift } from "react-icons/fi";
 import { FaRegCreditCard } from "react-icons/fa";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineQrcode } from "react-icons/hi";
@@ -53,7 +58,7 @@ const roads = [
     className:
       "right-[-80px] top-[140%] h-[240px] w-[160px] -translate-y-1/2 rotate-90",
     viewBox: "0 0 160 140",
-    path: "M20 60 C90 20, 140 60, 150 130,",
+    path: "M20 60 C90 20, 140 60, 150 130",
   },
   {
     className:
@@ -70,9 +75,80 @@ const roads = [
 ];
 
 const HowItWorks = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const stepEls = gsap.utils.toArray<HTMLElement>("[data-howitworks-step]");
+
+      stepEls.forEach((stepEl) => {
+        const tileEl = stepEl.querySelector<HTMLElement>(
+          "[data-howitworks-tile]"
+        );
+        const roadPath = stepEl.querySelector<SVGPathElement>(
+          "[data-howitworks-road-path]"
+        );
+
+        // Don't touch transforms on the step element itself, because it uses Tailwind
+        // translate-x for the zig-zag layout. Animate y on an inner wrapper instead.
+        gsap.set(stepEl, { autoAlpha: 0 });
+        if (tileEl) gsap.set(tileEl, { y: 18 });
+        if (roadPath) gsap.set(roadPath, { opacity: 0, strokeDashoffset: 120 });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: stepEl,
+            start: "top 85%",
+            end: "bottom 15%",
+            toggleActions: "play reverse play reverse",
+          },
+        });
+
+        tl.to(
+          stepEl,
+          {
+            autoAlpha: 1,
+            duration: 0.35,
+            ease: "power1.out",
+          },
+          0
+        );
+
+        if (roadPath) {
+          tl.to(
+            roadPath,
+            {
+              opacity: 0.3,
+              strokeDashoffset: 0,
+              duration: 0.75,
+              ease: "power2.out",
+            },
+            0.05
+          );
+        }
+
+        if (tileEl) {
+          tl.to(
+            tileEl,
+            {
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            0
+          );
+        }
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section className="mt-16">
-      <div className="glass-card p-8">
+      <div ref={sectionRef} className="glass-card p-8">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold text-contrast">How it works</h2>
           <p className="mt-2 text-sm text-contrast/80">
@@ -93,7 +169,8 @@ const HowItWorks = () => {
               return (
                 <div
                   key={step.title}
-                  className={`relative mx-auto flex w-full max-w-full rounded-2xl border border-accent-2 bg-accent-1/20 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] transition-transform md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
+                  data-howitworks-step
+                  className={`relative mx-auto flex w-full max-w-full rounded-2xl border border-accent-2 bg-accent-1/20 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
                 >
                   {index < roads.length ? (
                     <div
@@ -123,30 +200,32 @@ const HowItWorks = () => {
                           </linearGradient>
                         </defs>
                         <path
+                          data-howitworks-road-path
                           d={roads[index].path}
                           stroke={`url(#howitworks-segment-${index})`}
                           strokeWidth="6"
                           strokeDasharray="12 26"
                           strokeLinecap="round"
-                          opacity="0.3"
                         />
                       </svg>
                     </div>
                   ) : null}
-                  <div className="absolute right-5 top-4 text-3xl font-semibold text-brand/80 md:block hidden">
-                    {index + 1}
-                  </div>
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start">
-                    <div className="flex items-center justify-center">
-                      {step.icon}
+                  <div data-howitworks-tile>
+                    <div className="absolute right-5 top-4 hidden text-3xl font-semibold text-brand/80 md:block">
+                      {index + 1}
                     </div>
-                    <div>
-                      <p className="text-lg font-semibold text-contrast md:text-left text-center">
-                        {step.title}
-                      </p>
-                      <p className="mt-2 text-base text-contrast/75 md:text-left text-center">
-                        {step.description}
-                      </p>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start">
+                      <div className="flex items-center justify-center">
+                        {step.icon}
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-contrast md:text-left text-center">
+                          {step.title}
+                        </p>
+                        <p className="mt-2 text-base text-contrast/75 md:text-left text-center">
+                          {step.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
