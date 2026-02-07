@@ -10,6 +10,7 @@ type Blob = {
   x: number;
   y: number;
   r: number;
+  rFactor: number;
   color: string;
   opacity: number;
   dir: 1 | -1;
@@ -18,6 +19,7 @@ type Blob = {
 type BackgroundFogProps = {
   showBounds?: boolean;
   showScrollPercent?: boolean;
+  showCoreDot?: boolean;
   scrollScale?: number;
   centerGapRatioX?: number;
   centerGapRatioY?: number;
@@ -26,6 +28,7 @@ type BackgroundFogProps = {
 const BackgroundFog = ({
   showBounds = false,
   showScrollPercent = false,
+  showCoreDot = false,
   scrollScale = 900,
   centerGapRatioX = 0.75,
   centerGapRatioY = 0.75,
@@ -86,10 +89,13 @@ const BackgroundFog = ({
     const blobs: Blob[] = Array.from({ length: 8 }).map((_, index) => {
       const pos = getSpawnPosition();
       const minViewport = Math.min(window.innerWidth, window.innerHeight);
+      const sizeBoost = Math.min(1.3, Math.max(1, minViewport / 900));
+      const rFactor = 0.22 + Math.random() * 0.12;
       return {
         x: pos.x,
         y: pos.y,
-        r: minViewport * (0.22 + Math.random() * 0.12),
+        r: minViewport * rFactor * sizeBoost,
+        rFactor,
         color: COLORS[index % COLORS.length],
         opacity: 0.45 + Math.random() * 0.2,
         dir: Math.random() > 0.5 ? 1 : -1,
@@ -131,6 +137,9 @@ const BackgroundFog = ({
       const softRadius = 220;
 
       blobs.forEach((blob, index) => {
+        const minViewport = Math.min(width, height);
+        const sizeBoost = Math.min(1.3, Math.max(1, minViewport / 900));
+        blob.r = minViewport * blob.rFactor * sizeBoost;
         dirRefs[index] += (blob.dir - dirRefs[index]) * 0.05;
         const offset = dirRefs[index] * scrollOffset * 0.35;
         const drift = driftRefs[index];
@@ -192,10 +201,12 @@ const BackgroundFog = ({
         ctx.arc(x, y, blob.r, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-        ctx.fill();
+        if (showCoreDot) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
       });
 
       ctx.globalCompositeOperation = "source-over";
