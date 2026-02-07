@@ -85,13 +85,13 @@ const HowItWorks = () => {
 
       stepEls.forEach((stepEl) => {
         const tileEl = stepEl.querySelector<HTMLElement>(
-          "[data-howitworks-tile]"
+          "[data-howitworks-tile]",
         );
         const roadWrap = stepEl.querySelector<HTMLElement>(
-          "[data-howitworks-road]"
+          "[data-howitworks-road]",
         );
         const roadPath = stepEl.querySelector<SVGPathElement>(
-          "[data-howitworks-road-path]"
+          "[data-howitworks-road-path]",
         );
 
         // Don't touch transforms on the step element itself, because it uses Tailwind
@@ -136,10 +136,18 @@ const HowItWorks = () => {
               });
             },
             onLeave: () => {
-              gsap.to(roadPath, { opacity: 0, duration: 0.2, ease: "power1.out" });
+              gsap.to(roadPath, {
+                opacity: 0,
+                duration: 0.2,
+                ease: "power1.out",
+              });
             },
             onLeaveBack: () => {
-              gsap.to(roadPath, { opacity: 0, duration: 0.2, ease: "power1.out" });
+              gsap.to(roadPath, {
+                opacity: 0,
+                duration: 0.2,
+                ease: "power1.out",
+              });
             },
           });
         }
@@ -215,9 +223,6 @@ const HowItWorks = () => {
                     </div>
                   ) : null}
                   <div data-howitworks-tile>
-                    <div className="absolute right-5 top-4 hidden text-3xl font-semibold text-brand/80 md:block">
-                      {index + 1}
-                    </div>
                     <div className="flex flex-col gap-3 md:flex-row md:items-start">
                       <div className="flex items-center justify-center">
                         {step.icon}
