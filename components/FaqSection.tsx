@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const faqs = [
   {
@@ -40,10 +42,40 @@ const faqs = [
 
 const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const items = gsap.utils.toArray<HTMLElement>("[data-faq-item]");
+      items.forEach((item, index) => {
+        gsap.fromTo(
+          item,
+          { opacity: 0, y: 18 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            delay: index * 0.04,
+            scrollTrigger: {
+              trigger: item,
+              start: "top 85%",
+              end: "bottom 15%",
+              toggleActions: "play reverse play reverse",
+              markers: true,
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section className="mt-16">
-      <div className="glass-card p-8">
+      <div ref={sectionRef} className="glass-card p-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-contrast">
             Frequently Asked Questions
@@ -61,6 +93,7 @@ const FaqSection = () => {
                 key={faq.question}
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
+                data-faq-item
                 className="w-full rounded-2xl border border-accent-3/60 bg-primary/25 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)] backdrop-blur-md"
               >
                 <div className="flex items-center justify-between gap-4">
