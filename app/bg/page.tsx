@@ -23,6 +23,7 @@ const CENTER_GAP_RATIO_Y = 0.75;
 const BgPage = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scrollOffsetRef = useRef(0);
+  const scrollProgressRef = useRef(0);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -77,6 +78,7 @@ const BgPage = () => {
       };
     });
     const driftRefs = blobs.map(() => ({ x: 0 }));
+    const renderRefs = blobs.map((blob) => ({ x: blob.x, y: blob.y }));
 
     const scrollTrigger = ScrollTrigger.create({
       trigger: document.body,
@@ -84,6 +86,7 @@ const BgPage = () => {
       end: "bottom bottom",
       onUpdate: (self) => {
         scrollOffsetRef.current = self.progress * 900;
+        scrollProgressRef.current = self.progress;
       },
     });
 
@@ -93,32 +96,59 @@ const BgPage = () => {
       ctx.clearRect(0, 0, width, height);
       ctx.globalCompositeOperation = "lighter";
 
-      const scrollOffset = scrollOffsetRef.current;
+        const scrollOffset = scrollOffsetRef.current;
+        const scrollPercent = Math.round(scrollProgressRef.current * 100);
       const centerGapX = width * CENTER_GAP_RATIO_X;
       const centerGapY = height * CENTER_GAP_RATIO_Y;
       const centerStartX = (width - centerGapX) / 2;
       const centerEndX = centerStartX + centerGapX;
       const centerStartY = (height - centerGapY) / 2;
       const centerEndY = centerStartY + centerGapY;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const halfGapX = centerGapX / 2;
+      const halfGapY = centerGapY / 2;
+      const softRadius = 220;
 
       blobs.forEach((blob, index) => {
         const offset = blob.dir * scrollOffset * 0.35;
         const drift = driftRefs[index];
+        const renderPos = renderRefs[index];
         drift.x += (offset - drift.x) * 0.08;
         let x = blob.x + drift.x;
         let y = blob.y + offset * 0.25;
-        const insideNoGo =
-          x > centerStartX &&
-          x < centerEndX &&
-          y > centerStartY &&
-          y < centerEndY;
-        if (insideNoGo) {
-          blob.dir = x < width / 2 ? -1 : 1;
-          const targetX = x < width / 2 ? centerStartX - 20 : centerEndX + 20;
-          const targetY = y < height / 2 ? centerStartY - 20 : centerEndY + 20;
-          x = x + (targetX - x) * 0.15;
-          y = y + (targetY - y) * 0.15;
+        const relX = x - centerX;
+        const relY = y - centerY;
+        const dx = Math.abs(relX) - halfGapX;
+        const dy = Math.abs(relY) - halfGapY;
+
+        if (dx < softRadius && dy < softRadius) {
+          const nx = Math.max(dx, 0);
+          const ny = Math.max(dy, 0);
+          const dist = Math.hypot(nx, ny);
+          const force = dist > 0 ? (softRadius - dist) / softRadius : 1;
+          const vx = relX || 1;
+          const vy = relY || 1;
+          const len = Math.hypot(vx, vy) || 1;
+          x += (vx / len) * force * 22;
+          y += (vy / len) * force * 22;
         }
+
+        const insideCore = Math.abs(relX) < halfGapX && Math.abs(relY) < halfGapY;
+        if (insideCore) {
+          const penX = halfGapX - Math.abs(relX);
+          const penY = halfGapY - Math.abs(relY);
+          if (penX < penY) {
+            x = centerX + Math.sign(relX || 1) * (halfGapX + 4);
+          } else {
+            y = centerY + Math.sign(relY || 1) * (halfGapY + 4);
+          }
+        }
+
+        renderPos.x += (x - renderPos.x) * 0.15;
+        renderPos.y += (y - renderPos.y) * 0.15;
+        x = renderPos.x;
+        y = renderPos.y;
         x = Math.max(0, Math.min(width, x));
         y = Math.max(0, Math.min(height, y));
 
@@ -141,6 +171,11 @@ const BgPage = () => {
       });
 
       ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.font = "700 28px system-ui, -apple-system, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${scrollPercent}%`, width / 2, height / 2);
       animationFrame = requestAnimationFrame(render);
     };
 
