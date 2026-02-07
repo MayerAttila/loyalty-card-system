@@ -36,6 +36,39 @@ const steps = [
   },
 ];
 
+const roads = [
+  {
+    className:
+      "right-[-180px] top-[100%] h-[200px] w-[220px] -translate-y-1/2 rotate-12",
+    viewBox: "0 0 220 180",
+    path: "M40 50 C60 50, 140 50, 160 140",
+  },
+  {
+    className:
+      "left-[-130px] top-[100%] h-[140px] w-[160px] -translate-y-1/2 -rotate-6",
+    viewBox: "0 0 160 140",
+    path: "M120 20 C70 20, 20 60, 30 120",
+  },
+  {
+    className:
+      "right-[-80px] top-[140%] h-[240px] w-[160px] -translate-y-1/2 rotate-90",
+    viewBox: "0 0 160 140",
+    path: "M20 60 C90 20, 140 60, 150 130,",
+  },
+  {
+    className:
+      "left-[20px] top-[150%] h-[140px] w-[160px] -translate-y-1/2 -rotate-180",
+    viewBox: "0 0 160 140",
+    path: "M20 10 C90 20, 140 60, 140 120",
+  },
+  {
+    className:
+      "right-[0px] top-[180%] h-[140px] w-[160px] -translate-y-1/2 rotate-90",
+    viewBox: "0 0 160 140",
+    path: "M10 20 C30 20, 110 30, 120 90",
+  },
+];
+
 const HowItWorks = () => {
   return (
     <section className="mt-16">
@@ -48,37 +81,6 @@ const HowItWorks = () => {
         </div>
 
         <div className="relative mx-auto mt-12 max-w-5xl">
-          <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-[260px] -translate-x-1/2 md:block">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 260 760"
-              className="h-full w-full"
-              fill="none"
-            >
-              <defs>
-                <linearGradient
-                  id="howitworks-gradient"
-                  x1="130"
-                  y1="0"
-                  x2="130"
-                  y2="760"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stopColor="#e6345a" stopOpacity="0.5" />
-                  <stop offset="1" stopColor="#e6345a" stopOpacity="0.25" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M130 20 C240 110, 230 220, 130 300 S30 480, 140 560 S240 690, 130 740"
-                stroke="url(#howitworks-gradient)"
-                strokeWidth="8"
-                strokeDasharray="14 28"
-                strokeLinecap="round"
-                opacity="0.7"
-              />
-            </svg>
-          </div>
-
           <div className="grid gap-16">
             {steps.map((step, index) => {
               const offsetClass =
@@ -91,8 +93,46 @@ const HowItWorks = () => {
               return (
                 <div
                   key={step.title}
-                  className={`mx-auto flex w-full max-w-full rounded-2xl border border-accent-2 bg-accent-1/20 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] transition-transform md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
+                  className={`relative mx-auto flex w-full max-w-full rounded-2xl border border-accent-2 bg-accent-1/20 p-6 shadow-[0_16px_35px_-25px_rgba(0,0,0,0.6)] transition-transform md:inline-flex md:w-fit md:min-w-[520px] md:max-w-[760px] ${offsetClass}`}
                 >
+                  {index < roads.length ? (
+                    <div
+                      className={`pointer-events-none absolute hidden md:block ${roads[index].className}`}
+                    >
+                      <svg
+                        aria-hidden="true"
+                        viewBox={roads[index].viewBox}
+                        className="h-full w-full"
+                        fill="none"
+                      >
+                        <defs>
+                          <linearGradient
+                            id={`howitworks-segment-${index}`}
+                            x1="0"
+                            y1="0"
+                            x2="160"
+                            y2="140"
+                            gradientUnits="userSpaceOnUse"
+                          >
+                            <stop stopColor="#e6345a" stopOpacity="0.45" />
+                            <stop
+                              offset="1"
+                              stopColor="#e6345a"
+                              stopOpacity="0.2"
+                            />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d={roads[index].path}
+                          stroke={`url(#howitworks-segment-${index})`}
+                          strokeWidth="6"
+                          strokeDasharray="12 26"
+                          strokeLinecap="round"
+                          opacity="0.3"
+                        />
+                      </svg>
+                    </div>
+                  ) : null}
                   <div className="absolute right-5 top-4 text-3xl font-semibold text-brand/80 md:block hidden">
                     {index + 1}
                   </div>
