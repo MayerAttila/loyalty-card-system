@@ -87,6 +87,9 @@ const HowItWorks = () => {
         const tileEl = stepEl.querySelector<HTMLElement>(
           "[data-howitworks-tile]"
         );
+        const roadWrap = stepEl.querySelector<HTMLElement>(
+          "[data-howitworks-road]"
+        );
         const roadPath = stepEl.querySelector<SVGPathElement>(
           "[data-howitworks-road-path]"
         );
@@ -95,50 +98,50 @@ const HowItWorks = () => {
         // translate-x for the zig-zag layout. Animate y on an inner wrapper instead.
         gsap.set(stepEl, { autoAlpha: 0 });
         if (tileEl) gsap.set(tileEl, { y: 18 });
-        if (roadPath) gsap.set(roadPath, { opacity: 0, strokeDashoffset: 120 });
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: stepEl,
-            start: "top 85%",
-            end: "bottom 15%",
-            toggleActions: "play reverse play reverse",
-          },
-        });
+        // Tile animation (fade + lift) lives on its own ScrollTrigger.
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: stepEl,
+              start: "top 85%",
+              end: "bottom 15%",
+              toggleActions: "play reverse play reverse",
+            },
+          })
+          .to(stepEl, { autoAlpha: 1, duration: 0.35, ease: "power1.out" }, 0)
+          .to(tileEl, { y: 0, duration: 0.6, ease: "power2.out" }, 0);
 
-        tl.to(
-          stepEl,
-          {
-            autoAlpha: 1,
-            duration: 0.35,
-            ease: "power1.out",
-          },
-          0
-        );
-
+        // Road animation is separated from tiles:
+        // simple fade in/out (no continuous motion).
         if (roadPath) {
-          tl.to(
-            roadPath,
-            {
-              opacity: 0.3,
-              strokeDashoffset: 0,
-              duration: 0.75,
-              ease: "power2.out",
-            },
-            0.05
-          );
-        }
+          gsap.set(roadPath, { opacity: 0 });
 
-        if (tileEl) {
-          tl.to(
-            tileEl,
-            {
-              y: 0,
-              duration: 0.6,
-              ease: "power2.out",
+          ScrollTrigger.create({
+            trigger: roadWrap ?? stepEl,
+            start: "top 90%",
+            end: "bottom 10%",
+            onEnter: () => {
+              gsap.to(roadPath, {
+                opacity: 0.3,
+                duration: 0.35,
+                ease: "power1.out",
+              });
             },
-            0
-          );
+            onEnterBack: () => {
+              gsap.to(roadPath, {
+                opacity: 0.3,
+                duration: 0.35,
+                ease: "power1.out",
+              });
+            },
+            onLeave: () => {
+              gsap.to(roadPath, { opacity: 0, duration: 0.2, ease: "power1.out" });
+            },
+            onLeaveBack: () => {
+              gsap.to(roadPath, { opacity: 0, duration: 0.2, ease: "power1.out" });
+            },
+          });
         }
       });
     }, sectionRef);
@@ -174,6 +177,7 @@ const HowItWorks = () => {
                 >
                   {index < roads.length ? (
                     <div
+                      data-howitworks-road
                       className={`pointer-events-none absolute hidden md:block ${roads[index].className}`}
                     >
                       <svg
