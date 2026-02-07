@@ -79,6 +79,8 @@ const BgPage = () => {
     });
     const driftRefs = blobs.map(() => ({ x: 0 }));
     const renderRefs = blobs.map((blob) => ({ x: blob.x, y: blob.y }));
+    const hitRefs = blobs.map(() => false);
+    const dirRefs = blobs.map((blob) => blob.dir);
 
     const scrollTrigger = ScrollTrigger.create({
       trigger: document.body,
@@ -111,7 +113,8 @@ const BgPage = () => {
       const softRadius = 220;
 
       blobs.forEach((blob, index) => {
-        const offset = blob.dir * scrollOffset * 0.35;
+        dirRefs[index] += (blob.dir - dirRefs[index]) * 0.05;
+        const offset = dirRefs[index] * scrollOffset * 0.35;
         const drift = driftRefs[index];
         const renderPos = renderRefs[index];
         drift.x += (offset - drift.x) * 0.08;
@@ -134,19 +137,26 @@ const BgPage = () => {
           y += (vy / len) * force * 22;
         }
 
-        const insideCore = Math.abs(relX) < halfGapX && Math.abs(relY) < halfGapY;
+        const insideCore =
+          Math.abs(relX) < halfGapX && Math.abs(relY) < halfGapY;
         if (insideCore) {
+          if (!hitRefs[index]) {
+            blob.dir = blob.dir === 1 ? -1 : 1;
+            hitRefs[index] = true;
+          }
           const penX = halfGapX - Math.abs(relX);
           const penY = halfGapY - Math.abs(relY);
           if (penX < penY) {
-            x = centerX + Math.sign(relX || 1) * (halfGapX + 4);
+            x = centerX + Math.sign(relX || 1) * (halfGapX + 3);
           } else {
-            y = centerY + Math.sign(relY || 1) * (halfGapY + 4);
+            y = centerY + Math.sign(relY || 1) * (halfGapY + 3);
           }
+        } else if (hitRefs[index]) {
+          hitRefs[index] = false;
         }
 
-        renderPos.x += (x - renderPos.x) * 0.15;
-        renderPos.y += (y - renderPos.y) * 0.15;
+        renderPos.x += (x - renderPos.x) * 0.1;
+        renderPos.y += (y - renderPos.y) * 0.1;
         x = renderPos.x;
         y = renderPos.y;
         x = Math.max(0, Math.min(width, x));
