@@ -7,7 +7,7 @@ type Props = {
 export default function BottomBrandWave({
   className = "",
   topClassName = "fill-brand",
-  bottomClassName = "fill-primary",
+  bottomClassName = "fill-transparent",
 }: Props) {
   return (
     <svg

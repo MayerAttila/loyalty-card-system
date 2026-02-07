@@ -1,4 +1,3 @@
-import Link from "next/link";
 import CardDemo from "@/components/CardDemo";
 import FeaturesPanel from "@/components/FeaturesPanel";
 import HowItWorks from "@/components/HowItWorks";
@@ -9,7 +8,7 @@ import BenefitsSection from "@/components/BenefitsSection";
 
 const page = () => {
   return (
-    <main className="min-h-screen bg-primary text-contrast">
+    <main className="min-h-screen bg-transparent text-contrast">
       <div className="mx-auto max-w-6xl px-6 py-16">
         <header className="grid gap-10 lg:grid-cols-[1.2fr,0.8fr] lg:items-center">
           <h1 className="mt-3 text-4xl text-center font-semibold text-contrast md:text-5xl">
