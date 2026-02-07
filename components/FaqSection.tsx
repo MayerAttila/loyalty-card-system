@@ -63,7 +63,6 @@ const FaqSection = () => {
               start: "top 85%",
               end: "bottom 15%",
               toggleActions: "play reverse play reverse",
-              markers: true,
             },
           }
         );
