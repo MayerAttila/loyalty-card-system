@@ -56,7 +56,7 @@ const FeaturesPanel = () => {
               end: "bottom 15%",
               toggleActions: "play reverse play reverse",
             },
-          }
+          },
         );
       });
     }, sectionRef);
@@ -73,7 +73,7 @@ const FeaturesPanel = () => {
               <div
                 key={feature.title}
                 data-feature-item
-                className="rounded-xl border border-accent-2 bg-primary/10 p-4"
+                className="rounded-xl border border-accent-2 bg-accent-1/20 p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="space-y-1">

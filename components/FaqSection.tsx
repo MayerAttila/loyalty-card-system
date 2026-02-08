@@ -64,7 +64,7 @@ const FaqSection = () => {
               end: "bottom 20%",
               toggleActions: "play reverse play reverse",
             },
-          }
+          },
         );
       }
 
@@ -85,7 +85,7 @@ const FaqSection = () => {
               end: "bottom 15%",
               toggleActions: "play reverse play reverse",
             },
-          }
+          },
         );
       });
     }, sectionRef);
@@ -114,7 +114,7 @@ const FaqSection = () => {
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
                 data-faq-item
-                className="w-full rounded-2xl border border-accent-3/60 bg-primary/25 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)] backdrop-blur-md"
+                className="w-full rounded-2xl border border-accent-2 bg-accent-1/20 px-6 py-4 text-left shadow-[0_12px_30px_-22px_rgba(0,0,0,0.6)] backdrop-blur-md"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-lg font-semibold text-contrast">
