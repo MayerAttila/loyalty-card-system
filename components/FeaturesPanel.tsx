@@ -3,6 +3,11 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import dynamic from "next/dynamic";
+
+const PhoneCanvas = dynamic(() => import("@/components/PhoneCanvas"), {
+  ssr: false,
+});
 
 const FeaturesPanel = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -90,14 +95,8 @@ const FeaturesPanel = () => {
           </div>
         </div>
 
-        <div className="hidden md:block md:h-full">
-          <div className="flex h-full items-start">
-            <img
-              src="/what-you-get.png"
-              alt="Loyalty card preview"
-              className="h-full w-full object-contain object-top"
-            />
-          </div>
+        <div className="hidden md:block md:w-1/2 md:self-start md:sticky md:top-24">
+          <PhoneCanvas className="h-[640px] w-full" screenUrl="/phone-screen.png" />
         </div>
       </div>
     </section>
