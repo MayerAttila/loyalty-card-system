@@ -47,6 +47,27 @@ const FaqSection = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+      const titleEls = gsap.utils.toArray<HTMLElement>("[data-faq-title]");
+      if (titleEls.length) {
+        gsap.fromTo(
+          titleEls,
+          { opacity: 0, y: 10 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power2.out",
+            stagger: 0.06,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play reverse play reverse",
+            },
+          }
+        );
+      }
+
       const items = gsap.utils.toArray<HTMLElement>("[data-faq-item]");
       items.forEach((item, index) => {
         gsap.fromTo(
@@ -76,10 +97,10 @@ const FaqSection = () => {
     <section className="mt-16">
       <div ref={sectionRef} className="glass-card p-8">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-contrast">
+          <h2 data-faq-title className="text-2xl font-semibold text-contrast">
             Frequently Asked Questions
           </h2>
-          <p className="mt-2 text-sm text-contrast/70">
+          <p data-faq-title className="mt-2 text-sm text-contrast/70">
             Still have questions? Reach out and we will help.
           </p>
         </div>

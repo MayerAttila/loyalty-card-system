@@ -81,6 +81,29 @@ const HowItWorks = () => {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      const titleEls = gsap.utils.toArray<HTMLElement>(
+        "[data-howitworks-title]",
+      );
+      if (titleEls.length) {
+        gsap.fromTo(
+          titleEls,
+          { opacity: 0, y: 10 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power2.out",
+            stagger: 0.06,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play reverse play reverse",
+            },
+          },
+        );
+      }
+
       const stepEls = gsap.utils.toArray<HTMLElement>("[data-howitworks-step]");
 
       stepEls.forEach((stepEl) => {
@@ -161,8 +184,13 @@ const HowItWorks = () => {
     <section className="mt-16">
       <div ref={sectionRef} className="glass-card p-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-2xl font-semibold text-contrast">How it works</h2>
-          <p className="mt-2 text-sm text-contrast/80">
+          <h2
+            data-howitworks-title
+            className="text-2xl font-semibold text-contrast"
+          >
+            How it works
+          </h2>
+          <p data-howitworks-title className="mt-2 text-sm text-contrast/80">
             A simple flow your team and customers can follow in minutes.
           </p>
         </div>
