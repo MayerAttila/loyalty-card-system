@@ -3,11 +3,13 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Button from "@/components/Button";
 import SubscriptionCard from "@/components/SubscriptionCard";
 
 const PricingTeaser = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -76,6 +78,7 @@ const PricingTeaser = () => {
       <div className="grid gap-6 md:grid-cols-3">
         <div data-pricing-card>
           <SubscriptionCard
+            variant="glassy"
             title="Free trial"
             price="30 days"
             interval="no card required"
@@ -88,17 +91,15 @@ const PricingTeaser = () => {
               "Google Wallet cards",
             ]}
             action={
-              <Link
-                className="block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
-                href="/register"
-              >
+              <Button className="w-full" onClick={() => router.push("/register")}>
                 Start free trial
-              </Link>
+              </Button>
             }
           />
         </div>
         <div data-pricing-card>
           <SubscriptionCard
+            variant="glassy"
             title="Monthly"
             price="EUR 7.99"
             interval="per month"
@@ -112,17 +113,15 @@ const PricingTeaser = () => {
               "Customer notifications (Coming soon)",
             ]}
             action={
-              <Link
-                className="block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
-                href="/register"
-              >
+              <Button className="w-full" onClick={() => router.push("/register")}>
                 Subscribe monthly
-              </Link>
+              </Button>
             }
           />
         </div>
         <div data-pricing-card>
           <SubscriptionCard
+            variant="glassy"
             title="Annual"
             price="EUR 79.99"
             interval="per year"
@@ -139,12 +138,9 @@ const PricingTeaser = () => {
             badge="Best value"
             highlighted
             action={
-              <Link
-                className="block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-primary"
-                href="/register"
-              >
+              <Button className="w-full" onClick={() => router.push("/register")}>
                 Subscribe annually
-              </Link>
+              </Button>
             }
           />
         </div>

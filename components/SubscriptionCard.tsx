@@ -9,6 +9,7 @@ type SubscriptionCardProps = {
   action: React.ReactNode;
   badge?: string;
   highlighted?: boolean;
+  variant?: "solid" | "glassy";
 };
 
 const SubscriptionCard = ({
@@ -20,14 +21,25 @@ const SubscriptionCard = ({
   action,
   badge,
   highlighted = false,
+  variant = "solid",
 }: SubscriptionCardProps) => {
+  const base =
+    "relative flex h-full flex-col overflow-hidden rounded-2xl border px-6 py-7";
+  const glassBase = "bg-primary/15 backdrop-blur-md";
+
+  const nonHighlighted =
+    variant === "glassy"
+      ? `border-accent-3/60 ${glassBase} shadow-[0_18px_40px_-30px_rgba(0,0,0,0.65)]`
+      : "border-accent-3 bg-accent-1";
+
+  const highlightedStyle =
+    variant === "glassy"
+      ? `border-brand/60 bg-gradient-to-br from-accent-1/25 via-primary/10 to-primary/20 backdrop-blur-md shadow-[0_18px_40px_-28px_rgba(0,0,0,0.7)]`
+      : "border-brand/60 bg-gradient-to-br from-accent-1 via-accent-1/80 to-primary/70 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.7)]";
+
   return (
     <section
-      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border px-6 py-7 ${
-        highlighted
-          ? "border-brand/60 bg-gradient-to-br from-accent-1 via-accent-1/80 to-primary/70 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.7)]"
-          : "border-accent-3 bg-accent-1"
-      }`}
+      className={`${base} ${highlighted ? highlightedStyle : nonHighlighted}`}
     >
       {badge ? (
         <span className="absolute right-5 top-5 rounded-full bg-brand/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand">
