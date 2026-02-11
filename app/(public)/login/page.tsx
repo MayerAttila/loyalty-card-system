@@ -89,7 +89,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-primary text-contrast">
+    <main className="min-h-screen bg-transparent text-contrast">
       <section className="mx-auto max-w-5xl px-6 py-16">
         <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">
@@ -102,7 +102,7 @@ const LoginPage = () => {
           </p>
         </header>
 
-        <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+        <div className="glass-card p-6">
           <h2 className="text-lg font-semibold">Access your account</h2>
           <p className="mt-2 text-sm text-contrast/80">
             Use your email and password to continue.
@@ -112,6 +112,7 @@ const LoginPage = () => {
               id="email"
               type="email"
               placeholder="Email address"
+              variant="glassy"
               errorText={errors.email}
               onChange={() => clearFieldError("email")}
             />
@@ -119,6 +120,7 @@ const LoginPage = () => {
               id="password"
               type="password"
               placeholder="Password"
+              variant="glassy"
               errorText={errors.password}
               onChange={() => clearFieldError("password")}
             />

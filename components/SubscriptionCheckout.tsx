@@ -11,7 +11,9 @@ import {
 } from "@stripe/react-stripe-js";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import { createSubscriptionIntentAction } from "@/lib/subscription/actions";
+import { getSubscriptionPlanCatalog } from "@/lib/subscription/planCatalog";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
@@ -20,13 +22,7 @@ const stripePromise = loadStripe(
 const MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? "";
 const ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL ?? "";
 
-const CheckoutForm = ({
-  clientSecret,
-  returnUrl,
-}: {
-  clientSecret: string;
-  returnUrl: string;
-}) => {
+const CheckoutForm = ({ returnUrl }: { returnUrl: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
@@ -35,6 +31,7 @@ const CheckoutForm = ({
     event.preventDefault();
     if (!stripe || !elements) return;
     setSubmitting(true);
+
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -45,7 +42,6 @@ const CheckoutForm = ({
     if (error) {
       toast.error(error.message ?? "Payment failed.");
       setSubmitting(false);
-      return;
     }
   };
 
@@ -71,6 +67,7 @@ const SubscriptionCheckout = ({
   showPlanSelector?: boolean;
 }) => {
   const params = useParams<{ businessSlug?: string }>();
+  const plans = getSubscriptionPlanCatalog(30);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">(plan);
@@ -89,6 +86,7 @@ const SubscriptionCheckout = ({
       toast.error("Missing Stripe price configuration.");
       return;
     }
+
     setLoading(true);
     try {
       const data = await createSubscriptionIntentAction({
@@ -115,7 +113,7 @@ const SubscriptionCheckout = ({
   }, [priceId]);
 
   return (
-    <section className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+    <section className="glass-card p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-brand">Checkout</h2>
@@ -132,46 +130,62 @@ const SubscriptionCheckout = ({
               type="button"
               variant="neutral"
               onClick={() => {
-              if (onClose) {
-                onClose();
-                return;
-              }
-              if (!params?.businessSlug) return;
-              window.location.href = `/${params.businessSlug}/subscription`;
-            }}
-          >
-            Back to subscription
-          </Button>
-        ) : null}
-      </div>
+                if (onClose) {
+                  onClose();
+                  return;
+                }
+                if (!params?.businessSlug) return;
+                window.location.href = `/${params.businessSlug}/subscription`;
+              }}
+            >
+              Back to subscription
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {showPlanSelector ? (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setSelectedPlan("monthly")}
-            className={`rounded-lg border p-4 text-left ${
-              selectedPlan === "monthly"
-                ? "border-brand bg-primary/60"
-                : "border-accent-3 bg-primary/30"
-            }`}
-          >
-            <p className="text-sm font-semibold text-contrast">Monthly</p>
-            <p className="mt-2 text-xs text-contrast/70">€7.99 per month</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedPlan("annual")}
-            className={`rounded-lg border p-4 text-left ${
-              selectedPlan === "annual"
-                ? "border-brand bg-primary/60"
-                : "border-accent-3 bg-primary/30"
-            }`}
-          >
-            <p className="text-sm font-semibold text-contrast">Annual</p>
-            <p className="mt-2 text-xs text-contrast/70">€79.99 per year</p>
-          </button>
+          <SubscriptionCard
+            variant="glassy"
+            title={plans.monthly.title}
+            price={plans.monthly.price}
+            interval={plans.monthly.interval}
+            description={plans.monthly.description}
+            features={plans.monthly.features}
+            highlighted={selectedPlan === "monthly"}
+            action={
+              <Button
+                type="button"
+                onClick={() => setSelectedPlan("monthly")}
+                variant={selectedPlan === "monthly" ? "brand" : "neutral"}
+                className="w-full"
+              >
+                {selectedPlan === "monthly" ? "Selected" : "Choose monthly"}
+              </Button>
+            }
+          />
+
+          <SubscriptionCard
+            variant="glassy"
+            title={plans.annual.title}
+            price={plans.annual.price}
+            interval={plans.annual.interval}
+            description={plans.annual.description}
+            features={plans.annual.features}
+            badge={plans.annual.badge}
+            highlighted={selectedPlan === "annual"}
+            action={
+              <Button
+                type="button"
+                onClick={() => setSelectedPlan("annual")}
+                variant={selectedPlan === "annual" ? "brand" : "neutral"}
+                className="w-full"
+              >
+                {selectedPlan === "annual" ? "Selected" : "Choose annual"}
+              </Button>
+            }
+          />
         </div>
       ) : null}
 
@@ -223,7 +237,7 @@ const SubscriptionCheckout = ({
             },
           }}
         >
-          <CheckoutForm clientSecret={clientSecret} returnUrl={returnUrl} />
+          <CheckoutForm returnUrl={returnUrl} />
         </Elements>
       ) : null}
     </section>

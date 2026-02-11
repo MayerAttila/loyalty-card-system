@@ -2,6 +2,7 @@ import React from "react";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import Button from "@/components/Button";
 import type { SubscriptionStatus } from "@/types/subscription";
+import { getSubscriptionPlanCatalog } from "@/lib/subscription/planCatalog";
 
 type SubscriptionTiersProps = {
   trialDays: number;
@@ -29,19 +30,17 @@ const SubscriptionTiers = ({
   onSubscribeAnnual,
 }: SubscriptionTiersProps) => {
   const isPaidActive = status?.status === "active" || status?.status === "trialing";
+  const plans = getSubscriptionPlanCatalog(trialDays);
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <SubscriptionCard
-        title="Free trial"
-        price={`${trialDays} days`}
-        interval="no card required"
-        description="Try the full product before adding payment details."
-        features={[
-          "Full access during trial",
-          "No payment required",
-          "Cancel anytime",
-        ]}
+        variant="glassy"
+        title={plans.trial.title}
+        price={plans.trial.price}
+        interval={plans.trial.interval}
+        description={plans.trial.description}
+        features={plans.trial.features}
         badge={status?.status === "trial" ? "Active trial" : undefined}
         highlighted={selectedPlan === "trial"}
         action={
@@ -50,22 +49,18 @@ const SubscriptionTiers = ({
             onClick={onStartTrial}
             disabled={actionLoading || status?.status === "trial"}
           >
-            {status?.status === "trial"
-              ? "Trial active"
-              : "Start free trial"}
+            {status?.status === "trial" ? "Trial active" : "Start free trial"}
           </Button>
         }
       />
+
       <SubscriptionCard
-        title="Monthly"
-        price="€7.99"
-        interval="per month"
-        description="Flexible monthly plan for smaller teams."
-        features={[
-          "Cancel anytime",
-          "All core loyalty features",
-          "Email support",
-        ]}
+        variant="glassy"
+        title={plans.monthly.title}
+        price={plans.monthly.price}
+        interval={plans.monthly.interval}
+        description={plans.monthly.description}
+        features={plans.monthly.features}
         badge={
           status?.stripePriceId === monthlyPriceId && isPaidActive
             ? "Current plan"
@@ -87,21 +82,19 @@ const SubscriptionTiers = ({
           </Button>
         }
       />
+
       <SubscriptionCard
-        title="Annual"
-        price="€79.99"
-        interval="per year"
-        description="Save with annual subscription for growing teams."
-        features={[
-          "2 months free vs monthly",
-          "Priority support",
-          "All core loyalty features",
-        ]}
+        variant="glassy"
+        title={plans.annual.title}
+        price={plans.annual.price}
+        interval={plans.annual.interval}
+        description={plans.annual.description}
+        features={plans.annual.features}
         highlighted={selectedPlan === "annual"}
         badge={
           status?.stripePriceId === annualPriceId && isPaidActive
             ? "Current plan"
-            : "Best value"
+            : plans.annual.badge
         }
         action={
           <Button

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import BusinessRegistrationForm from "./BusinessRegistrationForm";
 import Stepper from "@/components/Stepper";
-import Button from "@/components/Button";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
 import SubscriptionCheckout from "@/components/SubscriptionCheckout";
 import { startTrialNoCard } from "@/api/client/subscription.api";
@@ -35,7 +34,7 @@ const RegisterPage = () => {
   const [businessSlug, setBusinessSlug] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<"monthly" | "annual" | null>(
-    null
+    null,
   );
 
   const requestStep = (next: number) => {
@@ -46,7 +45,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-primary text-contrast">
+    <main className="min-h-screen bg-transparent text-contrast">
       <section className="mx-auto max-w-5xl px-6 py-16">
         <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">
@@ -60,7 +59,7 @@ const RegisterPage = () => {
             invite employees later.
           </p>
         </header>
-        <div className="mb-8">
+        <div className="mb-8 ">
           <Stepper
             steps={steps}
             activeStep={activeStep}
@@ -82,13 +81,6 @@ const RegisterPage = () => {
           />
         ) : (
           <div className="space-y-6">
-            <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
-              <h2 className="text-lg font-semibold">Choose a plan</h2>
-              <p className="mt-2 text-sm text-contrast/80">
-                You can start with a free trial or pick a paid plan now.
-              </p>
-            </div>
-
             <SubscriptionTiers
               trialDays={30}
               actionLoading={actionLoading}

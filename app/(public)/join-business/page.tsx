@@ -4,7 +4,7 @@ import EmployeeRegistrationForm from "../register/EmployeeRegistrationForm";
 
 const JoinBusinessPage = () => {
   return (
-    <main className="min-h-screen bg-primary text-contrast">
+    <main className="min-h-screen bg-transparent text-contrast">
       <section className="mx-auto max-w-5xl px-6 py-16">
         <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">

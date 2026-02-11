@@ -147,7 +147,7 @@ const EmployeeRegistrationForm = () => {
   };
 
   return (
-    <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+    <div className="glass-card p-6">
       <h2 className="text-lg font-semibold">Register as Employee</h2>
       <p className="mt-2 text-sm text-contrast/80">
         Join an existing business and start managing customer rewards.
@@ -157,6 +157,7 @@ const EmployeeRegistrationForm = () => {
           id="employeeName"
           type="name"
           placeholder="Full name"
+          variant="glassy"
           errorText={errors.employeeName}
           onChange={() => clearFieldError("employeeName")}
         />
@@ -164,6 +165,7 @@ const EmployeeRegistrationForm = () => {
           id="employeeEmail"
           type="email"
           placeholder="Work email"
+          variant="glassy"
           errorText={errors.employeeEmail}
           onChange={() => clearFieldError("employeeEmail")}
         />
@@ -177,6 +179,7 @@ const EmployeeRegistrationForm = () => {
             id="employeePassword"
             type="password"
             placeholder="Create password"
+            variant="glassy"
             errorText={errors.employeePassword}
             onChange={() => clearFieldError("employeePassword")}
           />
@@ -186,6 +189,7 @@ const EmployeeRegistrationForm = () => {
             id="employeePasswordConfirm"
             type="password"
             placeholder="Confirm password"
+            variant="glassy"
             errorText={errors.employeePasswordConfirm}
             onChange={() => clearFieldError("employeePasswordConfirm")}
           />

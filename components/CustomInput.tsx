@@ -39,6 +39,7 @@ type CustomInputProps = {
   errorText?: string;
   autoComplete?: string;
   className?: string;
+  variant?: "default" | "glassy";
 };
 
 const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
@@ -57,6 +58,7 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
       errorText,
       autoComplete,
       className,
+      variant = "default",
     },
     ref
   ) => {
@@ -136,6 +138,10 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
     const errorId = errorText ? `${id}-error` : undefined;
     const describedBy =
       [helperId, errorId].filter(Boolean).join(" ") || undefined;
+    const containerClass =
+      variant === "glassy"
+        ? "flex items-center gap-3 rounded-lg border border-accent-3/70 bg-primary/20 px-4 py-3 text-contrast backdrop-blur-md focus-within:border-brand"
+        : "flex items-center gap-3 rounded-lg border border-accent-3 bg-primary px-4 py-3 text-contrast focus-within:border-brand";
 
     return (
       <div className={`block ${className ?? ""}`}>
@@ -147,7 +153,7 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             {label}
           </label>
         ) : null}
-        <div className="flex items-center gap-3 rounded-lg border border-accent-3 bg-primary px-4 py-3 text-contrast focus-within:border-brand">
+        <div className={containerClass}>
           {Icon ? <Icon className="text-lg text-contrast/70" /> : null}
           <input
             ref={ref}

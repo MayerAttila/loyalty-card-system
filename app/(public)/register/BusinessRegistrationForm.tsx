@@ -150,7 +150,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
   };
 
   return (
-    <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+    <div className="glass-card p-6">
       <h2 className="text-lg font-semibold">Register a Business</h2>
       <p className="mt-2 text-sm text-contrast/80">
         Set up your business profile, rewards, and team access.
@@ -160,6 +160,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
           id="businessName"
           type="business"
           placeholder="Business name"
+          variant="glassy"
           errorText={errors.businessName}
           onChange={() => clearFieldError("businessName")}
         />
@@ -167,6 +168,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
           id="ownerName"
           type="name"
           placeholder="Owner full name"
+          variant="glassy"
           errorText={errors.ownerName}
           onChange={() => clearFieldError("ownerName")}
         />
@@ -174,6 +176,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
           id="ownerEmail"
           type="email"
           placeholder="Owner email"
+          variant="glassy"
           errorText={errors.ownerEmail}
           onChange={() => clearFieldError("ownerEmail")}
           className="md:col-span-2"
@@ -183,6 +186,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
             id="ownerPassword"
             type="password"
             placeholder="Create owner password"
+            variant="glassy"
             errorText={errors.ownerPassword}
             onChange={() => clearFieldError("ownerPassword")}
           />
@@ -192,6 +196,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
             id="ownerPasswordConfirm"
             type="password"
             placeholder="Confirm owner password"
+            variant="glassy"
             errorText={errors.ownerPasswordConfirm}
             onChange={() => clearFieldError("ownerPasswordConfirm")}
           />

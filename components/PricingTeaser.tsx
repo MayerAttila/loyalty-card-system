@@ -6,10 +6,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import SubscriptionCard from "@/components/SubscriptionCard";
+import { getSubscriptionPlanCatalog } from "@/lib/subscription/planCatalog";
 
 const PricingTeaser = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
+  const plans = getSubscriptionPlanCatalog(30);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -79,17 +81,11 @@ const PricingTeaser = () => {
         <div data-pricing-card>
           <SubscriptionCard
             variant="glassy"
-            title="Free trial"
-            price="30 days"
-            interval="no card required"
-            description="Try the full product before adding payment details."
-            features={[
-              "Full access during trial",
-              "Custom card branding",
-              "Staff invitations",
-              "Stamping history logs",
-              "Google Wallet cards",
-            ]}
+            title={plans.trial.title}
+            price={plans.trial.price}
+            interval={plans.trial.interval}
+            description={plans.trial.description}
+            features={plans.trial.features}
             action={
               <Button className="w-full" onClick={() => router.push("/register")}>
                 Start free trial
@@ -100,18 +96,11 @@ const PricingTeaser = () => {
         <div data-pricing-card>
           <SubscriptionCard
             variant="glassy"
-            title="Monthly"
-            price="EUR 7.99"
-            interval="per month"
-            description="Flexible monthly plan for smaller teams."
-            features={[
-              "Custom card branding",
-              "Staff invitations",
-              "Stamping history logs",
-              "Google Wallet cards",
-              "Apple Wallet (Coming soon)",
-              "Customer notifications (Coming soon)",
-            ]}
+            title={plans.monthly.title}
+            price={plans.monthly.price}
+            interval={plans.monthly.interval}
+            description={plans.monthly.description}
+            features={plans.monthly.features}
             action={
               <Button className="w-full" onClick={() => router.push("/register")}>
                 Subscribe monthly
@@ -122,20 +111,12 @@ const PricingTeaser = () => {
         <div data-pricing-card>
           <SubscriptionCard
             variant="glassy"
-            title="Annual"
-            price="EUR 79.99"
-            interval="per year"
-            description="Save with annual subscription for growing teams."
-            features={[
-              "Custom card branding",
-              "Staff invitations",
-              "Stamping history logs",
-              "Google Wallet cards",
-              "Apple Wallet (Coming soon)",
-              "Customer notifications (Coming soon)",
-              "2 months free vs monthly",
-            ]}
-            badge="Best value"
+            title={plans.annual.title}
+            price={plans.annual.price}
+            interval={plans.annual.interval}
+            description={plans.annual.description}
+            features={plans.annual.features}
+            badge={plans.annual.badge}
             highlighted
             action={
               <Button className="w-full" onClick={() => router.push("/register")}>
