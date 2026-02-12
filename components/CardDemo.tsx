@@ -111,6 +111,7 @@ const CardDemo = () => {
               trigger: sectionRef.current,
               start: "top 80%",
               end: "bottom 20%",
+              markers: true,
               toggleActions: "play none none none",
             },
           }
@@ -208,6 +209,7 @@ const CardDemo = () => {
           },
           pin: sectionRef.current,
           scrub: true,
+          markers: true,
           ...(demos.length > 1
             ? {
                 snap: {
@@ -251,6 +253,7 @@ const CardDemo = () => {
             scrub: true,
             pin: wrapper,
             pinSpacing: false,
+            markers: true,
             invalidateOnRefresh: true,
           },
         });
@@ -357,12 +360,6 @@ const CardDemo = () => {
                   emptyStampSrc={demo.emptyStampSrc}
                   useStampImages
                 />
-              </div>
-              <div className="mx-auto mt-4 max-w-sm text-center">
-                <h3 className="text-lg font-semibold text-contrast">
-                  {demo.captionTitle}
-                </h3>
-                <p className="mt-2 text-sm text-contrast/75">{demo.captionBody}</p>
               </div>
             </div>
           </div>
