@@ -10,6 +10,27 @@ import { useSearchParams } from "next/navigation";
 import { getSession, signIn } from "@/api/client/auth.api";
 import { toBusinessSlug } from "@/lib/slug";
 
+const PASSWORD_REQUIREMENTS_TEXT =
+  "Password must be at least 8 characters and include one uppercase letter and one number.";
+const getPasswordRuleError = (password: string) => {
+  const failures: string[] = [];
+  if (password.length < 8) {
+    failures.push("be at least 8 characters");
+  }
+  if (!/[A-Z]/.test(password)) {
+    failures.push("include one uppercase letter");
+  }
+  if (!/\d/.test(password)) {
+    failures.push("include one number");
+  }
+  if (!failures.length) return null;
+  if (failures.length === 1) return `Password must ${failures[0]}.`;
+  if (failures.length === 2) {
+    return `Password must ${failures[0]} and ${failures[1]}.`;
+  }
+  return `Password must ${failures[0]}, ${failures[1]}, and ${failures[2]}.`;
+};
+
 const EmployeeRegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -72,6 +93,11 @@ const EmployeeRegistrationForm = () => {
     }
     if (!employeePassword) {
       nextErrors.employeePassword = "Password is required.";
+    } else {
+      const passwordRuleError = getPasswordRuleError(employeePassword);
+      if (passwordRuleError) {
+        nextErrors.employeePassword = passwordRuleError;
+      }
     }
     if (!employeePasswordConfirm) {
       nextErrors.employeePasswordConfirm = "Confirm the password.";
@@ -79,7 +105,8 @@ const EmployeeRegistrationForm = () => {
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      toast.error("Please fill in the required fields.");
+      const firstError = Object.values(nextErrors)[0];
+      toast.error(firstError ?? "Please fix the highlighted fields.");
       return;
     }
 
@@ -131,7 +158,7 @@ const EmployeeRegistrationForm = () => {
       }
     } catch (error) {
       console.error("createUser failed", error);
-      const message =
+      const maybeMessage =
         typeof error === "object" &&
         error !== null &&
         "response" in error &&
@@ -139,7 +166,17 @@ const EmployeeRegistrationForm = () => {
           ?.message
           ? (error as { response?: { data?: { message?: string } } }).response
               ?.data?.message
+          : undefined;
+      const message =
+        typeof maybeMessage === "string" && maybeMessage.trim()
+          ? maybeMessage
           : "Unable to create employee account.";
+      if (message.toLowerCase().includes("password")) {
+        setErrors((prev) => ({
+          ...prev,
+          employeePassword: message,
+        }));
+      }
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -180,6 +217,7 @@ const EmployeeRegistrationForm = () => {
             type="password"
             placeholder="Create password"
             variant="glassy"
+            helperText={PASSWORD_REQUIREMENTS_TEXT}
             errorText={errors.employeePassword}
             onChange={() => clearFieldError("employeePassword")}
           />

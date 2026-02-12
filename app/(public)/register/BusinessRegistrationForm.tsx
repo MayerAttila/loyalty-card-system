@@ -11,11 +11,34 @@ import { getSession, signIn } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
 
+const PASSWORD_REQUIREMENTS_TEXT =
+  "Password must be at least 8 characters and include one uppercase letter and one number.";
+const getPasswordRuleError = (password: string) => {
+  const failures: string[] = [];
+  if (password.length < 8) {
+    failures.push("be at least 8 characters");
+  }
+  if (!/[A-Z]/.test(password)) {
+    failures.push("include one uppercase letter");
+  }
+  if (!/\d/.test(password)) {
+    failures.push("include one number");
+  }
+  if (!failures.length) return null;
+  if (failures.length === 1) return `Password must ${failures[0]}.`;
+  if (failures.length === 2) {
+    return `Password must ${failures[0]} and ${failures[1]}.`;
+  }
+  return `Password must ${failures[0]}, ${failures[1]}, and ${failures[2]}.`;
+};
+
 type BusinessRegistrationFormProps = {
   onRegistered?: (businessSlug: string | null) => void;
 };
 
-const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProps) => {
+const BusinessRegistrationForm = ({
+  onRegistered,
+}: BusinessRegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const router = useRouter();
@@ -56,7 +79,7 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
     const formData = new FormData(event.currentTarget);
     const ownerPassword = String(formData.get("ownerPassword") ?? "");
     const ownerPasswordConfirm = String(
-      formData.get("ownerPasswordConfirm") ?? ""
+      formData.get("ownerPasswordConfirm") ?? "",
     );
 
     const nextErrors: Partial<Record<string, string>> = {};
@@ -75,6 +98,11 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
     }
     if (!ownerPassword) {
       nextErrors.ownerPassword = "Owner password is required.";
+    } else {
+      const passwordRuleError = getPasswordRuleError(ownerPassword);
+      if (passwordRuleError) {
+        nextErrors.ownerPassword = passwordRuleError;
+      }
     }
     if (!ownerPasswordConfirm) {
       nextErrors.ownerPasswordConfirm = "Confirm the owner password.";
@@ -82,7 +110,8 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      toast.error("Please fill in the required fields.");
+      const firstError = Object.values(nextErrors)[0];
+      toast.error(firstError ?? "Please fix the highlighted fields.");
       return;
     }
 
@@ -143,7 +172,26 @@ const BusinessRegistrationForm = ({ onRegistered }: BusinessRegistrationFormProp
       }
     } catch (error) {
       console.error("createBusiness failed", error);
-      toast.error("Unable to create business account.");
+      const maybeMessage =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : undefined;
+      const message =
+        typeof maybeMessage === "string" && maybeMessage.trim()
+          ? maybeMessage
+          : "Unable to create business account.";
+      if (message.toLowerCase().includes("password")) {
+        setErrors((prev) => ({
+          ...prev,
+          ownerPassword: message,
+        }));
+      }
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
