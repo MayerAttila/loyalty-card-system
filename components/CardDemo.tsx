@@ -11,6 +11,7 @@ const CardDemo = () => {
   const desktopPinRef = useRef<HTMLDivElement | null>(null);
   const desktopStageRef = useRef<HTMLDivElement | null>(null);
   const desktopCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const desktopPrevRelativeRef = useRef<number[]>([]);
   const captionTitleRef = useRef<HTMLHeadingElement | null>(null);
   const captionBodyRef = useRef<HTMLParagraphElement | null>(null);
   const captionIndexRef = useRef(0);
@@ -162,7 +163,7 @@ const CardDemo = () => {
           const normalized = Math.min(1, distance / 420);
           const scale = 1 - normalized * 0.16;
           const zIndex = 1000 - Math.round(normalized * 1000);
-          gsap.set(cardEl, { scale, zIndex, opacity: 1, force3D: true });
+          gsap.set(cardEl, { scale, zIndex, force3D: true });
         });
       };
 
@@ -185,12 +186,44 @@ const CardDemo = () => {
           const x = relative * overlapStep;
           const scale = Math.max(0.8, 1 - distance * 0.08);
           const zIndex = 1000 - Math.round(distance * 100);
-          gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
+          const prevRelative = desktopPrevRelativeRef.current[cardIndex];
+          const wrappedJump =
+            prevRelative !== undefined && Math.abs(relative - prevRelative) > half;
+
+          if (wrappedJump) {
+            // Smooth the side switch: card exits one edge then re-enters from the opposite edge.
+            const movingLeftToRight = prevRelative < 0 && relative > 0;
+            const offscreenX = movingLeftToRight
+              ? -(half + 0.65) * overlapStep
+              : (half + 0.65) * overlapStep;
+
+            gsap.killTweensOf(cardEl);
+            gsap.set(cardEl, {
+              x: offscreenX,
+              scale,
+              zIndex,
+              opacity: 0,
+              force3D: true,
+            });
+            gsap.to(cardEl, {
+              x,
+              opacity: 1,
+              duration: 0.24,
+              ease: "power2.out",
+              overwrite: "auto",
+              force3D: true,
+            });
+          } else {
+            gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
+          }
+
+          desktopPrevRelativeRef.current[cardIndex] = relative;
         });
 
         applyDepth();
       };
 
+      desktopPrevRelativeRef.current = [];
       renderStack(0);
 
       gsap.to(state, {
