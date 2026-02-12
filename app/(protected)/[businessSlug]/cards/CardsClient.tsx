@@ -11,6 +11,7 @@ import {
 } from "@/api/client/cardTemplate.api";
 import Button from "@/components/Button";
 import ActiveButton from "@/components/ActiveButton";
+import HelpCard from "@/components/HelpCard";
 
 type CardsClientProps = {
   initialTemplates: CardTemplate[];
@@ -135,32 +136,24 @@ const CardsClient = ({
   return (
     <div className="space-y-6">
       {!hasTemplates ? (
-        <section className="rounded-xl border border-accent-3 bg-primary/60 p-5">
-          <h3 className="text-lg font-semibold text-brand">
-            Create your first loyalty card
-          </h3>
-          <p className="mt-2 text-sm text-contrast/80">
-            Upload a logo and stamps in the Business tab, then create a template
-            here to start issuing cards.
-          </p>
-          <div className="mt-4">
+        <HelpCard
+          title="Create your first loyalty card"
+          description="Logo upload is required before creating cards. Upload your business logo in the Business tab, then create and activate a template here."
+        >
+          <div>
             <Button type="button" onClick={startCreate}>
               Create template
             </Button>
           </div>
-        </section>
+        </HelpCard>
       ) : (
         <>
           {!hasActiveTemplate ? (
-            <section className="rounded-xl border border-accent-3 bg-primary/60 p-5">
-              <h3 className="text-lg font-semibold text-brand">
-                No active template yet
-              </h3>
-              <p className="mt-2 text-sm text-contrast/80">
-                Activate one of your templates so new customers receive a card
-                automatically.
-              </p>
-              <div className="mt-3 flex items-center gap-2 text-xs text-contrast/70">
+            <HelpCard
+              title="No active template yet"
+              description="Activate one of your templates so new customers receive a card automatically."
+            >
+              <div className="flex items-center gap-2 text-xs text-contrast/70">
                 <ActiveButton
                   isActive={false}
                   onActivate={() => undefined}
@@ -169,7 +162,7 @@ const CardsClient = ({
                 />
                 <span>Use this toggle to set an active template.</span>
               </div>
-            </section>
+            </HelpCard>
           ) : null}
           <CardTemplatesPanel
             initialTemplates={templates}
