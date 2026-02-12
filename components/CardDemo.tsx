@@ -7,11 +7,18 @@ import WalletCardPreview from "@/app/(protected)/[businessSlug]/cards/WalletCard
 
 const CardDemo = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const cardsStageRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const desktopPinRef = useRef<HTMLDivElement | null>(null);
+  const desktopStageRef = useRef<HTMLDivElement | null>(null);
+  const desktopCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const captionTitleRef = useRef<HTMLHeadingElement | null>(null);
   const captionBodyRef = useRef<HTMLParagraphElement | null>(null);
   const captionIndexRef = useRef(0);
+
+  const mobileListRef = useRef<HTMLDivElement | null>(null);
+  const mobileWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const demos = [
     {
       text1: "Brew House",
@@ -90,7 +97,33 @@ const CardDemo = () => {
 
     const ctx = gsap.context(() => {
       const titleEls = gsap.utils.toArray<HTMLElement>("[data-carddemo-title]");
-      const stageEl = cardsStageRef.current;
+      if (titleEls.length) {
+        gsap.fromTo(
+          titleEls,
+          { opacity: 0, y: 10 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power2.out",
+            stagger: 0.06,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
+      const stageEl = desktopStageRef.current;
+      if (!stageEl || !sectionRef.current) return;
+
       const updateCaption = (nextIndex: number) => {
         const titleEl = captionTitleRef.current;
         const bodyEl = captionBodyRef.current;
@@ -118,9 +151,10 @@ const CardDemo = () => {
           },
         });
       };
+
       const applyDepth = () => {
         const viewportCenter = window.innerWidth / 2;
-        cardRefs.current.forEach((cardEl) => {
+        desktopCardRefs.current.forEach((cardEl) => {
           if (!cardEl) return;
           const rect = cardEl.getBoundingClientRect();
           const cardCenter = rect.left + rect.width / 2;
@@ -132,84 +166,101 @@ const CardDemo = () => {
         });
       };
 
-      if (titleEls.length) {
-        gsap.fromTo(
-          titleEls,
-          { opacity: 0, y: 10 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-            ease: "power2.out",
-            stagger: 0.06,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 80%",
-              end: "bottom 20%",
-              toggleActions: "play reverse play reverse",
-            },
-          }
+      const overlapStep = 156;
+      const half = demos.length / 2;
+      const state = { index: 0 };
+      const wrapRelative = gsap.utils.wrap(-half, half);
+
+      const renderStack = (progressIndex: number) => {
+        const clampedIndex = Math.max(
+          0,
+          Math.min(demos.length - 1, Math.round(progressIndex))
         );
-      }
+        updateCaption(clampedIndex);
 
-      if (sectionRef.current && stageEl) {
-        const overlapStep = window.innerWidth < 768 ? 120 : 156;
-        const half = demos.length / 2;
-        const state = { index: 0 };
-        const wrapRelative = gsap.utils.wrap(-half, half);
+        desktopCardRefs.current.forEach((cardEl, cardIndex) => {
+          if (!cardEl) return;
+          const relative = wrapRelative(cardIndex - progressIndex) as number;
+          const distance = Math.abs(relative);
+          const x = relative * overlapStep;
+          const scale = Math.max(0.8, 1 - distance * 0.08);
+          const zIndex = 1000 - Math.round(distance * 100);
+          gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
+        });
 
-        const renderStack = (progressIndex: number) => {
-          const clampedIndex = Math.max(
-            0,
-            Math.min(demos.length - 1, Math.round(progressIndex))
-          );
-          updateCaption(clampedIndex);
-          cardRefs.current.forEach((cardEl, cardIndex) => {
-            if (!cardEl) return;
-            const relative = wrapRelative(cardIndex - progressIndex) as number;
-            const distance = Math.abs(relative);
-            const x = relative * overlapStep;
-            const scale = Math.max(0.8, 1 - distance * 0.08);
-            const zIndex = 1000 - Math.round(distance * 100);
-            gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
-          });
-          applyDepth();
-        };
+        applyDepth();
+      };
 
-        renderStack(0);
+      renderStack(0);
 
-        gsap.to(state, {
-          index: demos.length - 1,
+      gsap.to(state, {
+        index: demos.length - 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: () => {
+            const vh = window.innerHeight || 900;
+            const perStep = vh * 0.45;
+            const min = vh * 1.25;
+            const total = Math.max(min, perStep * Math.max(1, demos.length - 1));
+            return `+=${Math.round(total)}`;
+          },
+          pin: sectionRef.current,
+          scrub: true,
+          ...(demos.length > 1
+            ? {
+                snap: {
+                  snapTo: 1 / (demos.length - 1),
+                  duration: { min: 0.15, max: 0.35 },
+                  ease: "power2.out",
+                },
+              }
+            : {}),
+          invalidateOnRefresh: true,
+        },
+        onUpdate: () => renderStack(state.index),
+      });
+    });
+
+    mm.add("(max-width: 767px)", () => {
+      const listEl = mobileListRef.current;
+      const wrappers = mobileWrapperRefs.current.filter(
+        Boolean
+      ) as HTMLDivElement[];
+      const cards = mobileCardRefs.current.filter(Boolean) as HTMLDivElement[];
+      if (!listEl || !wrappers.length || !cards.length) return;
+
+      wrappers.forEach((wrapper, i) => {
+        const card = cards[i];
+        if (!card) return;
+        const isLast = i === cards.length - 1;
+        const scale = isLast ? 1 : 0.9 + 0.025 * i;
+        const rotationX = isLast ? 0 : -8;
+
+        gsap.to(card, {
+          scale,
+          rotationX,
+          transformOrigin: "top center",
           ease: "none",
           scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: () => {
-              const vh = window.innerHeight || 900;
-              const perStep = vh * 0.45;
-              const min = vh * 1.25;
-              const total = Math.max(min, perStep * Math.max(1, demos.length - 1));
-              return `+=${Math.round(total)}`;
-            },
-            pin: true,
+            trigger: wrapper,
+            start: `top ${62 + 8 * i}px`,
+            end: "bottom 500px",
+            endTrigger: listEl,
             scrub: true,
-            ...(demos.length > 1
-              ? {
-                  snap: {
-                    snapTo: 1 / (demos.length - 1),
-                    duration: { min: 0.15, max: 0.35 },
-                    ease: "power2.out",
-                  },
-                }
-              : {}),
+            pin: wrapper,
+            pinSpacing: false,
             invalidateOnRefresh: true,
           },
-          onUpdate: () => renderStack(state.index),
         });
-      }
-    }, sectionRef);
+      });
+    });
 
-    return () => ctx.revert();
+    return () => {
+      mm.revert();
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -225,22 +276,74 @@ const CardDemo = () => {
         </div>
       </div>
 
-      <div className="mt-6 w-full overflow-hidden">
+      <div ref={desktopPinRef} className="mt-6 hidden md:block">
         <div
-          ref={cardsStageRef}
-          className="relative mx-auto h-[390px] w-full max-w-[1080px]"
+          ref={desktopStageRef}
+          className="relative mx-auto h-[390px] w-full max-w-[1080px] overflow-hidden"
           data-carddemo-track
         >
-          {demos.map((demo, index) => {
-            return (
-              <div
-                key={demo.text2}
-                data-carddemo-card
-                ref={(el) => {
-                  cardRefs.current[index] = el;
-                }}
-                className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
-              >
+          {demos.map((demo, index) => (
+            <div
+              key={`desktop-${demo.text2}`}
+              data-carddemo-card
+              ref={(el) => {
+                desktopCardRefs.current[index] = el;
+              }}
+              className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
+            >
+              <WalletCardPreview
+                text1={demo.text1}
+                text2={demo.text2}
+                maxPoints={demo.maxPoints}
+                filledPoints={demo.filledPoints}
+                rewardsCollected={demo.rewardsCollected}
+                cardColor={demo.cardColor}
+                logoSrc={demo.logoSrc}
+                useLogo
+                filledStampSrc={demo.filledStampSrc}
+                emptyStampSrc={demo.emptyStampSrc}
+                useStampImages
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="mx-auto mt-8 max-w-3xl pb-8 text-center md:pb-10">
+          <h3
+            ref={captionTitleRef}
+            className="text-xl font-semibold text-contrast md:text-2xl"
+          >
+            {demos[0].captionTitle}
+          </h3>
+          <p
+            ref={captionBodyRef}
+            className="mx-auto mt-3 max-w-2xl text-sm text-contrast/75 md:text-base"
+          >
+            {demos[0].captionBody}
+          </p>
+        </div>
+      </div>
+
+      <div
+        ref={mobileListRef}
+        className="mt-6 mx-auto w-full max-w-[1080px] px-2 md:hidden"
+        data-mobile-carddemo-list
+      >
+        {demos.map((demo, index) => (
+          <div
+            key={`mobile-${demo.text2}`}
+            ref={(el) => {
+              mobileWrapperRefs.current[index] = el;
+            }}
+            className="mb-10 last:mb-0 [perspective:800px]"
+          >
+            <div
+              ref={(el) => {
+                mobileCardRefs.current[index] = el;
+              }}
+              className="will-change-transform"
+            >
+              <div className="flex justify-center">
                 <WalletCardPreview
                   text1={demo.text1}
                   text2={demo.text2}
@@ -255,24 +358,15 @@ const CardDemo = () => {
                   useStampImages
                 />
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mx-auto mt-8 max-w-3xl pb-8 text-center md:pb-10">
-        <h3
-          ref={captionTitleRef}
-          className="text-xl font-semibold text-contrast md:text-2xl"
-        >
-          {demos[0].captionTitle}
-        </h3>
-        <p
-          ref={captionBodyRef}
-          className="mx-auto mt-3 max-w-2xl text-sm text-contrast/75 md:text-base"
-        >
-          {demos[0].captionBody}
-        </p>
+              <div className="mx-auto mt-4 max-w-sm text-center">
+                <h3 className="text-lg font-semibold text-contrast">
+                  {demo.captionTitle}
+                </h3>
+                <p className="mt-2 text-sm text-contrast/75">{demo.captionBody}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
