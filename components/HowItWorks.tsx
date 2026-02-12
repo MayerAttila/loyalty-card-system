@@ -231,11 +231,11 @@ const HowItWorks = () => {
                             y2="140"
                             gradientUnits="userSpaceOnUse"
                           >
-                            <stop stopColor="#e6345a" stopOpacity="0.45" />
+                            <stop stopColor="#e6345a" stopOpacity="0.8" />
                             <stop
                               offset="1"
                               stopColor="#e6345a"
-                              stopOpacity="0.2"
+                              stopOpacity="0.6"
                             />
                           </linearGradient>
                         </defs>
