@@ -1,14 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import LoyaleLogo from "@/components/LoyaleLogo";
 import ThemeSwitch from "@/components/ThemeSwitch";
 
-const MainHeader = () => {
+const MainHeader = ({
+  logoColor = "var(--color-primary)",
+}: {
+  logoColor?: string;
+}) => {
   return (
     <div className="bg-brand">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6 text-primary">
-        <Link className="text-lg font-semibold" href="/">
-          Brand Name
+        <Link
+          className="inline-flex items-center"
+          href="/"
+          aria-label="Loyale Home"
+        >
+          <LoyaleLogo
+            color={logoColor}
+            className="h-16 w-28 md:h-20 md:w-36"
+            label="Loyale"
+          />
         </Link>
         <div className="flex items-center gap-4 text-sm font-semibold">
           <ThemeSwitch
@@ -16,10 +29,7 @@ const MainHeader = () => {
             className="rounded-lg border border-primary/40 p-2 text-primary/90 transition hover:bg-primary/10"
             iconClassName="h-4 w-4"
           />
-          <Link
-            className="text-primary/80 hover:text-primary"
-            href="/register"
-          >
+          <Link className="text-primary/80 hover:text-primary" href="/register">
             Register
           </Link>
           <Link
