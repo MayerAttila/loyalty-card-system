@@ -111,7 +111,6 @@ const CardDemo = () => {
               trigger: sectionRef.current,
               start: "top 80%",
               end: "bottom 20%",
-              markers: true,
               toggleActions: "play none none none",
             },
           }
@@ -209,7 +208,6 @@ const CardDemo = () => {
           },
           pin: sectionRef.current,
           scrub: true,
-          markers: true,
           ...(demos.length > 1
             ? {
                 snap: {
@@ -253,7 +251,6 @@ const CardDemo = () => {
             scrub: true,
             pin: wrapper,
             pinSpacing: false,
-            markers: true,
             invalidateOnRefresh: true,
           },
         });
