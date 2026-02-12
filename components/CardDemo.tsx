@@ -246,8 +246,14 @@ const CardDemo = () => {
           scrollTrigger: {
             trigger: wrapper,
             start: `top ${62 + 8 * i}px`,
-            end: "bottom 500px",
-            endTrigger: listEl,
+            ...(isLast
+              ? {
+                  end: () => `+=${Math.round((window.innerHeight || 800) * 0.45)}`,
+                }
+              : {
+                  end: "bottom 500px",
+                  endTrigger: listEl,
+                }),
             scrub: true,
             pin: wrapper,
             pinSpacing: false,
