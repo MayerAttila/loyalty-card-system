@@ -304,8 +304,8 @@ const CardDemo = () => {
 
   return (
     <section ref={sectionRef} className="mt-16">
-      <div className="flex flex-col gap-4">
-        <div>
+      <div className="md:hidden">
+        <div className="flex flex-col gap-4">
           <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
             Card designs your customers will love
           </h2>
@@ -315,7 +315,19 @@ const CardDemo = () => {
         </div>
       </div>
 
-      <div ref={desktopPinRef} className="mt-6 hidden md:block">
+      <div
+        ref={desktopPinRef}
+        className="mt-6 hidden md:flex md:min-h-[calc(100vh-6rem)] md:flex-col md:items-center md:justify-center md:gap-6 md:pb-4"
+      >
+        <div className="w-full">
+          <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
+            Card designs your customers will love
+          </h2>
+          <p data-carddemo-title className="mt-2 text-sm text-contrast/80">
+            Create clean, modern loyalty cards that match your brand.
+          </p>
+        </div>
+
         <div
           ref={desktopStageRef}
           className="relative mx-auto h-[390px] w-full max-w-[1080px] overflow-hidden"
@@ -347,7 +359,7 @@ const CardDemo = () => {
           ))}
         </div>
 
-        <div className="mx-auto mt-8 max-w-3xl pb-8 text-center md:pb-10">
+        <div className="mx-auto max-w-3xl text-center">
           <h3
             ref={captionTitleRef}
             className="text-xl font-semibold text-contrast md:text-2xl"
