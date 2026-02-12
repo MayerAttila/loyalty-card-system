@@ -184,7 +184,13 @@ const CardDemo = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top top",
-            end: `+=${Math.max(240, demos.length * 70)}%`,
+            end: () => {
+              const vh = window.innerHeight || 900;
+              const perStep = vh * 0.45;
+              const min = vh * 1.25;
+              const total = Math.max(min, perStep * Math.max(1, demos.length - 1));
+              return `+=${Math.round(total)}`;
+            },
             pin: true,
             scrub: true,
             ...(demos.length > 1
@@ -207,7 +213,7 @@ const CardDemo = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="mt-16 min-h-screen">
+    <section ref={sectionRef} className="mt-16">
       <div className="flex flex-col gap-4">
         <div>
           <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
@@ -219,7 +225,7 @@ const CardDemo = () => {
         </div>
       </div>
 
-      <div className="mt-8 w-full overflow-hidden">
+      <div className="mt-6 w-full overflow-hidden">
         <div
           ref={cardsStageRef}
           className="relative mx-auto h-[390px] w-full max-w-[1080px]"
@@ -254,7 +260,7 @@ const CardDemo = () => {
         </div>
       </div>
 
-      <div className="mx-auto mt-10 max-w-3xl text-center">
+      <div className="mx-auto mt-8 max-w-3xl pb-8 text-center md:pb-10">
         <h3
           ref={captionTitleRef}
           className="text-xl font-semibold text-contrast md:text-2xl"
