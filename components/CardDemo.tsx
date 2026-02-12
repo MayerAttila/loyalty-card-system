@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import WalletCardPreview from "@/app/(protected)/[businessSlug]/cards/WalletCardPreview";
-import Button from "@/components/Button";
 
 const CardDemo = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const cardsStageRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const captionTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const captionBodyRef = useRef<HTMLParagraphElement | null>(null);
+  const captionIndexRef = useRef(0);
   const demos = [
     {
       text1: "Brew House",
@@ -21,6 +23,9 @@ const CardDemo = () => {
       logoSrc: "/demo/demo1/logo.png",
       filledStampSrc: "/demo/demo1/stampon.png",
       emptyStampSrc: "/demo/demo1/stampoff.png",
+      captionTitle: "Coffee stamps that drive repeat visits",
+      captionBody:
+        "Reward regulars with a free drink after 10 stamps and keep morning traffic consistent all week.",
     },
     {
       text1: "Glow Studio",
@@ -32,6 +37,9 @@ const CardDemo = () => {
       logoSrc: "/demo/demo2/logo.png",
       filledStampSrc: "/demo/demo2/stampon.png",
       emptyStampSrc: "/demo/demo2/stampoff.png",
+      captionTitle: "Beauty loyalty built for recurring clients",
+      captionBody:
+        "Track appointments and reward milestones so clients keep booking the next session.",
     },
     {
       text1: "Urban Fit",
@@ -43,6 +51,9 @@ const CardDemo = () => {
       logoSrc: "/demo/demo3/logo.png",
       filledStampSrc: "/demo/demo3/stampon.png",
       emptyStampSrc: "/demo/demo3/stampoff.png",
+      captionTitle: "Fitness retention with clear progress",
+      captionBody:
+        "Let members earn perks as they train, making each workout feel like progress toward something tangible.",
     },
     {
       text1: "Slice Spot",
@@ -54,6 +65,9 @@ const CardDemo = () => {
       logoSrc: "/demo/demo1/logo.png",
       filledStampSrc: "/demo/demo1/stampon.png",
       emptyStampSrc: "/demo/demo1/stampoff.png",
+      captionTitle: "Simple rewards for food orders",
+      captionBody:
+        "Boost order frequency with an easy punch-card style program customers already understand.",
     },
     {
       text1: "Leaf Market",
@@ -65,23 +79,58 @@ const CardDemo = () => {
       logoSrc: "/demo/demo2/logo.png",
       filledStampSrc: "/demo/demo2/stampon.png",
       emptyStampSrc: "/demo/demo2/stampoff.png",
+      captionTitle: "Eco-focused rewards customers remember",
+      captionBody:
+        "Encourage repeat shopping with points tied to sustainable choices and loyalty milestones.",
     },
   ];
-  const middleIndex = Math.floor(demos.length / 2);
-
-  const getRelativePosition = (index: number) => {
-    const total = demos.length;
-    const raw = index - activeIndex;
-    const wrapped = ((raw + total + middleIndex) % total) - middleIndex;
-    return wrapped;
-  };
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
       const titleEls = gsap.utils.toArray<HTMLElement>("[data-carddemo-title]");
-      const cardEls = gsap.utils.toArray<HTMLElement>("[data-carddemo-card]");
+      const stageEl = cardsStageRef.current;
+      const updateCaption = (nextIndex: number) => {
+        const titleEl = captionTitleRef.current;
+        const bodyEl = captionBodyRef.current;
+        const next = demos[nextIndex];
+        if (!titleEl || !bodyEl || !next) return;
+        if (captionIndexRef.current === nextIndex) return;
+
+        captionIndexRef.current = nextIndex;
+        gsap.to([titleEl, bodyEl], {
+          opacity: 0,
+          y: 8,
+          duration: 0.16,
+          ease: "power2.out",
+          overwrite: "auto",
+          onComplete: () => {
+            titleEl.textContent = next.captionTitle;
+            bodyEl.textContent = next.captionBody;
+            gsap.to([titleEl, bodyEl], {
+              opacity: 1,
+              y: 0,
+              duration: 0.2,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          },
+        });
+      };
+      const applyDepth = () => {
+        const viewportCenter = window.innerWidth / 2;
+        cardRefs.current.forEach((cardEl) => {
+          if (!cardEl) return;
+          const rect = cardEl.getBoundingClientRect();
+          const cardCenter = rect.left + rect.width / 2;
+          const distance = Math.abs(cardCenter - viewportCenter);
+          const normalized = Math.min(1, distance / 420);
+          const scale = 1 - normalized * 0.16;
+          const zIndex = 1000 - Math.round(normalized * 1000);
+          gsap.set(cardEl, { scale, zIndex, opacity: 1, force3D: true });
+        });
+      };
 
       if (titleEls.length) {
         gsap.fromTo(
@@ -103,25 +152,53 @@ const CardDemo = () => {
         );
       }
 
-      if (cardEls.length) {
-        cardEls.forEach((el, index) => {
-          gsap.fromTo(
-            el,
-            { opacity: 0, y: 18 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.65,
-              ease: "power2.out",
-              delay: index * 0.06,
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play reverse play reverse",
-              },
-            }
+      if (sectionRef.current && stageEl) {
+        const overlapStep = window.innerWidth < 768 ? 120 : 156;
+        const half = demos.length / 2;
+        const state = { index: 0 };
+        const wrapRelative = gsap.utils.wrap(-half, half);
+
+        const renderStack = (progressIndex: number) => {
+          const clampedIndex = Math.max(
+            0,
+            Math.min(demos.length - 1, Math.round(progressIndex))
           );
+          updateCaption(clampedIndex);
+          cardRefs.current.forEach((cardEl, cardIndex) => {
+            if (!cardEl) return;
+            const relative = wrapRelative(cardIndex - progressIndex) as number;
+            const distance = Math.abs(relative);
+            const x = relative * overlapStep;
+            const scale = Math.max(0.8, 1 - distance * 0.08);
+            const zIndex = 1000 - Math.round(distance * 100);
+            gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
+          });
+          applyDepth();
+        };
+
+        renderStack(0);
+
+        gsap.to(state, {
+          index: demos.length - 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: `+=${Math.max(240, demos.length * 70)}%`,
+            pin: true,
+            scrub: true,
+            ...(demos.length > 1
+              ? {
+                  snap: {
+                    snapTo: 1 / (demos.length - 1),
+                    duration: { min: 0.15, max: 0.35 },
+                    ease: "power2.out",
+                  },
+                }
+              : {}),
+            invalidateOnRefresh: true,
+          },
+          onUpdate: () => renderStack(state.index),
         });
       }
     }, sectionRef);
@@ -129,34 +206,9 @@ const CardDemo = () => {
     return () => ctx.revert();
   }, []);
 
-  useEffect(() => {
-    cardRefs.current.forEach((el, index) => {
-      if (!el) return;
-      const relative = getRelativePosition(index);
-      const distance = Math.abs(relative);
-      const zIndex = demos.length - distance;
-      const scale = Math.max(0.78, 1 - distance * 0.08);
-      const opacity = Math.max(0.5, 1 - distance * 0.12);
-      const x = relative * 180;
-
-      gsap.to(el, {
-        x,
-        scale,
-        opacity,
-        zIndex,
-        duration: 0.55,
-        ease: "power3.out",
-      });
-    });
-  }, [activeIndex, demos.length]);
-
-  const goToNext = () => {
-    setActiveIndex((prev) => (prev + 1) % demos.length);
-  };
-
   return (
-    <section ref={sectionRef} className="mt-16">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <section ref={sectionRef} className="mt-16 min-h-screen">
+      <div className="flex flex-col gap-4">
         <div>
           <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
             Card designs your customers will love
@@ -165,13 +217,14 @@ const CardDemo = () => {
             Create clean, modern loyalty cards that match your brand.
           </p>
         </div>
-        <Button type="button" variant="neutral" onClick={goToNext}>
-          Next Card
-        </Button>
       </div>
 
       <div className="mt-8 w-full overflow-hidden">
-        <div className="relative mx-auto h-[390px] w-full max-w-[1080px]">
+        <div
+          ref={cardsStageRef}
+          className="relative mx-auto h-[390px] w-full max-w-[1080px]"
+          data-carddemo-track
+        >
           {demos.map((demo, index) => {
             return (
               <div
@@ -180,7 +233,7 @@ const CardDemo = () => {
                 ref={(el) => {
                   cardRefs.current[index] = el;
                 }}
-                className="absolute left-1/2 top-0 flex -translate-x-1/2 justify-center will-change-transform"
+                className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
               >
                 <WalletCardPreview
                   text1={demo.text1}
@@ -199,6 +252,21 @@ const CardDemo = () => {
             );
           })}
         </div>
+      </div>
+
+      <div className="mx-auto mt-10 max-w-3xl text-center">
+        <h3
+          ref={captionTitleRef}
+          className="text-xl font-semibold text-contrast md:text-2xl"
+        >
+          {demos[0].captionTitle}
+        </h3>
+        <p
+          ref={captionBodyRef}
+          className="mx-auto mt-3 max-w-2xl text-sm text-contrast/75 md:text-base"
+        >
+          {demos[0].captionBody}
+        </p>
       </div>
     </section>
   );
