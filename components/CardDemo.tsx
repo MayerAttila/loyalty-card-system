@@ -22,12 +22,12 @@ const CardDemo = () => {
 
   const demos = [
     {
-      text1: "Brew House",
+      text1: "Brew&Bean",
       text2: "Coffee Club",
       maxPoints: 10,
       filledPoints: 4,
       rewardsCollected: 1,
-      cardColor: "#141b2d",
+      cardColor: "#31230c",
       logoSrc: "/demo/demo1/logo.png",
       filledStampSrc: "/demo/demo1/stampon.png",
       emptyStampSrc: "/demo/demo1/stampoff.png",
@@ -36,60 +36,62 @@ const CardDemo = () => {
         "Reward regulars with a free drink after 10 stamps and keep morning traffic consistent all week.",
     },
     {
-      text1: "Glow Studio",
-      text2: "Beauty Rewards",
-      maxPoints: 8,
-      filledPoints: 6,
-      rewardsCollected: 0,
-      cardColor: "#1c273a",
-      logoSrc: "/demo/demo2/logo.png",
-      filledStampSrc: "/demo/demo2/stampon.png",
-      emptyStampSrc: "/demo/demo2/stampoff.png",
-      captionTitle: "Beauty loyalty built for recurring clients",
-      captionBody:
-        "Track appointments and reward milestones so clients keep booking the next session.",
-    },
-    {
-      text1: "Urban Fit",
-      text2: "Fitness Pass",
-      maxPoints: 12,
-      filledPoints: 9,
-      rewardsCollected: 2,
-      cardColor: "#0f172a",
-      logoSrc: "/demo/demo3/logo.png",
-      filledStampSrc: "/demo/demo3/stampon.png",
-      emptyStampSrc: "/demo/demo3/stampoff.png",
-      captionTitle: "Fitness retention with clear progress",
-      captionBody:
-        "Let members earn perks as they train, making each workout feel like progress toward something tangible.",
-    },
-    {
-      text1: "Slice Spot",
+      text1: "Grande Slice",
       text2: "Pizza Perks",
       maxPoints: 10,
       filledPoints: 7,
       rewardsCollected: 1,
-      cardColor: "#2a1a14",
-      logoSrc: "/demo/demo1/logo.png",
-      filledStampSrc: "/demo/demo1/stampon.png",
-      emptyStampSrc: "/demo/demo1/stampoff.png",
-      captionTitle: "Simple rewards for food orders",
-      captionBody:
-        "Boost order frequency with an easy punch-card style program customers already understand.",
-    },
-    {
-      text1: "Leaf Market",
-      text2: "Green Rewards",
-      maxPoints: 6,
-      filledPoints: 2,
-      rewardsCollected: 0,
-      cardColor: "#143024",
+      cardColor: "#f9e02e",
       logoSrc: "/demo/demo2/logo.png",
       filledStampSrc: "/demo/demo2/stampon.png",
       emptyStampSrc: "/demo/demo2/stampoff.png",
-      captionTitle: "Eco-focused rewards customers remember",
+      captionTitle: "Pizza stamps that keep them coming back",
       captionBody:
-        "Encourage repeat shopping with points tied to sustainable choices and loyalty milestones.",
+        "Reward loyal customers with a free pizza after 10 stamps and turn first-time visitors into regulars every week.",
+    },
+    {
+      text1: "Sweet Delights",
+      text2: "Cake Rewards",
+      maxPoints: 8,
+      filledPoints: 6,
+      rewardsCollected: 0,
+      cardColor: "#ff8da1",
+      logoSrc: "/demo/demo3/logo.png",
+      filledStampSrc: "/demo/demo3/stampon.png",
+      emptyStampSrc: "/demo/demo3/stampoff.png",
+      captionTitle: "Sweet stamps that turn cravings into loyalty",
+      captionBody:
+        "Reward every visit with a stamp and treat customers to a free slice after 8 — keeping dessert lovers coming back for more.",
+    },
+    {
+      text1: "Velvet Lounge",
+      text2: "Cocktail Rewards",
+      maxPoints: 8,
+      filledPoints: 5,
+      rewardsCollected: 2,
+      cardColor: "#088F8F",
+      logoSrc: "/demo/demo4/logo.png",
+      filledStampSrc: "/demo/demo4/stampon.png",
+      emptyStampSrc: "/demo/demo4/stampoff.png",
+      captionTitle: "Sip, collect, celebrate.",
+      captionBody:
+        "Reward every cocktail with a stamp and treat loyal guests to a free signature drink — turning casual nights into unforgettable rituals.",
+    },
+
+    {
+      text1: "Sugar Loop",
+      text2: "Donut Rewards",
+
+      maxPoints: 8,
+      filledPoints: 2,
+      rewardsCollected: 0,
+      cardColor: "#FB5581",
+      logoSrc: "/demo/demo5/logo.png",
+      filledStampSrc: "/demo/demo5/stampon.png",
+      emptyStampSrc: "/demo/demo5/stampoff.png",
+      captionTitle: "Sweet rewards in every bite",
+      captionBody:
+        "Collect a stamp with every donut and enjoy a free treat after 6 — turning quick cravings into loyal daily visits.",
     },
   ];
 
@@ -114,7 +116,7 @@ const CardDemo = () => {
               end: "bottom 20%",
               toggleActions: "play none none none",
             },
-          }
+          },
         );
       }
     }, sectionRef);
@@ -175,7 +177,7 @@ const CardDemo = () => {
       const renderStack = (progressIndex: number) => {
         const clampedIndex = Math.max(
           0,
-          Math.min(demos.length - 1, Math.round(progressIndex))
+          Math.min(demos.length - 1, Math.round(progressIndex)),
         );
         updateCaption(clampedIndex);
 
@@ -188,7 +190,8 @@ const CardDemo = () => {
           const zIndex = 1000 - Math.round(distance * 100);
           const prevRelative = desktopPrevRelativeRef.current[cardIndex];
           const wrappedJump =
-            prevRelative !== undefined && Math.abs(relative - prevRelative) > half;
+            prevRelative !== undefined &&
+            Math.abs(relative - prevRelative) > half;
 
           if (wrappedJump) {
             // Smooth the side switch: card exits one edge then re-enters from the opposite edge.
@@ -236,7 +239,10 @@ const CardDemo = () => {
             const vh = window.innerHeight || 900;
             const perStep = vh * 0.45;
             const min = vh * 1.25;
-            const total = Math.max(min, perStep * Math.max(1, demos.length - 1));
+            const total = Math.max(
+              min,
+              perStep * Math.max(1, demos.length - 1),
+            );
             return `+=${Math.round(total)}`;
           },
           pin: sectionRef.current,
@@ -259,7 +265,7 @@ const CardDemo = () => {
     mm.add("(max-width: 767px)", () => {
       const listEl = mobileListRef.current;
       const wrappers = mobileWrapperRefs.current.filter(
-        Boolean
+        Boolean,
       ) as HTMLDivElement[];
       const cards = mobileCardRefs.current.filter(Boolean) as HTMLDivElement[];
       if (!listEl || !wrappers.length || !cards.length) return;
@@ -281,7 +287,8 @@ const CardDemo = () => {
             start: `top ${62 + 8 * i}px`,
             ...(isLast
               ? {
-                  end: () => `+=${Math.round((window.innerHeight || 800) * 0.45)}`,
+                  end: () =>
+                    `+=${Math.round((window.innerHeight || 800) * 0.45)}`,
                 }
               : {
                   end: "bottom 500px",
@@ -306,7 +313,10 @@ const CardDemo = () => {
     <section ref={sectionRef} className="mt-16">
       <div className="md:hidden">
         <div className="flex flex-col gap-4">
-          <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
+          <h2
+            data-carddemo-title
+            className="text-2xl font-semibold text-contrast"
+          >
             Card designs your customers will love
           </h2>
           <p data-carddemo-title className="mt-2 text-sm text-contrast/80">
@@ -320,7 +330,10 @@ const CardDemo = () => {
         className="mt-6 hidden md:flex md:min-h-[calc(100vh-6rem)] md:flex-col md:items-center md:justify-center md:gap-6 md:pb-4"
       >
         <div className="w-full">
-          <h2 data-carddemo-title className="text-2xl font-semibold text-contrast">
+          <h2
+            data-carddemo-title
+            className="text-2xl font-semibold text-contrast"
+          >
             Card designs your customers will love
           </h2>
           <p data-carddemo-title className="mt-2 text-sm text-contrast/80">
