@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { signOut } from "@/api/client/auth.api";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import {
@@ -89,7 +89,9 @@ export default function Navbar({
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [logoError, setLogoError] = useState(false);
+  const [logoLoadFailedSrc, setLogoLoadFailedSrc] = useState<string | null>(
+    null
+  );
   const allowedNavItems = buildNavItems(basePath).filter((item) => {
     if (!item.allow) return true;
     if (!currentUserRole) return false;
@@ -109,9 +111,7 @@ export default function Navbar({
     apiBaseUrl && businessId && businessHasLogo !== false
       ? `${apiBaseUrl}/business/id/${businessId}/logo`
       : "";
-  useEffect(() => {
-    setLogoError(false);
-  }, [logoSrc]);
+  const canShowLogo = Boolean(logoSrc) && logoLoadFailedSrc !== logoSrc;
 
   return (
     <>
@@ -132,7 +132,7 @@ export default function Navbar({
         />
       ) : null}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-accent-3 bg-accent-1 transition-transform duration-200 md:static md:min-h-screen md:translate-x-0 md:transition-[width] md:duration-200 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-hidden border-r border-accent-3 bg-accent-1 transition-transform duration-200 md:inset-y-auto md:left-auto md:sticky md:top-0 md:h-screen md:translate-x-0 md:transition-[width] md:duration-200 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         } ${collapsed ? "md:w-16" : "md:w-64"}`}
       >
@@ -144,18 +144,18 @@ export default function Navbar({
         >
           <div
             className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl ${
-              logoSrc && !logoError
+              canShowLogo
                 ? "bg-transparent"
                 : "border border-accent-3 bg-accent-2"
             }`}
           >
-            {logoSrc && !logoError ? (
+            {canShowLogo ? (
               <img
                 src={logoSrc}
                 alt={`${displayBusinessName} logo`}
                 className="h-full w-full object-contain"
                 onError={() => {
-                  setLogoError(true);
+                  setLogoLoadFailedSrc(logoSrc);
                 }}
               />
             ) : (
@@ -196,7 +196,7 @@ export default function Navbar({
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-2">
         {allowedNavItems.map((item) => {
           const Icon = item.icon;
           return (

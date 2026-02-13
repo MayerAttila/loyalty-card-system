@@ -32,7 +32,7 @@ const SubscriptionClient = () => {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<"monthly" | "annual" | null>(
-    null
+    null,
   );
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
 
@@ -79,7 +79,9 @@ const SubscriptionClient = () => {
   const handleManageSubscription = async () => {
     setActionLoading(true);
     try {
-      const { url } = await createPortalSessionAction({ returnUrl: subscriptionUrl });
+      const { url } = await createPortalSessionAction({
+        returnUrl: subscriptionUrl,
+      });
       if (url) {
         window.location.href = url;
         return;
@@ -95,6 +97,32 @@ const SubscriptionClient = () => {
 
   const trialEnds = formatDate(status?.trialEndsAt);
   const periodEnds = formatDate(status?.currentPeriodEnd);
+  const isTrialPlan =
+    status?.status === "trial" || status?.status === "trialing";
+  const isSubscribedPlan = status?.status === "active" && !isTrialPlan;
+  const pendingPaidPlanLabel =
+    isTrialPlan && status?.stripePriceId
+      ? status.stripePriceId === MONTHLY_PRICE_ID
+        ? "Monthly subscription"
+        : status.stripePriceId === ANNUAL_PRICE_ID
+          ? "Annual subscription"
+          : "Paid subscription"
+      : null;
+  const planTypeLabel = loading
+    ? "Loading..."
+    : isTrialPlan
+      ? "Trial"
+      : isSubscribedPlan
+        ? `${currentPlanLabel} subscription`
+        : "No active plan";
+  const timingLabel = isTrialPlan ? "Trial ends" : "Next payment";
+  const timingValue = loading
+    ? "Loading..."
+    : isTrialPlan
+      ? (trialEnds ?? "Not available")
+      : isSubscribedPlan
+        ? (periodEnds ?? "Not scheduled")
+        : "No payment scheduled";
 
   return (
     <section className="space-y-6">
@@ -114,7 +142,7 @@ const SubscriptionClient = () => {
                 disabled={actionLoading || !status?.stripeCustomerId}
                 variant="neutral"
               >
-              Manage subscription
+                Manage subscription
               </Button>
             ) : null}
             <Button
@@ -166,40 +194,42 @@ const SubscriptionClient = () => {
               onClick={() => setShowUpgradeOptions((prev) => !prev)}
               disabled={actionLoading}
             >
-              {showUpgradeOptions ? "Hide upgrade options" : "Upgrade subscription"}
+              {showUpgradeOptions
+                ? "Hide upgrade options"
+                : "Upgrade subscription"}
             </Button>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-accent-3 bg-primary p-4">
-            <p className="text-xs uppercase tracking-wide text-contrast/60">
-              Status
-            </p>
-            <p className="mt-2 text-lg font-semibold text-contrast">
-              {loading ? "Loading..." : status?.status ?? "Not subscribed"}
-            </p>
-            <p className="mt-1 text-xs text-contrast/70">
-              Current plan: {currentPlanLabel}
-            </p>
-          </div>
-          <div className="rounded-lg border border-accent-3 bg-primary p-4">
-            <p className="text-xs uppercase tracking-wide text-contrast/60">
-              Renewal
-            </p>
-            <p className="mt-2 text-sm text-contrast/80">
-              {trialEnds
-                ? `Trial ends on ${trialEnds}`
-                : periodEnds
-                ? `Renews on ${periodEnds}`
-                : "No renewal scheduled"}
-            </p>
-            {status?.cancelAtPeriodEnd ? (
-              <p className="mt-2 text-xs text-brand">
-                Cancellation scheduled at period end.
+        <div className="mt-5  p-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-contrast/60">
+                Plan type
               </p>
-            ) : null}
+              <p className="mt-2 text-lg font-semibold text-contrast">
+                {planTypeLabel}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-contrast/60">
+                {timingLabel}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-contrast">
+                {timingValue}
+              </p>
+            </div>
           </div>
+          {status?.cancelAtPeriodEnd ? (
+            <p className="mt-3 text-xs text-brand">
+              Cancellation scheduled at period end.
+            </p>
+          ) : null}
+          {pendingPaidPlanLabel ? (
+            <p className="mt-2 text-xs text-contrast/75">
+              {pendingPaidPlanLabel} activates on {trialEnds ?? "trial end"}.
+            </p>
+          ) : null}
         </div>
       </div>
 
