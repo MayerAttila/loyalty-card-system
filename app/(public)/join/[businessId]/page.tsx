@@ -7,7 +7,10 @@ import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
 import Stepper, { StepperTheme } from "@/components/Stepper";
 import { createCustomer } from "@/api/client/customer.api";
-import { getGoogleWalletSaveLink } from "@/api/client/userCard.api";
+import {
+  getAppleWalletPassUrl,
+  getGoogleWalletSaveLink,
+} from "@/api/client/userCard.api";
 import { toast } from "react-toastify";
 
 const steps = [
@@ -28,6 +31,7 @@ const JoinPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [walletLoading, setWalletLoading] = useState(false);
   const [saveUrl, setSaveUrl] = useState<string | undefined>();
+  const [applePassUrl, setApplePassUrl] = useState<string | undefined>();
   const [walletError, setWalletError] = useState<string | undefined>();
 
   const isAnimating = pendingStep !== null;
@@ -83,6 +87,7 @@ const JoinPage = () => {
     setSubmitting(true);
     setWalletError(undefined);
     setSaveUrl(undefined);
+    setApplePassUrl(undefined);
 
     try {
       const result = await createCustomer({
@@ -101,6 +106,7 @@ const JoinPage = () => {
         return;
       }
 
+      setApplePassUrl(getAppleWalletPassUrl(cardId));
       const wallet = await getGoogleWalletSaveLink(cardId);
       setSaveUrl(wallet?.saveUrl);
       if (!wallet?.saveUrl) {
@@ -188,6 +194,7 @@ const JoinPage = () => {
             ) : (
               <AddToWalletForm
                 saveUrl={saveUrl}
+                applePassUrl={applePassUrl}
                 loading={walletLoading}
                 errorMessage={walletError}
               />

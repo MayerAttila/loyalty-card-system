@@ -18,7 +18,6 @@ export type SignOutResponse = {
   url?: string | null;
 };
 
-
 type CsrfResponse = {
   csrfToken: string;
 };

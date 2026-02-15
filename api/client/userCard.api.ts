@@ -53,6 +53,15 @@ export const getGoogleWalletSaveLink = async (cardId: string) => {
   return data as GoogleWalletSaveLink;
 };
 
+export const getAppleWalletPassUrl = (cardId: string) => {
+  const encodedCardId = encodeURIComponent(cardId);
+  const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
+  if (base) {
+    return `${base}/user-loyalty-card/id/${encodedCardId}/apple-wallet`;
+  }
+  return `/user-loyalty-card/id/${encodedCardId}/apple-wallet`;
+};
+
 export const stampCard = async (cardId: string, addedStamps = 1) => {
   const { data } = await api.post(`/user-loyalty-card/id/${cardId}/stamp`, {
     addedStamps,
