@@ -137,15 +137,15 @@ const EmployeeRegistrationForm = () => {
             email: employeeEmail,
             password: employeePassword,
           });
+          const session = await getSession();
+          if (!session?.user) {
+            throw new Error("SessionNotEstablished");
+          }
+
           let redirectTo = resolveAppRedirect(result?.url) ?? "/";
-          try {
-            const session = await getSession();
-            const businessSlug = toBusinessSlug(session?.user?.businessName);
-            if (businessSlug) {
-              redirectTo = `/${businessSlug}`;
-            }
-          } catch (sessionError) {
-            console.error("session lookup failed", sessionError);
+          const businessSlug = toBusinessSlug(session.user.businessName);
+          if (businessSlug) {
+            redirectTo = `/${businessSlug}`;
           }
           router.push(redirectTo);
           return;

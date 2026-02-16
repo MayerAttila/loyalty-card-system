@@ -68,21 +68,25 @@ const LoginPage = () => {
 
     try {
       const result = await signIn(payload);
+      const session = await getSession();
+      if (!session?.user) {
+        throw new Error("SessionNotEstablished");
+      }
+
       toast.success("Welcome back!");
       form.reset();
       let redirectTo = resolveAppRedirect(result?.url) ?? "/";
-      try {
-        const session = await getSession();
-        const businessSlug = toBusinessSlug(session?.user?.businessName);
-        if (businessSlug) {
-          redirectTo = `/${businessSlug}`;
-        }
-      } catch (sessionError) {
-        console.error("session lookup failed", sessionError);
+      const businessSlug = toBusinessSlug(session.user.businessName);
+      if (businessSlug) {
+        redirectTo = `/${businessSlug}`;
       }
       router.push(redirectTo);
     } catch (error) {
       console.log(error);
+      if (error instanceof Error && error.message === "SessionNotEstablished") {
+        toast.error("Login succeeded but session was not established. Please try again.");
+        return;
+      }
       toast.error("Invalid email or password.");
       return;
     }

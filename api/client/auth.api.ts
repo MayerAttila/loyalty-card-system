@@ -22,6 +22,22 @@ type CsrfResponse = {
   csrfToken: string;
 };
 
+const getAuthErrorFromCallbackUrl = (url?: string | null) => {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const base =
+      typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const parsed = new URL(url, base);
+    const errorCode = parsed.searchParams.get("error");
+    return errorCode?.trim() || null;
+  } catch {
+    return null;
+  }
+};
+
 const getCsrfToken = async () => {
   const res = await api.get<CsrfResponse>("/auth/csrf");
   if (!res.data?.csrfToken) {
@@ -51,11 +67,17 @@ export const signIn = async function name(payload: signInPayload) {
     },
   });
 
-  if (res.data?.error) {
-    throw new Error(res.data.error);
+  const result = res.data as SignInResponse;
+  const callbackError = getAuthErrorFromCallbackUrl(result?.url);
+
+  if (result?.error) {
+    throw new Error(result.error);
+  }
+  if (callbackError) {
+    throw new Error(callbackError);
   }
 
-  return res.data as SignInResponse;
+  return result;
 };
 
 export const signOut = async () => {

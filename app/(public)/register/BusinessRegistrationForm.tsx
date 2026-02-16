@@ -146,6 +146,11 @@ const BusinessRegistrationForm = ({
           email: ownerEmail,
           password: ownerPassword,
         });
+        const session = await getSession();
+        if (!session?.user) {
+          throw new Error("SessionNotEstablished");
+        }
+
         let redirectTo = resolveAppRedirect(result?.url) ?? "/";
         const businessSlugFromForm = toBusinessSlug(businessName);
         if (onRegistered) {
@@ -155,14 +160,9 @@ const BusinessRegistrationForm = ({
         if (businessSlugFromForm) {
           redirectTo = `/${businessSlugFromForm}`;
         } else {
-          try {
-            const session = await getSession();
-            const businessSlug = toBusinessSlug(session?.user?.businessName);
-            if (businessSlug) {
-              redirectTo = `/${businessSlug}`;
-            }
-          } catch (sessionError) {
-            console.error("session lookup failed", sessionError);
+          const businessSlug = toBusinessSlug(session.user.businessName);
+          if (businessSlug) {
+            redirectTo = `/${businessSlug}`;
           }
         }
         router.push(redirectTo);
