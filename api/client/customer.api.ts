@@ -6,10 +6,19 @@ export type CreateCustomerPayload = {
   businessId: string;
 };
 
+export type CustomerCardPreview = {
+  issuerName: string;
+  programName: string;
+  maxPoints: number;
+  cardColor: string;
+  logoUrl?: string | null;
+};
+
 export const createCustomer = async (payload: CreateCustomerPayload) => {
   const { data } = await api.post("/customer", payload);
   return data as {
     customer: { id: string; name: string; email: string; businessId: string };
     cardId: string | null;
+    cardPreview: CustomerCardPreview | null;
   };
 };

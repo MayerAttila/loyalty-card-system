@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
+import JoinCustomerDetailsStep from "./JoinCustomerDetailsStep";
 import Stepper, { StepperTheme } from "@/components/Stepper";
 import { createCustomer } from "@/api/client/customer.api";
+import type { CustomerCardPreview } from "@/api/client/customer.api";
 import {
   getAppleWalletPassUrl,
   getGoogleWalletSaveLink,
 } from "@/api/client/userCard.api";
 import { toast } from "react-toastify";
+import { detectWalletPlatform } from "./walletPlatform";
 
 const steps = [
   { key: "details", label: "Details", description: "Enter your information" },
@@ -33,6 +35,8 @@ const JoinPage = () => {
   const [saveUrl, setSaveUrl] = useState<string | undefined>();
   const [applePassUrl, setApplePassUrl] = useState<string | undefined>();
   const [walletError, setWalletError] = useState<string | undefined>();
+  const [walletPreview, setWalletPreview] =
+    useState<CustomerCardPreview | null>(null);
 
   const isAnimating = pendingStep !== null;
 
@@ -88,6 +92,7 @@ const JoinPage = () => {
     setWalletError(undefined);
     setSaveUrl(undefined);
     setApplePassUrl(undefined);
+    setWalletPreview(null);
 
     try {
       const result = await createCustomer({
@@ -106,19 +111,37 @@ const JoinPage = () => {
         return;
       }
 
-      setApplePassUrl(getAppleWalletPassUrl(cardId));
-      const wallet = await getGoogleWalletSaveLink(cardId);
-      setSaveUrl(wallet?.saveUrl);
-      if (!wallet?.saveUrl) {
-        setWalletError("Unable to generate Wallet link.");
-        toast.error("Unable to generate Wallet link.");
+      setWalletPreview(
+        result.cardPreview ?? {
+          issuerName: "Loyale",
+          programName: "Stamps",
+          maxPoints: 10,
+          cardColor: "#d43555",
+          logoUrl: null,
+        },
+      );
+
+      const walletPlatform = detectWalletPlatform();
+
+      if (walletPlatform !== "android") {
+        setApplePassUrl(getAppleWalletPassUrl(cardId));
+      }
+
+      if (walletPlatform !== "ios") {
+        const wallet = await getGoogleWalletSaveLink(cardId);
+        setSaveUrl(wallet?.saveUrl);
+        if (!wallet?.saveUrl) {
+          setWalletError("Unable to generate Wallet link.");
+          toast.error("Unable to generate Wallet link.");
+        }
       }
       requestStep(1);
     } catch (error) {
       console.error(error);
       const message =
-        (error as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? (error instanceof Error ? error.message : "Unable to register.");
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ??
+        (error instanceof Error ? error.message : "Unable to register.");
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -127,7 +150,7 @@ const JoinPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-primary text-contrast">
+    <main className="min-h-screen text-contrast">
       <section className="mx-auto max-w-3xl px-6 py-16">
         <header className="mb-10">
           <p className="text-sm uppercase tracking-wide text-contrast/70">
@@ -157,46 +180,21 @@ const JoinPage = () => {
 
           <div className="rounded-lg border border-accent-3 bg-primary p-6">
             {activeStep === 0 ? (
-              <form
-                className="space-y-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void handleJoinSubmit();
-                }}
-              >
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    Step 1: Your details
-                  </h2>
-                  <p className="mt-2 text-sm text-contrast/70">
-                    Fill in your name and email to create your loyalty card.
-                  </p>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <CustomInput
-                    id="customerName"
-                    type="text"
-                    placeholder="Full name"
-                    value={customerName}
-                    onChange={(event) => setCustomerName(event.target.value)}
-                    disabled={submitting}
-                  />
-                  <CustomInput
-                    id="customerEmail"
-                    type="email"
-                    placeholder="Email address"
-                    value={customerEmail}
-                    onChange={(event) => setCustomerEmail(event.target.value)}
-                    disabled={submitting}
-                  />
-                </div>
-              </form>
+              <JoinCustomerDetailsStep
+                customerName={customerName}
+                customerEmail={customerEmail}
+                submitting={submitting}
+                onCustomerNameChange={setCustomerName}
+                onCustomerEmailChange={setCustomerEmail}
+                onSubmit={handleJoinSubmit}
+              />
             ) : (
               <AddToWalletForm
                 saveUrl={saveUrl}
                 applePassUrl={applePassUrl}
                 loading={walletLoading}
                 errorMessage={walletError}
+                preview={walletPreview}
               />
             )}
           </div>
@@ -221,9 +219,7 @@ const JoinPage = () => {
                 requestStep(activeStep + 1);
               }}
               disabled={
-                activeStep === steps.length - 1 ||
-                isAnimating ||
-                submitting
+                activeStep === steps.length - 1 || isAnimating || submitting
               }
             >
               Next
