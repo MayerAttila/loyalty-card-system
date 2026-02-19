@@ -14,17 +14,29 @@ const page = () => {
           Turn every visit into a reason to come back.
         </h1>
 
-        <FeaturesPanel />
+        <section id="features" className="scroll-mt-24">
+          <FeaturesPanel />
+        </section>
 
-        <CardDemo />
+        <section id="demo" className="scroll-mt-24">
+          <CardDemo />
+        </section>
 
-        <HowItWorks />
+        <section id="how-it-works" className="scroll-mt-24">
+          <HowItWorks />
+        </section>
 
-        <PricingTeaser />
+        <section id="pricing" className="scroll-mt-24">
+          <PricingTeaser />
+        </section>
 
-        <BenefitsSection />
+        <section id="benefits" className="scroll-mt-24">
+          <BenefitsSection />
+        </section>
 
-        <FaqSection />
+        <section id="faq" className="scroll-mt-24">
+          <FaqSection />
+        </section>
       </div>
     </main>
   );
