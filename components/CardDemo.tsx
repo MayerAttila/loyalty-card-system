@@ -276,6 +276,10 @@ const CardDemo = () => {
         const isLast = i === cards.length - 1;
         const scale = isLast ? 1 : 0.9 + 0.025 * i;
         const rotationX = isLast ? 0 : -8;
+        const baseMobilePinTop = 62;
+        const startOffset = isLast
+          ? baseMobilePinTop
+          : baseMobilePinTop + 8 * i;
 
         gsap.to(card, {
           scale,
@@ -284,11 +288,11 @@ const CardDemo = () => {
           ease: "none",
           scrollTrigger: {
             trigger: wrapper,
-            start: `top ${62 + 8 * i}px`,
+            start: `top ${startOffset}px`,
             ...(isLast
               ? {
-                  end: () =>
-                    `+=${Math.round((window.innerHeight || 800) * 0.45)}`,
+                  end: "bottom bottom",
+                  endTrigger: listEl,
                 }
               : {
                   end: "bottom 500px",
@@ -296,7 +300,7 @@ const CardDemo = () => {
                 }),
             scrub: true,
             pin: wrapper,
-            pinSpacing: false,
+            pinSpacing: isLast,
             invalidateOnRefresh: true,
           },
         });
