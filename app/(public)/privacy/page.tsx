@@ -112,9 +112,9 @@ export default function PrivacyPage() {
                 For privacy questions, contact us at{" "}
                 <a
                   className="text-brand hover:underline"
-                  href="mailto:support@loyale.online"
+                  href="mailto:contactloyale@gmail.com"
                 >
-                  support@loyale.online
+                  contactloyale@gmail.com
                 </a>
                 .
               </p>

@@ -28,6 +28,10 @@ const nextConfig = {
         source: "/subscription/:path*",
         destination: `${backend}/subscription/:path*`,
       },
+      {
+        source: "/support/:path*",
+        destination: `${backend}/support/:path*`,
+      },
     ];
   },
 };

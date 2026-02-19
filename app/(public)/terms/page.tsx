@@ -112,9 +112,9 @@ export default function TermsPage() {
                 For questions regarding these Terms, contact{" "}
                 <a
                   className="text-brand hover:underline"
-                  href="mailto:support@loyale.online"
+                  href="mailto:contactloyale@gmail.com"
                 >
-                  support@loyale.online
+                  contactloyale@gmail.com
                 </a>
                 .
               </p>

@@ -85,7 +85,11 @@ const MainFooter = () => {
                   <li key={link.label}>
                     <Link
                       className="transition hover:text-primary"
-                      href={pathname === "/" && sectionId ? `#${sectionId}` : link.href}
+                      href={
+                        pathname === "/" && sectionId
+                          ? `#${sectionId}`
+                          : link.href
+                      }
                       onClick={
                         sectionId
                           ? (event) => handleSectionClick(event, sectionId)
@@ -111,7 +115,11 @@ const MainFooter = () => {
                   <li key={link.label}>
                     <Link
                       className="transition hover:text-primary"
-                      href={pathname === "/" && sectionId ? `#${sectionId}` : link.href}
+                      href={
+                        pathname === "/" && sectionId
+                          ? `#${sectionId}`
+                          : link.href
+                      }
                       onClick={
                         sectionId
                           ? (event) => handleSectionClick(event, sectionId)
@@ -132,12 +140,9 @@ const MainFooter = () => {
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-primary/85">
               <li>
-                <a
-                  className="transition hover:text-primary"
-                  href="mailto:support@loyale.online"
-                >
-                  support@loyale.online
-                </a>
+                <Link className="transition hover:text-primary" href="/contact">
+                  Contact Us
+                </Link>
               </li>
               {legalLinks.map((link) => (
                 <li key={link.label}>
