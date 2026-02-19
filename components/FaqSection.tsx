@@ -121,9 +121,10 @@ const FaqSection = () => {
                     {faq.question}
                   </span>
                   <AiOutlinePlus
-                    className={`text-3xl text-brand transition-transform duration-200 ${
+                    className={`h-7 w-7 shrink-0 text-brand transition-transform duration-200 ${
                       isOpen ? "rotate-45" : ""
                     }`}
+                    aria-hidden="true"
                   />
                 </div>
                 <div
