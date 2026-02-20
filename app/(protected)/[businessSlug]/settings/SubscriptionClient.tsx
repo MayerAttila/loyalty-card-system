@@ -26,7 +26,11 @@ const formatDate = (value?: string | null) => {
   return date.toLocaleDateString();
 };
 
-const SubscriptionClient = () => {
+type SubscriptionClientProps = {
+  embedded?: boolean;
+};
+
+const SubscriptionClient = ({ embedded = false }: SubscriptionClientProps) => {
   const params = useParams<{ businessSlug?: string }>();
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,7 +43,7 @@ const SubscriptionClient = () => {
   const basePath = params?.businessSlug ? `/${params.businessSlug}` : "";
   const subscriptionUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}${basePath}/subscription`
+      ? `${window.location.origin}${basePath}/settings`
       : "";
 
   useEffect(() => {
@@ -124,9 +128,13 @@ const SubscriptionClient = () => {
         ? (periodEnds ?? "Not scheduled")
         : "No payment scheduled";
 
+  const containerClassName = embedded
+    ? ""
+    : "rounded-xl border border-accent-3 bg-accent-1 p-6";
+
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+      <div className={containerClassName}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-brand">Subscription</h2>

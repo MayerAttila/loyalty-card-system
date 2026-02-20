@@ -29,6 +29,17 @@ export const updateUserProfile = async (
   return data;
 };
 
+export const changeUserPassword = async (
+  id: string,
+  payload: { currentPassword: string; newPassword: string }
+) => {
+  const { data } = await api.patch<{ message: string }>(
+    `/user/id/${id}/password`,
+    payload
+  );
+  return data;
+};
+
 export const deleteUser = async (id: string) => {
   await api.delete(`/user/id/${id}`);
 };

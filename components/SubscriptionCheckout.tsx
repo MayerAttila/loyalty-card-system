@@ -78,7 +78,7 @@ const SubscriptionCheckout = ({
   const returnUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     if (!params?.businessSlug) return window.location.origin;
-    return `${window.location.origin}/${params.businessSlug}/subscription`;
+    return `${window.location.origin}/${params.businessSlug}/settings`;
   }, [params?.businessSlug]);
 
   const startPayment = async () => {
@@ -135,10 +135,10 @@ const SubscriptionCheckout = ({
                   return;
                 }
                 if (!params?.businessSlug) return;
-                window.location.href = `/${params.businessSlug}/subscription`;
+                window.location.href = `/${params.businessSlug}/settings`;
               }}
             >
-              Back to subscription
+              Back to settings
             </Button>
           ) : null}
         </div>

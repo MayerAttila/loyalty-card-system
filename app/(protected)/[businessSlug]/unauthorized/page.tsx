@@ -23,10 +23,10 @@ const UnauthorizedPage = ({ params }: { params: { businessSlug: string } }) => {
         </p>
         <div className="mt-8 flex justify-center">
           <Link
-            href={`/${params.businessSlug}/profile`}
+            href={`/${params.businessSlug}/settings`}
             className="inline-flex items-center justify-center rounded-lg border border-accent-3 bg-primary px-5 py-2.5 text-sm font-semibold text-contrast transition hover:border-accent-4 hover:bg-accent-2"
           >
-            Back to profile
+            Back to settings
           </Link>
         </div>
       </div>

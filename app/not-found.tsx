@@ -5,8 +5,8 @@ import { toBusinessSlug } from "@/lib/slug";
 const NotFoundPage = async () => {
   const session = await getSession();
   const businessSlug = toBusinessSlug(session?.user?.businessName);
-  const backHref = businessSlug ? `/${businessSlug}/profile` : "/";
-  const backLabel = businessSlug ? "Back to profile" : "Back to home";
+  const backHref = businessSlug ? `/${businessSlug}/settings` : "/";
+  const backLabel = businessSlug ? "Back to settings" : "Back to home";
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12 text-center">

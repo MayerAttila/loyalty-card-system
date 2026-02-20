@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getSubscriptionStatusAction } from "@/lib/subscription/actions";
 
-const subscriptionAllowlist = ["/subscription"];
+const subscriptionAllowlist = ["/settings"];
 
 const isSubscriptionPath = (pathname: string) =>
   subscriptionAllowlist.some((path) => pathname.endsWith(path));
@@ -29,7 +29,7 @@ const RequireSubscription = ({ children }: { children: React.ReactNode }) => {
         if (!isSubscriptionActive(data?.status)) {
           const parts = pathname.split("/").filter(Boolean);
           const businessSlug = parts[0];
-          router.replace(`/${businessSlug}/subscription`);
+          router.replace(`/${businessSlug}/settings`);
           return;
         }
         setChecking(false);

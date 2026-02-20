@@ -1,29 +1,33 @@
 import { getSession } from "@/api/server/auth.api";
-import ProfileClient from "./ProfileClient";
 import EmptyState from "@/components/EmptyState";
+import SettingsClient from "./SettingsClient";
 
-const ProfilePage = async () => {
+const SettingsPage = async () => {
   const session = await getSession();
 
   if (!session?.user?.id) {
     return (
       <EmptyState
-        title="Profile unavailable"
-        description="We couldn't load your profile details."
+        title="Settings unavailable"
+        description="We couldn't load your account settings."
         actionLabel="Go to login"
         actionHref="/login"
       />
     );
   }
 
+  const roleLabel = session.user.role ?? "Unknown";
+  const isOwner = session.user.role === "OWNER";
+
   return (
-    <ProfileClient
+    <SettingsClient
       userId={session.user.id}
       initialName={session.user.name ?? ""}
       initialEmail={session.user.email ?? ""}
-      roleLabel={session.user.role ?? "Unknown"}
+      roleLabel={roleLabel}
+      isOwner={isOwner}
     />
   );
 };
 
-export default ProfilePage;
+export default SettingsPage;
