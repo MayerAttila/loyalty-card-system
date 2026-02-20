@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/api/client/auth.api";
 import {
+  FiBell,
   FiBriefcase,
   FiCheckSquare,
   FiChevronLeft,
@@ -55,6 +56,12 @@ const buildNavItems = (
     href: `${basePath}/stamping-logs`,
     label: "Logs",
     icon: FiList,
+    allow: ["ADMIN", "OWNER"],
+  },
+  {
+    href: `${basePath}/notifications`,
+    label: "Notifications",
+    icon: FiBell,
     allow: ["ADMIN", "OWNER"],
   },
   { href: `${basePath}/stamping`, label: "Stamping", icon: FiCheckSquare },
