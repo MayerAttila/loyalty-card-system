@@ -4,7 +4,6 @@ import type { MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LoyaleLogo from "@/components/LoyaleLogo";
-import ThemeSwitch from "@/components/ThemeSwitch";
 
 const menuLinks = [
   { id: "features", label: "Features" },
@@ -73,11 +72,6 @@ const MainHeader = ({
         </nav>
 
         <div className="flex items-center gap-3 text-sm font-semibold md:gap-4">
-          <ThemeSwitch
-            showLabel={false}
-            className="rounded-lg border border-primary/40 p-2 text-primary/90 transition hover:bg-primary/10"
-            iconClassName="h-4 w-4"
-          />
           <Link className="text-primary/80 hover:text-primary" href="/register">
             Register
           </Link>

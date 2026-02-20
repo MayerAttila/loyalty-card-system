@@ -10,14 +10,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative">
-      <BackgroundFog />
-      <div className="relative z-10">
-        <MainHeader />
-        <TopBrandWave />
-        {children}
-        <BottomBrandWave />
-        <MainFooter />
+    <div className="dark">
+      <div className="relative">
+        <BackgroundFog />
+        <div className="relative z-10">
+          <MainHeader />
+          <TopBrandWave />
+          {children}
+          <BottomBrandWave />
+          <MainFooter />
+        </div>
       </div>
     </div>
   );
