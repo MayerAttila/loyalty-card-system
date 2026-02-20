@@ -130,13 +130,21 @@ const LoginPage = () => {
             />
             <Button type="submit">Log in</Button>
           </form>
-          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
-            <span className="text-contrast/70">New here?</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-contrast/70">New here?</span>
+              <Link
+                className="font-semibold text-brand hover:text-brand/80"
+                href="/register"
+              >
+                Create an account
+              </Link>
+            </div>
             <Link
-              className="font-semibold text-brand hover:text-brand/80"
-              href="/register"
+              className="text-xs font-semibold text-brand hover:text-brand/80"
+              href="/forgot-password"
             >
-              Create an account
+              Forgot password?
             </Link>
           </div>
         </div>

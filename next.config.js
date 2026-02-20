@@ -32,6 +32,10 @@ const nextConfig = {
         source: "/support/:path*",
         destination: `${backend}/support/:path*`,
       },
+      {
+        source: "/password-reset/:path*",
+        destination: `${backend}/password-reset/:path*`,
+      },
     ];
   },
 };
