@@ -123,15 +123,15 @@ const JoinPage = () => {
         return;
       }
 
-      setWalletPreview(
-        result.cardPreview ?? {
-          issuerName: "Loyale",
-          programName: "Stamps",
-          maxPoints: 10,
-          cardColor: "#d43555",
-          logoUrl: null,
-        },
-      );
+      const previewData: CustomerCardPreview = result.cardPreview ?? {
+        issuerName: "Loyale",
+        programName: "Stamps",
+        maxPoints: 10,
+        cardColor: "#d43555",
+        logoUrl: null,
+      };
+
+      setWalletPreview(previewData);
 
       const walletPlatform = detectWalletPlatform();
 

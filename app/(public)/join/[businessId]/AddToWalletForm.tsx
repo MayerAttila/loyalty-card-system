@@ -63,6 +63,9 @@ const AddToWalletForm = ({
           cardColor={preview.cardColor}
           logoSrc={preview.logoUrl ?? undefined}
           useLogo={Boolean(preview.logoUrl)}
+          filledStampSrc={preview.filledStampSrc ?? undefined}
+          emptyStampSrc={preview.emptyStampSrc ?? undefined}
+          useStampImages={Boolean(preview.useStampImages)}
           className="mx-auto"
         />
       ) : (

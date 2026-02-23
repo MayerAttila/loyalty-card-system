@@ -12,6 +12,9 @@ export type CustomerCardPreview = {
   maxPoints: number;
   cardColor: string;
   logoUrl?: string | null;
+  useStampImages?: boolean;
+  filledStampSrc?: string | null;
+  emptyStampSrc?: string | null;
 };
 
 export const createCustomer = async (payload: CreateCustomerPayload) => {
