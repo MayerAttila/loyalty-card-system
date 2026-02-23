@@ -1,6 +1,23 @@
 import { RequireRole } from "@/lib/auth/RequireRole";
+import EmptyState from "@/components/EmptyState";
+import { getSession } from "@/api/server/auth.api";
+import NotificationsWorkspace from "./NotificationsWorkspace";
 
-const NotificationsPage = () => {
+const NotificationsPage = async () => {
+  const session = await getSession();
+  const businessId = session?.user?.businessId;
+
+  if (!businessId) {
+    return (
+      <EmptyState
+        title="No business found"
+        description="We couldn't find a business linked to this account."
+        actionLabel="Go to login"
+        actionHref="/login"
+      />
+    );
+  }
+
   return (
     <RequireRole allow={["OWNER", "ADMIN"]}>
       <section className="space-y-6">
@@ -16,13 +33,7 @@ const NotificationsPage = () => {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-accent-3 bg-accent-1 p-6">
-          <h2 className="text-xl font-semibold text-brand">Coming soon</h2>
-          <p className="mt-2 text-sm text-contrast/80">
-            Notification scheduling UI will be added here. This page is ready
-            for the next implementation step.
-          </p>
-        </section>
+        <NotificationsWorkspace businessId={businessId} />
       </section>
     </RequireRole>
   );
