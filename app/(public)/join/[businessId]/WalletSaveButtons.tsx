@@ -5,6 +5,8 @@ import {
   detectWalletPlatform,
   type WalletPlatform,
 } from "./walletPlatform";
+import { APPLE_WALLET_BADGE_SVG } from "./appleWalletBadgeSvg";
+import { GOOGLE_WALLET_BADGE_SVG } from "./googleWalletBadgeSvg";
 
 type WalletSaveButtonsProps = {
   saveUrl?: string;
@@ -12,6 +14,7 @@ type WalletSaveButtonsProps = {
   loading?: boolean;
   size?: "default" | "footer";
   layout?: "stack" | "row";
+  walletPlatform?: WalletPlatform;
 };
 
 const WalletSaveButtons = ({
@@ -20,25 +23,30 @@ const WalletSaveButtons = ({
   loading = false,
   size = "default",
   layout = "stack",
+  walletPlatform: walletPlatformProp,
 }: WalletSaveButtonsProps) => {
-  const [walletPlatform, setWalletPlatform] = useState<WalletPlatform>("other");
-  const [googleBadgeMissing, setGoogleBadgeMissing] = useState(false);
-  const [appleBadgeMissing, setAppleBadgeMissing] = useState(false);
+  const [detectedWalletPlatform, setDetectedWalletPlatform] =
+    useState<WalletPlatform>("other");
 
   useEffect(() => {
-    setWalletPlatform(detectWalletPlatform());
-  }, []);
+    if (walletPlatformProp) return;
+    setDetectedWalletPlatform(detectWalletPlatform());
+  }, [walletPlatformProp]);
 
+  const walletPlatform = walletPlatformProp ?? detectedWalletPlatform;
   const showGoogleWallet = walletPlatform !== "ios";
   const showAppleWallet = walletPlatform !== "android";
-  const googleBadgeSrc = "/wallet/google/en.svg";
-  const appleBadgeSrc = "/wallet/apple/en.svg";
 
-  const badgeImageClassName =
+  const googleBadgeWrapperClassName =
     size === "footer"
-      ? "block h-10 w-auto max-w-full sm:h-11"
-      : "block h-11 w-auto max-w-full sm:h-12";
-  const badgeDisabledClassName = `${badgeImageClassName} opacity-60`;
+      ? "block h-10 w-[145px] sm:h-11 sm:w-[159px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
+      : "block h-11 w-[159px] sm:h-12 sm:w-[174px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full";
+  const googleBadgeDisabledWrapperClassName = `${googleBadgeWrapperClassName} opacity-60`;
+  const appleBadgeWrapperClassName =
+    size === "footer"
+      ? "block h-10 w-[127px] sm:h-11 sm:w-[140px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
+      : "block h-11 w-[140px] sm:h-12 sm:w-[152px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full";
+  const appleBadgeDisabledWrapperClassName = `${appleBadgeWrapperClassName} opacity-60`;
   const fallbackButtonClassName =
     size === "footer"
       ? "inline-flex h-10 min-w-[190px] items-center justify-center rounded-xl border border-accent-4 px-4 text-sm font-semibold text-contrast/90 transition hover:bg-accent-2 disabled:cursor-not-allowed disabled:opacity-60 sm:h-11"
@@ -51,42 +59,23 @@ const WalletSaveButtons = ({
   const renderGoogle = () => {
     if (!showGoogleWallet) return null;
 
-    if (googleBadgeMissing) {
-      return (
-        <button
-          type="button"
-          className={fallbackButtonClassName}
-          disabled={!saveUrl || loading}
-          onClick={() => {
-            if (saveUrl) {
-              window.location.href = saveUrl;
-            }
-          }}
-        >
-          Add to Google Wallet
-        </button>
-      );
-    }
-
     if (saveUrl && !loading) {
       return (
         <a href={saveUrl} className="block w-fit">
-          <img
-            src={googleBadgeSrc}
-            alt="Add to Google Wallet"
-            className={badgeImageClassName}
-            onError={() => setGoogleBadgeMissing(true)}
+          <span
+            aria-label="Add to Google Wallet"
+            className={googleBadgeWrapperClassName}
+            dangerouslySetInnerHTML={{ __html: GOOGLE_WALLET_BADGE_SVG }}
           />
         </a>
       );
     }
 
     return (
-      <img
-        src={googleBadgeSrc}
-        alt="Add to Google Wallet"
-        className={badgeDisabledClassName}
-        onError={() => setGoogleBadgeMissing(true)}
+      <span
+        aria-label="Add to Google Wallet"
+        className={googleBadgeDisabledWrapperClassName}
+        dangerouslySetInnerHTML={{ __html: GOOGLE_WALLET_BADGE_SVG }}
       />
     );
   };
@@ -94,42 +83,23 @@ const WalletSaveButtons = ({
   const renderApple = () => {
     if (!showAppleWallet) return null;
 
-    if (appleBadgeMissing) {
-      return (
-        <button
-          type="button"
-          className={fallbackButtonClassName}
-          disabled={!applePassUrl || loading}
-          onClick={() => {
-            if (applePassUrl) {
-              window.location.href = applePassUrl;
-            }
-          }}
-        >
-          Add to Apple Wallet
-        </button>
-      );
-    }
-
     if (applePassUrl && !loading) {
       return (
         <a href={applePassUrl} className="block w-fit">
-          <img
-            src={appleBadgeSrc}
-            alt="Add to Apple Wallet"
-            className={badgeImageClassName}
-            onError={() => setAppleBadgeMissing(true)}
+          <span
+            aria-label="Add to Apple Wallet"
+            className={appleBadgeWrapperClassName}
+            dangerouslySetInnerHTML={{ __html: APPLE_WALLET_BADGE_SVG }}
           />
         </a>
       );
     }
 
     return (
-      <img
-        src={appleBadgeSrc}
-        alt="Add to Apple Wallet"
-        className={badgeDisabledClassName}
-        onError={() => setAppleBadgeMissing(true)}
+      <span
+        aria-label="Add to Apple Wallet"
+        className={appleBadgeDisabledWrapperClassName}
+        dangerouslySetInnerHTML={{ __html: APPLE_WALLET_BADGE_SVG }}
       />
     );
   };

@@ -208,6 +208,7 @@ const JoinPage = () => {
                 errorMessage={walletError}
                 preview={walletPreview}
                 showWalletButtons={false}
+                walletPlatform={walletPlatform}
               />
             )}
           </div>
@@ -248,6 +249,7 @@ const JoinPage = () => {
                   loading={walletLoading}
                   size="footer"
                   layout="row"
+                  walletPlatform={walletPlatform}
                 />
               </div>
             )}

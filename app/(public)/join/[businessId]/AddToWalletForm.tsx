@@ -13,6 +13,7 @@ type AddToWalletFormProps = {
   errorMessage?: string;
   preview?: CustomerCardPreview | null;
   showWalletButtons?: boolean;
+  walletPlatform?: WalletPlatform;
 };
 
 const AddToWalletForm = ({
@@ -22,12 +23,17 @@ const AddToWalletForm = ({
   errorMessage,
   preview,
   showWalletButtons = true,
+  walletPlatform: walletPlatformProp,
 }: AddToWalletFormProps) => {
-  const [walletPlatform, setWalletPlatform] = useState<WalletPlatform>("other");
+  const [detectedWalletPlatform, setDetectedWalletPlatform] =
+    useState<WalletPlatform>("other");
 
   useEffect(() => {
-    setWalletPlatform(detectWalletPlatform());
-  }, []);
+    if (walletPlatformProp) return;
+    setDetectedWalletPlatform(detectWalletPlatform());
+  }, [walletPlatformProp]);
+
+  const walletPlatform = walletPlatformProp ?? detectedWalletPlatform;
 
   const showGoogleWallet = walletPlatform !== "ios";
   const showAppleWallet = walletPlatform !== "android";
@@ -87,6 +93,7 @@ const AddToWalletForm = ({
           loading={loading}
           size="default"
           layout="stack"
+          walletPlatform={walletPlatform}
         />
       ) : null}
     </div>
