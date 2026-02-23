@@ -24,9 +24,9 @@ const LogoUploadPanel = ({
 }: LogoUploadPanelProps) => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoVersion, setLogoVersion] = useState(0);
-  const [logoStatus, setLogoStatus] = useState<"unknown" | "available" | "missing">(
-    hasLogo ? "available" : "missing"
-  );
+  const [logoStatus, setLogoStatus] = useState<
+    "unknown" | "available" | "missing"
+  >(hasLogo ? "available" : "missing");
   const logoInputRef = useRef<HTMLInputElement | null>(null);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const logoSrc =
@@ -35,7 +35,7 @@ const LogoUploadPanel = ({
       : "";
 
   const handleLogoChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -56,8 +56,8 @@ const LogoUploadPanel = ({
     } catch (error) {
       console.error(error);
       const message =
-        (error as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ??
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ??
         (error instanceof Error ? error.message : "Unable to upload logo.");
       toast.error(message);
     } finally {
@@ -82,7 +82,7 @@ const LogoUploadPanel = ({
   return (
     <div className="flex items-center gap-3">
       {logoStatus === "available" && logoSrc ? (
-        <div className="relative h-16 w-16 rounded-lg border border-accent-3 bg-transparent">
+        <div className="relative h-16 w-16 rounded-lg border border-accent-3 bg-primary">
           <img
             src={logoSrc}
             alt={`${businessName} logo`}

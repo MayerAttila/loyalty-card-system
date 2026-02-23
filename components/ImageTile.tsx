@@ -36,7 +36,7 @@ const ImageTile = ({
           onSelect?.();
         }
       }}
-      className={`relative h-16 w-16 rounded-lg border bg-transparent ${
+      className={`relative h-16 w-16 rounded-lg border bg-primary ${
         selected ? "border-brand ring-2 ring-brand/40" : "border-accent-3"
       } ${selectable ? "cursor-pointer" : ""}`}
     >

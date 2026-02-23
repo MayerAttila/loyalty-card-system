@@ -30,7 +30,7 @@ const CardTemplateEditor = ({
   initialBusinessName = "Coffee Club",
   initialMaxPoints = 10,
   initialFilledPoints = 3,
-  initialCardColor = "#121826",
+  initialCardColor = "#e6345a",
   initialHasLogo = false,
   businessId: businessIdProp,
   selectedTemplate,
@@ -41,7 +41,7 @@ const CardTemplateEditor = ({
   const businessId = businessIdProp ?? session?.user?.businessId;
   const [businessName] = useState(initialBusinessName);
   const [text1, setText1] = useState(
-    selectedTemplate?.text1 ?? initialBusinessName
+    selectedTemplate?.text1 ?? initialBusinessName,
   );
   const [text2, setText2] = useState(selectedTemplate?.text2 ?? "Stamps");
   const [maxPoints, setMaxPoints] = useState(initialMaxPoints);
@@ -146,8 +146,8 @@ const CardTemplateEditor = ({
   ]);
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-      <div className="rounded-xl border border-accent-3 bg-primary/40 p-5">
+    <div className="mt-6">
+      <div className="rounded-xl border border-accent-3 bg-accent-1 p-5">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-contrast/70">
           Card Details
         </h3>
@@ -177,7 +177,10 @@ const CardTemplateEditor = ({
                   onChange={(event) => {
                     setTemplateName(event.target.value);
                     if (errors.templateName) {
-                      setErrors((prev) => ({ ...prev, templateName: undefined }));
+                      setErrors((prev) => ({
+                        ...prev,
+                        templateName: undefined,
+                      }));
                     }
                   }}
                 />
@@ -241,42 +244,73 @@ const CardTemplateEditor = ({
               Select a business to manage stamps.
             </p>
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block text-xs text-contrast/70">
-              Max stamps
-              <input
-                type="number"
-                min={4}
-                max={16}
-                value={maxPoints}
-                onChange={(event) => setMaxPoints(Number(event.target.value))}
-                className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none"
-              />
-            </label>
-            <label className="block text-xs text-contrast/70">
-              Stamps filled
-              <input
-                type="number"
-                min={0}
-                max={maxPoints}
-                value={filledPoints}
-                onChange={(event) =>
-                  setFilledPoints(Number(event.target.value))
-                }
-                className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none"
-              />
-            </label>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="block text-xs text-contrast/70">
-              Card color
-              <input
-                type="color"
-                value={cardColor}
-                onChange={(event) => setCardColor(event.target.value)}
-                className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-accent-3 bg-primary p-1"
-              />
-            </label>
+          <div className="grid gap-6 lg:items-start lg:grid-cols-[minmax(0,_1fr)_360px]">
+            <div className="space-y-4">
+              <label className="block text-xs text-contrast/70">
+                Max stamps
+                <input
+                  type="number"
+                  min={4}
+                  max={16}
+                  value={maxPoints}
+                  onChange={(event) => setMaxPoints(Number(event.target.value))}
+                  className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none"
+                />
+              </label>
+              <label className="block text-xs text-contrast/70">
+                Stamps filled
+                <input
+                  type="number"
+                  min={0}
+                  max={maxPoints}
+                  value={filledPoints}
+                  onChange={(event) =>
+                    setFilledPoints(Number(event.target.value))
+                  }
+                  className="mt-2 w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none"
+                />
+              </label>
+
+              <label className="block text-xs text-contrast/70">
+                Card color
+                <input
+                  type="color"
+                  value={cardColor}
+                  onChange={(event) => setCardColor(event.target.value)}
+                  className="mt-2 h-12 w-full cursor-pointer rounded-lg border border-accent-3 bg-primary p-1"
+                />
+              </label>
+            </div>
+
+            <div className="rounded-xl border border-accent-3 bg-primary/30 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-contrast/60">
+                Live preview
+              </p>
+              <div className="mt-3 flex items-center justify-center">
+                <WalletCardPreview
+                  text1={sanitized.text1}
+                  text2={sanitized.text2}
+                  maxPoints={sanitized.maxPoints}
+                  filledPoints={sanitized.filledPoints}
+                  rewardsCollected={sanitized.rewardsCollected}
+                  cardColor={sanitized.cardColor}
+                  logoSrc={logoAvailable ? logoSrc : undefined}
+                  useLogo={logoAvailable}
+                  filledStampSrc={
+                    useBusinessStamps && selectedStampOnUrl
+                      ? selectedStampOnUrl
+                      : undefined
+                  }
+                  emptyStampSrc={
+                    useBusinessStamps && selectedStampOffUrl
+                      ? selectedStampOffUrl
+                      : undefined
+                  }
+                  useStampImages={useBusinessStamps}
+                  className="max-w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
@@ -333,8 +367,8 @@ const CardTemplateEditor = ({
                 setErrors({});
                 toast.success(
                   selectedTemplate?.id
-                  ? "Card template updated."
-                  : "Card template saved.",
+                    ? "Card template updated."
+                    : "Card template saved.",
                 );
               } catch (error) {
                 console.error(error);
@@ -352,25 +386,6 @@ const CardTemplateEditor = ({
           </Button>
         </div>
       </div>
-        <div className="flex items-center justify-center rounded-xl border border-accent-3 bg-primary/30 p-5">
-          <WalletCardPreview
-            text1={sanitized.text1}
-            text2={sanitized.text2}
-            maxPoints={sanitized.maxPoints}
-            filledPoints={sanitized.filledPoints}
-            rewardsCollected={sanitized.rewardsCollected}
-            cardColor={sanitized.cardColor}
-            logoSrc={logoAvailable ? logoSrc : undefined}
-            useLogo={logoAvailable}
-            filledStampSrc={
-              useBusinessStamps && selectedStampOnUrl ? selectedStampOnUrl : undefined
-            }
-            emptyStampSrc={
-              useBusinessStamps && selectedStampOffUrl ? selectedStampOffUrl : undefined
-            }
-            useStampImages={useBusinessStamps}
-          />
-        </div>
     </div>
   );
 };

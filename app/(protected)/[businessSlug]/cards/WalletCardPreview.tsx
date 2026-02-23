@@ -23,7 +23,7 @@ const WalletCardPreview = ({
   maxPoints,
   filledPoints = 0,
   rewardsCollected = 0,
-  cardColor = "#141b2d",
+  cardColor = "#e6345a",
   logoSrc,
   useLogo = false,
   filledStampSrc,

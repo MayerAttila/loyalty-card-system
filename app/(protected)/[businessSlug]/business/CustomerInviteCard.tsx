@@ -15,7 +15,7 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
   const joinUrl = appOrigin ? `${appOrigin}/join/${businessId}` : "";
   const downloadName = useMemo(
     () => `loyalty-invite-${businessId}.png`,
-    [businessId]
+    [businessId],
   );
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
   };
 
   return (
-    <div className="rounded-lg border border-accent-3 bg-primary p-4">
+    <div className="rounded-lg border border-accent-3 bg-accent-1 p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-sm font-semibold text-contrast">
@@ -88,11 +88,7 @@ const CustomerInviteCard = ({ businessId }: CustomerInviteCardProps) => {
       <div className="mt-4 flex items-center gap-4">
         <div className="rounded-lg border border-accent-3 bg-white p-3">
           {joinUrl ? (
-            <QRCodeCanvas
-              value={joinUrl}
-              size={140}
-              ref={qrRef}
-            />
+            <QRCodeCanvas value={joinUrl} size={140} ref={qrRef} />
           ) : (
             <div className="flex h-[140px] w-[140px] items-center justify-center text-xs text-contrast/60">
               Loading...

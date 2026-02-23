@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import CardTemplatesPanel from "./CardTemplatesPanel";
 import CardTemplateEditor from "./CardTemplateEditor";
@@ -20,6 +20,11 @@ type CardsClientProps = {
   initialHasLogo?: boolean;
 };
 
+type EditorRenderState = {
+  selectedTemplate?: CardTemplate;
+  isCreating: boolean;
+};
+
 const CardsClient = ({
   initialTemplates,
   businessId,
@@ -31,8 +36,13 @@ const CardsClient = ({
   const [isCreating, setIsCreating] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [activatingIds, setActivatingIds] = useState<Set<string>>(new Set());
+  const [editorExpanded, setEditorExpanded] = useState(false);
+  const [editorRenderState, setEditorRenderState] =
+    useState<EditorRenderState | null>(null);
+  const editorSectionRef = useRef<HTMLDivElement | null>(null);
   const hasTemplates = templates.length > 0;
   const hasActiveTemplate = templates.some((template) => template.isActive);
+  const isEditorOpen = Boolean(selectedTemplate || isCreating);
 
   const startCreate = () => {
     setSelectedTemplate(undefined);
@@ -133,6 +143,59 @@ const CardsClient = ({
     [selectedTemplate]
   );
 
+  useEffect(() => {
+    if (!isEditorOpen) return;
+    setEditorRenderState({
+      selectedTemplate,
+      isCreating,
+    });
+  }, [isEditorOpen, isCreating, selectedTemplate]);
+
+  useEffect(() => {
+    if (!isEditorOpen) {
+      setEditorExpanded(false);
+      return;
+    }
+
+    setEditorExpanded(false);
+    let raf1 = 0;
+    let raf2 = 0;
+
+    raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        setEditorExpanded(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      window.cancelAnimationFrame(raf2);
+    };
+  }, [isEditorOpen]);
+
+  useEffect(() => {
+    if (isEditorOpen || !editorRenderState) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setEditorRenderState(null);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [editorRenderState, isEditorOpen]);
+
+  useEffect(() => {
+    if (!isEditorOpen || !editorExpanded) return;
+
+    const timeoutId = window.setTimeout(() => {
+      editorSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isEditorOpen, editorExpanded, selectedTemplate?.id]);
+
   return (
     <div className="space-y-6">
       {!hasTemplates ? (
@@ -181,19 +244,38 @@ const CardsClient = ({
           />
         </>
       )}
-      {selectedTemplate || isCreating ? (
-        <CardTemplateEditor
-          key={selectedTemplate?.id ?? "new-template"}
-          initialBusinessName={initialBusinessName}
-          initialHasLogo={initialHasLogo}
-          businessId={businessId}
-          selectedTemplate={selectedTemplate}
-          onTemplateSaved={handleTemplateSaved}
-          onCancel={() => {
-            setSelectedTemplate(undefined);
-            setIsCreating(false);
-          }}
-        />
+      {editorRenderState ? (
+        <div
+          ref={editorSectionRef}
+          className={`scroll-mt-24 grid transition-all duration-300 ease-out ${
+            editorExpanded
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div
+              className={`transition-all duration-300 ease-out ${
+                editorExpanded
+                  ? "translate-y-0 scale-100"
+                  : "-translate-y-2 scale-[0.995]"
+              }`}
+            >
+              <CardTemplateEditor
+                key={editorRenderState.selectedTemplate?.id ?? "new-template"}
+                initialBusinessName={initialBusinessName}
+                initialHasLogo={initialHasLogo}
+                businessId={businessId}
+                selectedTemplate={editorRenderState.selectedTemplate}
+                onTemplateSaved={handleTemplateSaved}
+                onCancel={() => {
+                  setSelectedTemplate(undefined);
+                  setIsCreating(false);
+                }}
+              />
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

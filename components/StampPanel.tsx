@@ -20,7 +20,7 @@ type StampPanelProps = {
   onSelect?: (kind: "on" | "off", image: BusinessStampImage) => void;
   onStampsLoaded?: (
     stampOn: BusinessStampImage[],
-    stampOff: BusinessStampImage[]
+    stampOff: BusinessStampImage[],
   ) => void;
   showToggle?: boolean;
   useStampImages?: boolean;
@@ -48,6 +48,7 @@ const StampPanel = ({
   const [deletingStampIds, setDeletingStampIds] = useState<string[]>([]);
   const stampOnInputRef = useRef<HTMLInputElement | null>(null);
   const stampOffInputRef = useRef<HTMLInputElement | null>(null);
+  const showStampSections = !showToggle || useStampImages;
 
   const loadStamps = useCallback(async () => {
     try {
@@ -176,9 +177,17 @@ const StampPanel = ({
           </button>
         ) : null}
       </div>
-      {!showToggle || useStampImages ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-accent-3 p-3">
+      <div
+        className={`grid transition-all duration-300 ease-out ${
+          showStampSections
+            ? "mt-4 grid-rows-[1fr] opacity-100"
+            : "mt-0 grid-rows-[0fr] opacity-0"
+        }`}
+        aria-hidden={!showStampSections}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border bg-accent-1 border-accent-3 p-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-contrast">
                 Stamp on
@@ -218,7 +227,7 @@ const StampPanel = ({
               )}
             </div>
           </div>
-          <div className="rounded-lg border border-accent-3 p-3">
+          <div className="rounded-lg border  bg-accent-1 border-accent-3 p-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-contrast">
                 Stamp off
@@ -258,8 +267,9 @@ const StampPanel = ({
               )}
             </div>
           </div>
+          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };
