@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Button from "@/components/Button";
 import AddToWalletForm from "./AddToWalletForm";
 import JoinCustomerDetailsStep from "./JoinCustomerDetailsStep";
+import WalletSaveButtons from "./WalletSaveButtons";
 import Stepper, { StepperTheme } from "@/components/Stepper";
 import { createCustomer } from "@/api/client/customer.api";
 import type { CustomerCardPreview } from "@/api/client/customer.api";
@@ -13,7 +14,7 @@ import {
   getGoogleWalletSaveLink,
 } from "@/api/client/userCard.api";
 import { toast } from "react-toastify";
-import { detectWalletPlatform } from "./walletPlatform";
+import { detectWalletPlatform, type WalletPlatform } from "./walletPlatform";
 
 const steps = [
   { key: "details", label: "Details", description: "Enter your information" },
@@ -37,8 +38,19 @@ const JoinPage = () => {
   const [walletError, setWalletError] = useState<string | undefined>();
   const [walletPreview, setWalletPreview] =
     useState<CustomerCardPreview | null>(null);
+  const [walletPlatform, setWalletPlatform] = useState<WalletPlatform>("other");
 
   const isAnimating = pendingStep !== null;
+  const walletTypeLabel =
+    walletPlatform === "ios"
+      ? "Apple Wallet"
+      : walletPlatform === "android"
+        ? "Google Wallet"
+        : "Google Wallet or Apple Wallet";
+
+  useEffect(() => {
+    setWalletPlatform(detectWalletPlatform());
+  }, []);
 
   // ✅ All styling + timing configured HERE
   const stepperTheme = {
@@ -160,11 +172,11 @@ const JoinPage = () => {
             Get your digital card
           </h1>
           <p className="mt-4 max-w-2xl text-base text-contrast/80">
-            Complete your details first, then add your card to Google Wallet.
+            Complete your details first, then add your card to {walletTypeLabel}.
           </p>
         </header>
 
-        <div className="rounded-xl border border-accent-3 bg-accent-1 p-6">
+        <div className="glass-card p-6">
           <div className="mb-8">
             <Stepper
               steps={steps}
@@ -178,7 +190,7 @@ const JoinPage = () => {
             />
           </div>
 
-          <div className="rounded-lg border border-accent-3 bg-primary p-6">
+          <div>
             {activeStep === 0 ? (
               <JoinCustomerDetailsStep
                 customerName={customerName}
@@ -195,35 +207,50 @@ const JoinPage = () => {
                 loading={walletLoading}
                 errorMessage={walletError}
                 preview={walletPreview}
+                showWalletButtons={false}
               />
             )}
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <Button
-              type="button"
-              variant="neutral"
-              onClick={() => requestStep(activeStep - 1)}
-              disabled={activeStep === 0 || isAnimating}
-            >
-              Back
-            </Button>
+          <div
+            className={`mt-6 flex gap-3 ${
+              activeStep === 0 ? "justify-end" : "items-center justify-between"
+            }`}
+          >
+            {activeStep > 0 && (
+              <Button
+                type="button"
+                variant="neutral"
+                onClick={() => requestStep(activeStep - 1)}
+                disabled={isAnimating}
+                className="h-10 w-[127px] shrink-0 rounded-xl px-0 sm:h-11 sm:w-[140px]"
+              >
+                Back
+              </Button>
+            )}
 
-            <Button
-              type="button"
-              onClick={() => {
-                if (activeStep === 0) {
+            {activeStep === 0 ? (
+              <Button
+                type="button"
+                onClick={() => {
                   void handleJoinSubmit();
-                  return;
-                }
-                requestStep(activeStep + 1);
-              }}
-              disabled={
-                activeStep === steps.length - 1 || isAnimating || submitting
-              }
-            >
-              Next
-            </Button>
+                }}
+                disabled={isAnimating || submitting}
+                className="h-10 w-[127px] rounded-xl px-0 sm:h-11 sm:w-[140px]"
+              >
+                Next
+              </Button>
+            ) : (
+              <div className="ml-auto min-w-0">
+                <WalletSaveButtons
+                  saveUrl={saveUrl}
+                  applePassUrl={applePassUrl}
+                  loading={walletLoading}
+                  size="footer"
+                  layout="row"
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>

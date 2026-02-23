@@ -28,7 +28,6 @@ const JoinCustomerDetailsStep = ({
       }}
     >
       <div>
-        <h2 className="text-lg font-semibold">Step 1: Your details</h2>
         <p className="mt-2 text-sm text-contrast/70">
           Fill in your name and email to create your loyalty card.
         </p>
