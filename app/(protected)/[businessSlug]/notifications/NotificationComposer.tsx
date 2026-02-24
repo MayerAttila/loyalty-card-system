@@ -4,7 +4,6 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
-import CustomInput from "@/components/CustomInput";
 import FormSwitch from "@/components/FormSwitch";
 import {
   createNotification,
@@ -99,7 +98,6 @@ const NotificationComposer = ({
   const [repeatPattern, setRepeatPattern] = useState<RepeatPattern>("weekly");
   const [repeatDays, setRepeatDays] = useState<WeekdayKey[]>([]);
   const [monthlyDayOfMonth, setMonthlyDayOfMonth] = useState("1");
-  const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [scheduledDate, setScheduledDate] = useState(
     toLocalDateInputValue(now),
@@ -118,14 +116,12 @@ const NotificationComposer = ({
       setRepeatPattern("weekly");
       setRepeatDays([]);
       setMonthlyDayOfMonth("1");
-      setTitle("");
       setMessage("");
       setScheduledDate(toLocalDateInputValue(now));
       setScheduledTime("10:00");
       return;
     }
 
-    setTitle(initialNotification.title ?? "");
     setMessage(initialNotification.message ?? "");
     setDeliveryMode(initialNotification.deliveryMode);
     setScheduleType(initialNotification.scheduleType);
@@ -209,11 +205,6 @@ const NotificationComposer = ({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!title.trim()) {
-      toast.error("Notification title is required.");
-      return;
-    }
-
     if (!message.trim()) {
       toast.error("Notification message is required.");
       return;
@@ -247,7 +238,6 @@ const NotificationComposer = ({
         Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const payloadBase = {
         businessId,
-        title: title.trim(),
         message: message.trim(),
         deliveryMode,
         timezone,
@@ -257,7 +247,6 @@ const NotificationComposer = ({
         deliveryMode === "now"
           ? isEditMode && initialNotification
             ? await updateNotification(initialNotification.id, {
-                title: payloadBase.title,
                 message: payloadBase.message,
                 deliveryMode: "now",
                 scheduleType: "once",
@@ -270,7 +259,6 @@ const NotificationComposer = ({
           : isRecurringSchedule
             ? isEditMode && initialNotification
               ? await updateNotification(initialNotification.id, {
-                  title: payloadBase.title,
                   message: payloadBase.message,
                   deliveryMode: "scheduled",
                   scheduleType: "repeat",
@@ -294,7 +282,6 @@ const NotificationComposer = ({
                 })
             : isEditMode && initialNotification
               ? await updateNotification(initialNotification.id, {
-                  title: payloadBase.title,
                   message: payloadBase.message,
                   deliveryMode: "scheduled",
                   scheduleType: "once",
@@ -356,16 +343,6 @@ const NotificationComposer = ({
       </div>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-        <div className="grid gap-4">
-          <CustomInput
-            id="notification-title"
-            label="Notification title"
-            placeholder="Weekend offer"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-        </div>
-
         <div>
           <label
             htmlFor="notification-message"

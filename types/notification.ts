@@ -20,7 +20,6 @@ export type NotificationRecord = {
     name: string;
     email: string;
   };
-  title: string;
   message: string;
   status: NotificationStatus;
   deliveryMode: NotificationDeliveryMode;
@@ -40,7 +39,6 @@ export type NotificationRecord = {
 
 export type CreateNotificationPayload = {
   businessId: string;
-  title: string;
   message: string;
   deliveryMode: NotificationDeliveryMode;
   scheduleType?: NotificationScheduleType;

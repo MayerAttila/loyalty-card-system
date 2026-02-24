@@ -146,6 +146,12 @@ const NotificationOverview = ({
           const isSending = sendingIds.includes(notification.id);
           const isBusy = isToggling || isDeleting || isSending;
           const scheduleLine = buildScheduleLine(notification);
+          const displayMessage =
+            notification.message?.trim() || "Notification message";
+          const actionLabel =
+            displayMessage.length > 40
+              ? `${displayMessage.slice(0, 40).trimEnd()}...`
+              : displayMessage;
 
           return (
             <article
@@ -163,16 +169,13 @@ const NotificationOverview = ({
                       }}
                       aria-hidden="true"
                     />
-                    <p className="text-sm font-semibold text-contrast">
-                      {notification.title}
+                    <p className="line-clamp-1 text-sm font-semibold text-contrast">
+                      {displayMessage}
                     </p>
                     <span className="text-[11px] font-medium text-contrast/55">
                       {scheduleLine}
                     </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-contrast/72">
-                    {notification.message}
-                  </p>
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
@@ -182,7 +185,7 @@ const NotificationOverview = ({
                       onClick={() => void onSendNow(notification)}
                       disabled={isBusy}
                       title={isSending ? "Sending..." : "Send now"}
-                      aria-label={`Send notification now: ${notification.title}`}
+                        aria-label={`Send notification now: ${actionLabel}`}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-brand transition-transform duration-200 hover:bg-brand/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <FaPaperPlane className="text-sm" />
@@ -191,14 +194,14 @@ const NotificationOverview = ({
                   <EditButton
                     disabled={isBusy}
                     title="Edit notification"
-                    ariaLabel={`Edit notification ${notification.title}`}
+                      ariaLabel={`Edit notification ${actionLabel}`}
                     onClick={() => void onEdit(notification)}
                   />
                   <div className={isDeleting ? "opacity-60" : ""}>
                     <DeleteButton
                       disabled={isBusy}
                       title={isDeleting ? "Deleting..." : "Delete notification"}
-                      ariaLabel={`Delete notification ${notification.title}`}
+                      ariaLabel={`Delete notification ${actionLabel}`}
                       onConfirm={() => void onDelete(notification)}
                     />
                   </div>
