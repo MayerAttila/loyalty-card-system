@@ -55,3 +55,14 @@ export type CreateNotificationPayload = {
 export type UpdateNotificationStatusPayload = {
   status?: NotificationStatus;
 };
+
+export type SendNotificationNowResponse = {
+  notificationId: string;
+  executionId: string;
+  triggerType: "manual_now";
+  sentCount: number;
+  failedCount: number;
+  skippedCount: number;
+  targetCardCount: number;
+  attemptedAt: string;
+};

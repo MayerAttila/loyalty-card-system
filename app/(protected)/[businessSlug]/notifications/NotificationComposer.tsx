@@ -8,6 +8,7 @@ import CustomInput from "@/components/CustomInput";
 import FormSwitch from "@/components/FormSwitch";
 import {
   createNotification,
+  sendNotificationNow,
   updateNotification,
 } from "@/api/client/notification.api";
 import type {
@@ -312,13 +313,22 @@ const NotificationComposer = ({
                   ),
                 });
 
-      toast.success(
-        isEditMode
-          ? "Notification updated."
-          : deliveryMode === "now"
-            ? "Notification saved."
-            : "Scheduled notification saved.",
-      );
+      let sendNowSummary:
+        | Awaited<ReturnType<typeof sendNotificationNow>>
+        | null = null;
+      if (deliveryMode === "now") {
+        sendNowSummary = await sendNotificationNow(saved.id);
+      }
+
+      if (sendNowSummary) {
+        toast.success(
+          `Notification sent. ${sendNowSummary.sentCount} sent, ${sendNowSummary.failedCount} failed, ${sendNowSummary.skippedCount} skipped.`,
+        );
+      } else {
+        toast.success(
+          isEditMode ? "Notification updated." : "Scheduled notification saved.",
+        );
+      }
       onSaved?.(saved);
     } catch (error) {
       const message = axios.isAxiosError<{ message?: string }>(error)

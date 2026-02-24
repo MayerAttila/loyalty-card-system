@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Button from "@/components/Button";
 import DeleteButton from "@/components/DeleteButton";
 import EditButton from "@/components/EditButton";
+import { FaPaperPlane } from "react-icons/fa6";
 import type { NotificationRecord } from "@/types/notification";
 import { getNotificationColor } from "./notificationVisuals";
 
@@ -32,9 +33,11 @@ type NotificationOverviewProps = {
   loading?: boolean;
   togglingIds?: string[];
   deletingIds?: string[];
+  sendingIds?: string[];
   onToggleStatus: (notification: NotificationRecord) => void | Promise<void>;
   onDelete: (notification: NotificationRecord) => void | Promise<void>;
   onEdit: (notification: NotificationRecord) => void | Promise<void>;
+  onSendNow?: (notification: NotificationRecord) => void | Promise<void>;
   onCreate?: () => void;
   showCreateButton?: boolean;
 };
@@ -81,9 +84,11 @@ const NotificationOverview = ({
   loading = false,
   togglingIds = [],
   deletingIds = [],
+  sendingIds = [],
   onToggleStatus,
   onDelete,
   onEdit,
+  onSendNow,
   onCreate,
   showCreateButton = false,
 }: NotificationOverviewProps) => {
@@ -138,7 +143,8 @@ const NotificationOverview = ({
           const isActive = notification.status === "active";
           const isToggling = togglingIds.includes(notification.id);
           const isDeleting = deletingIds.includes(notification.id);
-          const isBusy = isToggling || isDeleting;
+          const isSending = sendingIds.includes(notification.id);
+          const isBusy = isToggling || isDeleting || isSending;
           const scheduleLine = buildScheduleLine(notification);
 
           return (
@@ -170,6 +176,18 @@ const NotificationOverview = ({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
+                  {onSendNow ? (
+                    <button
+                      type="button"
+                      onClick={() => void onSendNow(notification)}
+                      disabled={isBusy}
+                      title={isSending ? "Sending..." : "Send now"}
+                      aria-label={`Send notification now: ${notification.title}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-brand transition-transform duration-200 hover:bg-brand/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <FaPaperPlane className="text-sm" />
+                    </button>
+                  ) : null}
                   <EditButton
                     disabled={isBusy}
                     title="Edit notification"

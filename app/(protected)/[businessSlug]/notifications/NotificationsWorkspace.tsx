@@ -8,6 +8,7 @@ import NotificationOverview from "./NotificationOverview";
 import {
   deleteNotification,
   getNotificationsByBusinessId,
+  sendNotificationNow,
   updateNotificationStatus,
 } from "@/api/client/notification.api";
 import type { NotificationRecord } from "@/types/notification";
@@ -24,10 +25,12 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [togglingIds, setTogglingIds] = useState<string[]>([]);
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
+  const [sendingIds, setSendingIds] = useState<string[]>([]);
   const composerRef = useRef<HTMLDivElement | null>(null);
 
   const togglingSet = useMemo(() => new Set(togglingIds), [togglingIds]);
   const deletingSet = useMemo(() => new Set(deletingIds), [deletingIds]);
+  const sendingSet = useMemo(() => new Set(sendingIds), [sendingIds]);
 
   const loadNotifications = useCallback(async () => {
     setLoadingNotifications(true);
@@ -77,13 +80,19 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
   };
 
   const handleEditNotification = (notification: NotificationRecord) => {
-    if (deletingSet.has(notification.id)) return;
+    if (deletingSet.has(notification.id) || sendingSet.has(notification.id)) return;
     setEditingNotification(notification);
     setIsComposerOpen(true);
   };
 
   const handleToggleStatus = async (notification: NotificationRecord) => {
-    if (togglingSet.has(notification.id) || deletingSet.has(notification.id)) return;
+    if (
+      togglingSet.has(notification.id) ||
+      deletingSet.has(notification.id) ||
+      sendingSet.has(notification.id)
+    ) {
+      return;
+    }
 
     setTogglingIds((current) => [...current, notification.id]);
     try {
@@ -105,7 +114,13 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
   };
 
   const handleDeleteNotification = async (notification: NotificationRecord) => {
-    if (deletingSet.has(notification.id) || togglingSet.has(notification.id)) return;
+    if (
+      deletingSet.has(notification.id) ||
+      togglingSet.has(notification.id) ||
+      sendingSet.has(notification.id)
+    ) {
+      return;
+    }
 
     setDeletingIds((current) => [...current, notification.id]);
     try {
@@ -122,6 +137,36 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
     }
   };
 
+  const handleSendNowNotification = async (notification: NotificationRecord) => {
+    if (
+      sendingSet.has(notification.id) ||
+      deletingSet.has(notification.id) ||
+      togglingSet.has(notification.id)
+    ) {
+      return;
+    }
+
+    setSendingIds((current) => [...current, notification.id]);
+    try {
+      const result = await sendNotificationNow(notification.id);
+      setNotifications((current) =>
+        current.map((item) =>
+          item.id === notification.id
+            ? { ...item, lastRunAtUtc: result.attemptedAt }
+            : item
+        )
+      );
+      toast.success(
+        `Notification sent. ${result.sentCount} sent, ${result.failedCount} failed, ${result.skippedCount} skipped.`
+      );
+    } catch (error) {
+      console.error("sendNotificationNow failed", error);
+      toast.error("Unable to send notification now.");
+    } finally {
+      setSendingIds((current) => current.filter((id) => id !== notification.id));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-2">
@@ -131,9 +176,11 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
           loading={loadingNotifications}
           togglingIds={togglingIds}
           deletingIds={deletingIds}
+          sendingIds={sendingIds}
           onToggleStatus={handleToggleStatus}
           onDelete={handleDeleteNotification}
           onEdit={handleEditNotification}
+          onSendNow={handleSendNowNotification}
           onCreate={handleStartCreate}
           showCreateButton={!isComposerOpen}
         />

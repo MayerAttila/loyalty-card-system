@@ -2,6 +2,7 @@ import { api } from "./axios";
 import type {
   CreateNotificationPayload,
   NotificationRecord,
+  SendNotificationNowResponse,
   UpdateNotificationStatusPayload,
 } from "@/types/notification";
 
@@ -50,6 +51,13 @@ export async function updateNotificationStatus(
 export async function deleteNotification(id: string) {
   const res = await api.delete<{ id: string; deleted: boolean }>(
     `/notification/id/${id}`
+  );
+  return res.data;
+}
+
+export async function sendNotificationNow(id: string) {
+  const res = await api.post<SendNotificationNowResponse>(
+    `/notification/id/${id}/send-now`
   );
   return res.data;
 }
