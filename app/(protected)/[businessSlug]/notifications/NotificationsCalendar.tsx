@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/Button";
+import CustomDropdown from "@/components/CustomDropdown";
 import { getPublicHolidays } from "@/api/client/holiday.api";
 import type { HolidayCountryCode, PublicHolidayRecord } from "@/types/holiday";
 import type { NotificationRecord } from "@/types/notification";
@@ -51,7 +52,7 @@ const HOLIDAY_COUNTRY_OPTIONS: Array<{
 ];
 
 const HOLIDAY_COUNTRY_OPTION_SET = new Set(
-  HOLIDAY_COUNTRY_OPTIONS.map((option) => option.value)
+  HOLIDAY_COUNTRY_OPTIONS.map((option) => option.value),
 );
 
 const startOfDay = (date: Date) =>
@@ -73,7 +74,8 @@ const startOfWeekMonday = (date: Date) => {
 };
 
 const getWeekDiff = (from: Date, to: Date) => {
-  const diffMs = startOfWeekMonday(to).getTime() - startOfWeekMonday(from).getTime();
+  const diffMs =
+    startOfWeekMonday(to).getTime() - startOfWeekMonday(from).getTime();
   return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
 };
 
@@ -92,7 +94,10 @@ type CalendarCell = {
   isPast: boolean;
 };
 
-const buildCalendarCells = (visibleMonth: Date, today: Date): CalendarCell[] => {
+const buildCalendarCells = (
+  visibleMonth: Date,
+  today: Date,
+): CalendarCell[] => {
   const monthStart = startOfMonth(visibleMonth);
   const dayOfWeek = monthStart.getDay();
   const mondayOffset = (dayOfWeek + 6) % 7;
@@ -162,44 +167,48 @@ const NotificationsCalendar = ({
   const today = useMemo(() => startOfDay(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(today));
   const [selectedDateKeys, setSelectedDateKeys] = useState<string[]>([]);
-  const [holidayCountryCode, setHolidayCountryCode] = useState<HolidayCountryCode>(
-    () => readStoredHolidayCountry() ?? detectDefaultHolidayCountry()
-  );
+  const [holidayCountryCode, setHolidayCountryCode] =
+    useState<HolidayCountryCode>(
+      () => readStoredHolidayCountry() ?? detectDefaultHolidayCountry(),
+    );
   const [holidayCache, setHolidayCache] = useState<
     Record<string, PublicHolidayRecord[]>
   >({});
   const [loadingHolidayKeys, setLoadingHolidayKeys] = useState<string[]>([]);
   const [holidayError, setHolidayError] = useState<string | null>(null);
 
-  const monthLabel = useMemo(() => formatMonthLabel(visibleMonth), [visibleMonth]);
+  const monthLabel = useMemo(
+    () => formatMonthLabel(visibleMonth),
+    [visibleMonth],
+  );
 
   const calendarCells = useMemo(
     () => buildCalendarCells(visibleMonth, today),
-    [today, visibleMonth]
+    [today, visibleMonth],
   );
 
   const visibleYears = useMemo(
     () =>
       Array.from(
-        new Set(calendarCells.map((cell) => cell.date.getFullYear()))
+        new Set(calendarCells.map((cell) => cell.date.getFullYear())),
       ).sort((a, b) => a - b),
-    [calendarCells]
+    [calendarCells],
   );
 
   useEffect(() => {
     const missingYears = visibleYears.filter(
-      (year) => !holidayCache[getHolidayCacheKey(holidayCountryCode, year)]
+      (year) => !holidayCache[getHolidayCacheKey(holidayCountryCode, year)],
     );
 
     if (missingYears.length === 0) return;
 
     const missingKeys = missingYears.map((year) =>
-      getHolidayCacheKey(holidayCountryCode, year)
+      getHolidayCacheKey(holidayCountryCode, year),
     );
     let cancelled = false;
 
     setLoadingHolidayKeys((current) =>
-      Array.from(new Set([...current, ...missingKeys]))
+      Array.from(new Set([...current, ...missingKeys])),
     );
     setHolidayError(null);
 
@@ -207,7 +216,7 @@ const NotificationsCalendar = ({
       missingYears.map(async (year) => ({
         year,
         holidays: await getPublicHolidays(holidayCountryCode, year),
-      }))
+      })),
     )
       .then((results) => {
         if (cancelled) return;
@@ -228,7 +237,7 @@ const NotificationsCalendar = ({
       .finally(() => {
         if (cancelled) return;
         setLoadingHolidayKeys((current) =>
-          current.filter((key) => !missingKeys.includes(key))
+          current.filter((key) => !missingKeys.includes(key)),
         );
       });
 
@@ -242,7 +251,7 @@ const NotificationsCalendar = ({
     try {
       window.localStorage.setItem(
         HOLIDAY_COUNTRY_STORAGE_KEY,
-        holidayCountryCode
+        holidayCountryCode,
       );
     } catch {
       // Ignore storage write failures (private mode / quota / disabled storage).
@@ -271,7 +280,10 @@ const NotificationsCalendar = ({
     const map = new Map<string, CalendarNotificationMarker[]>();
     const visibleDateKeys = new Set(calendarCells.map((cell) => cell.key));
 
-    const pushMarker = (dateKey: string, marker: CalendarNotificationMarker) => {
+    const pushMarker = (
+      dateKey: string,
+      marker: CalendarNotificationMarker,
+    ) => {
       if (!visibleDateKeys.has(dateKey)) return;
       const current = map.get(dateKey) ?? [];
       if (!current.some((item) => item.id === marker.id)) {
@@ -313,7 +325,7 @@ const NotificationsCalendar = ({
           notification.createdAt ??
             notification.scheduledAtUtc ??
             notification.nextRunAtUtc ??
-            Date.now()
+            Date.now(),
         );
 
         for (const cell of calendarCells) {
@@ -328,7 +340,8 @@ const NotificationsCalendar = ({
         continue;
       }
 
-      const scheduledIso = notification.scheduledAtUtc ?? notification.nextRunAtUtc;
+      const scheduledIso =
+        notification.scheduledAtUtc ?? notification.nextRunAtUtc;
       if (!scheduledIso) continue;
       const scheduledDate = new Date(scheduledIso);
       if (Number.isNaN(scheduledDate.getTime())) continue;
@@ -341,9 +354,11 @@ const NotificationsCalendar = ({
   const isHolidayLoading = useMemo(
     () =>
       visibleYears.some((year) =>
-        loadingHolidayKeys.includes(getHolidayCacheKey(holidayCountryCode, year))
+        loadingHolidayKeys.includes(
+          getHolidayCacheKey(holidayCountryCode, year),
+        ),
       ),
-    [holidayCountryCode, loadingHolidayKeys, visibleYears]
+    [holidayCountryCode, loadingHolidayKeys, visibleYears],
   );
 
   const toggleDate = (cell: CalendarCell) => {
@@ -359,18 +374,43 @@ const NotificationsCalendar = ({
 
   return (
     <section className="rounded-2xl border border-accent-3 bg-accent-1 p-5">
-      <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h2 className="text-xl font-semibold text-brand">Schedule Calendar</h2>
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-contrast/60">
+            Holidays
+          </span>
+          <CustomDropdown
+            value={holidayCountryCode}
+            options={HOLIDAY_COUNTRY_OPTIONS.map((option) => ({
+              value: option.value,
+              label: option.label,
+              metaLabel: option.value,
+            }))}
+            onChange={(value) =>
+              setHolidayCountryCode(value as HolidayCountryCode)
+            }
+            ariaLabel="Holiday country options"
+          />
+          {isHolidayLoading ? (
+            <span className="text-[11px] text-contrast/55">Loading...</span>
+          ) : holidayError ? (
+            <span className="text-[11px] text-brand/80">{holidayError}</span>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-5 rounded-xl border border-accent-3 bg-primary/35 p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-contrast">{monthLabel}</p>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               size="sm"
               variant="neutral"
-              onClick={() => setVisibleMonth((current) => addMonths(current, -1))}
+              onClick={() =>
+                setVisibleMonth((current) => addMonths(current, -1))
+              }
               aria-label="Previous month"
             >
               {"<"}
@@ -379,42 +419,13 @@ const NotificationsCalendar = ({
               type="button"
               size="sm"
               variant="neutral"
-              onClick={() => setVisibleMonth((current) => addMonths(current, 1))}
+              onClick={() =>
+                setVisibleMonth((current) => addMonths(current, 1))
+              }
               aria-label="Next month"
             >
               {">"}
             </Button>
-          </div>
-
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <p className="text-sm font-semibold text-contrast">{monthLabel}</p>
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="holiday-country"
-                className="text-[11px] font-semibold uppercase tracking-wide text-contrast/60"
-              >
-                Holidays
-              </label>
-              <select
-                id="holiday-country"
-                value={holidayCountryCode}
-                onChange={(event) =>
-                  setHolidayCountryCode(event.target.value as HolidayCountryCode)
-                }
-                className="h-8 rounded-md border border-accent-3 bg-primary/70 px-2 text-xs font-medium text-contrast outline-none transition-colors focus:border-brand"
-              >
-                {HOLIDAY_COUNTRY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {isHolidayLoading ? (
-                <span className="text-[11px] text-contrast/55">Loading...</span>
-              ) : holidayError ? (
-                <span className="text-[11px] text-brand/80">{holidayError}</span>
-              ) : null}
-            </div>
           </div>
         </div>
 
@@ -435,11 +446,13 @@ const NotificationsCalendar = ({
             const visibleMarkers = markers.slice(0, 3);
             const extraMarkerCount = Math.max(
               markers.length - visibleMarkers.length,
-              0
+              0,
             );
             const holidayLabel =
               holidays.length > 0
-                ? holidays.map((holiday) => holiday.localName || holiday.name).join(", ")
+                ? holidays
+                    .map((holiday) => holiday.localName || holiday.name)
+                    .join(", ")
                 : "";
 
             const baseClassName =

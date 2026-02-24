@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Button from "@/components/Button";
 import DeleteButton from "@/components/DeleteButton";
 import EditButton from "@/components/EditButton";
 import type { NotificationRecord } from "@/types/notification";
@@ -34,6 +35,8 @@ type NotificationOverviewProps = {
   onToggleStatus: (notification: NotificationRecord) => void | Promise<void>;
   onDelete: (notification: NotificationRecord) => void | Promise<void>;
   onEdit: (notification: NotificationRecord) => void | Promise<void>;
+  onCreate?: () => void;
+  showCreateButton?: boolean;
 };
 
 const toTimeLabel = (iso: string) => {
@@ -81,6 +84,8 @@ const NotificationOverview = ({
   onToggleStatus,
   onDelete,
   onEdit,
+  onCreate,
+  showCreateButton = false,
 }: NotificationOverviewProps) => {
   const sortedNotifications = useMemo(() => {
     return [...notifications].sort((a, b) => {
@@ -96,12 +101,17 @@ const NotificationOverview = ({
 
   return (
     <section className="rounded-2xl border border-accent-3 bg-accent-1 p-5">
-      <div>
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold text-brand">
             Notification Overview
           </h2>
         </div>
+        {showCreateButton && onCreate ? (
+          <Button type="button" size="sm" onClick={onCreate}>
+            Add new notification
+          </Button>
+        ) : null}
       </div>
 
       <div className="mt-5 space-y-3">

@@ -5,7 +5,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import CustomInput from "@/components/CustomInput";
-import { createNotification, updateNotification } from "@/api/client/notification.api";
+import FormSwitch from "@/components/FormSwitch";
+import {
+  createNotification,
+  updateNotification,
+} from "@/api/client/notification.api";
 import type {
   NotificationRecord,
   NotificationRepeatPattern,
@@ -17,7 +21,11 @@ type ScheduleType = "once" | "repeat";
 type WeekdayKey = NotificationWeekday;
 type RepeatPattern = NotificationRepeatPattern;
 
-const WEEKDAY_OPTIONS: Array<{ key: WeekdayKey; label: string; short: string }> = [
+const WEEKDAY_OPTIONS: Array<{
+  key: WeekdayKey;
+  label: string;
+  short: string;
+}> = [
   { key: "mon", label: "Monday", short: "Mon" },
   { key: "tue", label: "Tuesday", short: "Tue" },
   { key: "wed", label: "Wednesday", short: "Wed" },
@@ -27,11 +35,24 @@ const WEEKDAY_OPTIONS: Array<{ key: WeekdayKey; label: string; short: string }> 
   { key: "sun", label: "Sunday", short: "Sun" },
 ];
 
-const WEEKDAY_PRESETS: Record<"everyday" | "weekdays" | "weekends", WeekdayKey[]> = {
+const WEEKDAY_PRESETS: Record<
+  "everyday" | "weekdays" | "weekends",
+  WeekdayKey[]
+> = {
   everyday: WEEKDAY_OPTIONS.map((day) => day.key),
   weekdays: ["mon", "tue", "wed", "thu", "fri"],
   weekends: ["sat", "sun"],
 };
+
+const DELIVERY_MODE_ITEMS = [
+  { key: "now", label: "Send now" },
+  { key: "scheduled", label: "Schedule" },
+] as const;
+
+const SCHEDULE_TYPE_ITEMS = [
+  { key: "once", label: "One time" },
+  { key: "repeat", label: "Repeat" },
+] as const;
 
 const toLocalDateInputValue = (date: Date) => {
   const y = date.getFullYear();
@@ -73,13 +94,15 @@ const NotificationComposer = ({
 }: NotificationComposerProps) => {
   const now = useMemo(() => new Date(), []);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("scheduled");
-  const [scheduleType, setScheduleType] = useState<ScheduleType>("once");
+  const [scheduleType, setScheduleType] = useState<ScheduleType>("repeat");
   const [repeatPattern, setRepeatPattern] = useState<RepeatPattern>("weekly");
   const [repeatDays, setRepeatDays] = useState<WeekdayKey[]>([]);
   const [monthlyDayOfMonth, setMonthlyDayOfMonth] = useState("1");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [scheduledDate, setScheduledDate] = useState(toLocalDateInputValue(now));
+  const [scheduledDate, setScheduledDate] = useState(
+    toLocalDateInputValue(now),
+  );
   const [scheduledTime, setScheduledTime] = useState("10:00");
   const [submitting, setSubmitting] = useState(false);
   const isEditMode = Boolean(initialNotification?.id);
@@ -90,7 +113,7 @@ const NotificationComposer = ({
   useEffect(() => {
     if (!initialNotification) {
       setDeliveryMode("scheduled");
-      setScheduleType("once");
+      setScheduleType("repeat");
       setRepeatPattern("weekly");
       setRepeatDays([]);
       setMonthlyDayOfMonth("1");
@@ -107,9 +130,7 @@ const NotificationComposer = ({
     setScheduleType(initialNotification.scheduleType);
     setRepeatPattern(initialNotification.repeatPattern ?? "weekly");
     setRepeatDays(initialNotification.repeatDays ?? []);
-    setMonthlyDayOfMonth(
-      String(initialNotification.monthlyDayOfMonth ?? 1)
-    );
+    setMonthlyDayOfMonth(String(initialNotification.monthlyDayOfMonth ?? 1));
 
     if (initialNotification.scheduleType === "repeat") {
       setScheduledTime(initialNotification.repeatTimeLocal ?? "10:00");
@@ -150,17 +171,21 @@ const NotificationComposer = ({
     }
     if (isSamePresetSelected(WEEKDAY_PRESETS.weekdays)) {
       return `${
-        repeatPattern === "biweekly" ? "Every 2 weeks (weekdays)" : "Every weekday"
+        repeatPattern === "biweekly"
+          ? "Every 2 weeks (weekdays)"
+          : "Every weekday"
       } at ${scheduledTime || "selected time"}.`;
     }
     if (isSamePresetSelected(WEEKDAY_PRESETS.weekends)) {
       return `${
-        repeatPattern === "biweekly" ? "Every 2 weeks (weekends)" : "Every weekend"
+        repeatPattern === "biweekly"
+          ? "Every 2 weeks (weekends)"
+          : "Every weekend"
       } at ${scheduledTime || "selected time"}.`;
     }
-    const labels = WEEKDAY_OPTIONS.filter((day) => repeatDays.includes(day.key)).map(
-      (day) => day.label,
-    );
+    const labels = WEEKDAY_OPTIONS.filter((day) =>
+      repeatDays.includes(day.key),
+    ).map((day) => day.label);
     return `${cadencePrefix}: ${labels.join(", ")} at ${
       scheduledTime || "selected time"
     }.`;
@@ -217,7 +242,8 @@ const NotificationComposer = ({
 
     setSubmitting(true);
     try {
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      const timezone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const payloadBase = {
         businessId,
         title: title.trim(),
@@ -271,19 +297,27 @@ const NotificationComposer = ({
                   message: payloadBase.message,
                   deliveryMode: "scheduled",
                   scheduleType: "once",
-                  scheduledAtUtc: toScheduledAtUtcIso(scheduledDate, scheduledTime),
+                  scheduledAtUtc: toScheduledAtUtcIso(
+                    scheduledDate,
+                    scheduledTime,
+                  ),
                   timezone,
                 })
               : await createNotification({
                   ...payloadBase,
                   scheduleType: "once",
-                  scheduledAtUtc: toScheduledAtUtcIso(scheduledDate, scheduledTime),
+                  scheduledAtUtc: toScheduledAtUtcIso(
+                    scheduledDate,
+                    scheduledTime,
+                  ),
                 });
 
       toast.success(
-        isEditMode ? "Notification updated." : deliveryMode === "now"
-          ? "Notification saved."
-          : "Scheduled notification saved."
+        isEditMode
+          ? "Notification updated."
+          : deliveryMode === "now"
+            ? "Notification saved."
+            : "Scheduled notification saved.",
       );
       onSaved?.(saved);
     } catch (error) {
@@ -303,36 +337,12 @@ const NotificationComposer = ({
           <h2 className="text-xl font-semibold text-brand">
             {isEditMode ? "Edit Notification" : "Notification Composer"}
           </h2>
-          <p className="mt-2 text-sm text-contrast/80">
-            {isEditMode
-              ? "Update the notification content or schedule."
-              : "Create a notification and choose whether to send it now or schedule it for later."}
-          </p>
         </div>
-        <div className="inline-flex rounded-xl border border-accent-3 bg-primary/35 p-1">
-          <button
-            type="button"
-            onClick={() => setDeliveryMode("now")}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-              deliveryMode === "now"
-                ? "bg-brand text-primary"
-                : "text-contrast/70 hover:text-contrast"
-            }`}
-          >
-            Send now
-          </button>
-          <button
-            type="button"
-            onClick={() => setDeliveryMode("scheduled")}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-              deliveryMode === "scheduled"
-                ? "bg-brand text-primary"
-                : "text-contrast/70 hover:text-contrast"
-            }`}
-          >
-            Schedule
-          </button>
-        </div>
+        <FormSwitch
+          items={[...DELIVERY_MODE_ITEMS]}
+          activeKey={deliveryMode}
+          onChange={(key) => setDeliveryMode(key as DeliveryMode)}
+        />
       </div>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -362,10 +372,6 @@ const NotificationComposer = ({
             className="w-full rounded-lg border border-accent-3 bg-primary px-4 py-3 text-sm text-contrast outline-none placeholder:text-contrast/50"
             maxLength={500}
           />
-          <div className="mt-2 flex items-center justify-between gap-3 text-xs text-contrast/60">
-            <span>Keep it short and action-focused.</span>
-            <span>{message.length}/500</span>
-          </div>
         </div>
 
         {deliveryMode === "scheduled" ? (
@@ -376,59 +382,29 @@ const NotificationComposer = ({
                   Delivery settings
                 </p>
                 <p className="mt-1 text-xs text-contrast/65">
-                  Choose a one-time schedule or repeat weekly, biweekly, or monthly.
+                  Choose a one-time schedule or repeat weekly, biweekly, or
+                  monthly.
                 </p>
               </div>
-              <span className="inline-flex h-8 items-center rounded-full border border-brand/20 bg-brand/10 px-3 text-xs font-semibold uppercase tracking-wide text-brand">
-                Scheduled
-              </span>
+              <FormSwitch
+                items={[...SCHEDULE_TYPE_ITEMS]}
+                activeKey={scheduleType}
+                onChange={(key) => setScheduleType(key as ScheduleType)}
+              />
             </div>
 
             <div className="mt-4 space-y-4">
-              <div>
-                <p className="mb-2 block text-xs font-semibold text-contrast/70">
-                  Schedule type
-                </p>
-                <div className="inline-flex rounded-xl border border-accent-3 bg-primary/35 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setScheduleType("once")}
-                    className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                      scheduleType === "once"
-                        ? "bg-brand text-primary"
-                        : "text-contrast/70 hover:text-contrast"
-                    }`}
-                  >
-                    One time
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScheduleType("repeat")}
-                    className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                      scheduleType === "repeat"
-                        ? "bg-brand text-primary"
-                        : "text-contrast/70 hover:text-contrast"
-                    }`}
-                  >
-                    Repeat
-                  </button>
-                </div>
-                <p className="mt-2 text-xs text-contrast/65">
-                  {isRecurringSchedule
-                    ? repeatSummary
-                    : "Send one notification at the selected date and time."}
-                </p>
-              </div>
-
               {isRecurringSchedule ? (
                 <div className="space-y-3">
                   <div className="rounded-xl border border-accent-3 bg-primary/25 p-2">
                     <div className="grid grid-cols-3 gap-2">
-                      {([
-                        ["weekly", "Weekly"],
-                        ["biweekly", "Biweekly"],
-                        ["monthly", "Monthly"],
-                      ] as const).map(([value, label]) => {
+                      {(
+                        [
+                          ["weekly", "Weekly"],
+                          ["biweekly", "Biweekly"],
+                          ["monthly", "Monthly"],
+                        ] as const
+                      ).map(([value, label]) => {
                         const selected = repeatPattern === value;
                         return (
                           <button
@@ -521,11 +497,7 @@ const NotificationComposer = ({
           </div>
         ) : null}
 
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-contrast/60">
-            This saves the notification configuration. Wallet delivery execution
-            will be connected next.
-          </p>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
           <div className="flex flex-wrap items-center gap-2">
             {onCancel ? (
               <Button
@@ -543,8 +515,8 @@ const NotificationComposer = ({
                 : isEditMode
                   ? "Save changes"
                   : deliveryMode === "now"
-                  ? "Send notification now"
-                  : "Schedule notification"}
+                    ? "Send notification now"
+                    : "Schedule notification"}
             </Button>
           </div>
         </div>

@@ -58,6 +58,7 @@ const FormSwitch = ({
       {items.map((item, idx) => (
         <button
           key={item.key}
+          type="button"
           ref={(el) => {
             buttonRefs.current[idx] = el;
           }}

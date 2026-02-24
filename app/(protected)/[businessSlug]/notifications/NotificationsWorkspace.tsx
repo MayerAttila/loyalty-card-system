@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import Button from "@/components/Button";
 import NotificationsCalendar from "./NotificationsCalendar";
 import NotificationComposer from "./NotificationComposer";
 import NotificationOverview from "./NotificationOverview";
@@ -125,14 +124,6 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        {!isComposerOpen ? (
-          <Button type="button" onClick={handleStartCreate}>
-            Add new notification
-          </Button>
-        ) : null}
-      </div>
-
       <div className="grid gap-6 xl:grid-cols-2">
         <NotificationsCalendar notifications={notifications} />
         <NotificationOverview
@@ -143,6 +134,8 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
           onToggleStatus={handleToggleStatus}
           onDelete={handleDeleteNotification}
           onEdit={handleEditNotification}
+          onCreate={handleStartCreate}
+          showCreateButton={!isComposerOpen}
         />
       </div>
 
