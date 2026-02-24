@@ -1,16 +1,21 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import CustomInput from "@/components/CustomInput";
-import { createNotification } from "@/api/client/notification.api";
-import type { NotificationRecord, NotificationWeekday } from "@/types/notification";
+import { createNotification, updateNotification } from "@/api/client/notification.api";
+import type {
+  NotificationRecord,
+  NotificationRepeatPattern,
+  NotificationWeekday,
+} from "@/types/notification";
 
 type DeliveryMode = "now" | "scheduled";
 type ScheduleType = "once" | "repeat";
 type WeekdayKey = NotificationWeekday;
+type RepeatPattern = NotificationRepeatPattern;
 
 const WEEKDAY_OPTIONS: Array<{ key: WeekdayKey; label: string; short: string }> = [
   { key: "mon", label: "Monday", short: "Mon" },
@@ -35,10 +40,17 @@ const toLocalDateInputValue = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
+const toLocalTimeInputValue = (date: Date) => {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+};
+
 type NotificationComposerProps = {
   businessId: string;
   onCancel?: () => void;
-  onCreated?: (notification: NotificationRecord) => void;
+  initialNotification?: NotificationRecord | null;
+  onSaved?: (notification: NotificationRecord) => void;
 };
 
 const toScheduledAtUtcIso = (dateValue: string, timeValue: string) => {
@@ -56,19 +68,66 @@ const toScheduledAtUtcIso = (dateValue: string, timeValue: string) => {
 const NotificationComposer = ({
   businessId,
   onCancel,
-  onCreated,
+  initialNotification = null,
+  onSaved,
 }: NotificationComposerProps) => {
   const now = useMemo(() => new Date(), []);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("scheduled");
   const [scheduleType, setScheduleType] = useState<ScheduleType>("once");
+  const [repeatPattern, setRepeatPattern] = useState<RepeatPattern>("weekly");
   const [repeatDays, setRepeatDays] = useState<WeekdayKey[]>([]);
+  const [monthlyDayOfMonth, setMonthlyDayOfMonth] = useState("1");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [scheduledDate, setScheduledDate] = useState(toLocalDateInputValue(now));
   const [scheduledTime, setScheduledTime] = useState("10:00");
   const [submitting, setSubmitting] = useState(false);
+  const isEditMode = Boolean(initialNotification?.id);
   const isRecurringSchedule =
     deliveryMode === "scheduled" && scheduleType === "repeat";
+  const isMonthlyRepeat = isRecurringSchedule && repeatPattern === "monthly";
+
+  useEffect(() => {
+    if (!initialNotification) {
+      setDeliveryMode("scheduled");
+      setScheduleType("once");
+      setRepeatPattern("weekly");
+      setRepeatDays([]);
+      setMonthlyDayOfMonth("1");
+      setTitle("");
+      setMessage("");
+      setScheduledDate(toLocalDateInputValue(now));
+      setScheduledTime("10:00");
+      return;
+    }
+
+    setTitle(initialNotification.title ?? "");
+    setMessage(initialNotification.message ?? "");
+    setDeliveryMode(initialNotification.deliveryMode);
+    setScheduleType(initialNotification.scheduleType);
+    setRepeatPattern(initialNotification.repeatPattern ?? "weekly");
+    setRepeatDays(initialNotification.repeatDays ?? []);
+    setMonthlyDayOfMonth(
+      String(initialNotification.monthlyDayOfMonth ?? 1)
+    );
+
+    if (initialNotification.scheduleType === "repeat") {
+      setScheduledTime(initialNotification.repeatTimeLocal ?? "10:00");
+      setScheduledDate(toLocalDateInputValue(now));
+    } else if (initialNotification.scheduledAtUtc) {
+      const scheduled = new Date(initialNotification.scheduledAtUtc);
+      if (!Number.isNaN(scheduled.getTime())) {
+        setScheduledDate(toLocalDateInputValue(scheduled));
+        setScheduledTime(toLocalTimeInputValue(scheduled));
+      } else {
+        setScheduledDate(toLocalDateInputValue(now));
+        setScheduledTime("10:00");
+      }
+    } else {
+      setScheduledDate(toLocalDateInputValue(now));
+      setScheduledTime("10:00");
+    }
+  }, [initialNotification, now]);
 
   const isSamePresetSelected = (preset: WeekdayKey[]) =>
     preset.length === repeatDays.length &&
@@ -76,21 +135,42 @@ const NotificationComposer = ({
 
   const repeatSummary = useMemo(() => {
     if (!isRecurringSchedule) return "";
+    if (repeatPattern === "monthly") {
+      return `Monthly on day ${monthlyDayOfMonth || "1"} at ${
+        scheduledTime || "selected time"
+      }.`;
+    }
     if (repeatDays.length === 0) return "Select one or more days.";
+    const cadencePrefix =
+      repeatPattern === "biweekly" ? "Every 2 weeks" : "Every week";
     if (isSamePresetSelected(WEEKDAY_PRESETS.everyday)) {
-      return `Every day at ${scheduledTime || "selected time"}.`;
+      return `${
+        repeatPattern === "biweekly" ? "Every 2 weeks (all days)" : "Every day"
+      } at ${scheduledTime || "selected time"}.`;
     }
     if (isSamePresetSelected(WEEKDAY_PRESETS.weekdays)) {
-      return `Every weekday at ${scheduledTime || "selected time"}.`;
+      return `${
+        repeatPattern === "biweekly" ? "Every 2 weeks (weekdays)" : "Every weekday"
+      } at ${scheduledTime || "selected time"}.`;
     }
     if (isSamePresetSelected(WEEKDAY_PRESETS.weekends)) {
-      return `Every weekend at ${scheduledTime || "selected time"}.`;
+      return `${
+        repeatPattern === "biweekly" ? "Every 2 weeks (weekends)" : "Every weekend"
+      } at ${scheduledTime || "selected time"}.`;
     }
     const labels = WEEKDAY_OPTIONS.filter((day) => repeatDays.includes(day.key)).map(
       (day) => day.label,
     );
-    return `${labels.join(", ")} at ${scheduledTime || "selected time"}.`;
-  }, [isRecurringSchedule, repeatDays, scheduledTime]);
+    return `${cadencePrefix}: ${labels.join(", ")} at ${
+      scheduledTime || "selected time"
+    }.`;
+  }, [
+    isRecurringSchedule,
+    monthlyDayOfMonth,
+    repeatDays,
+    repeatPattern,
+    scheduledTime,
+  ]);
 
   const toggleRepeatDay = (day: WeekdayKey) => {
     setRepeatDays((current) =>
@@ -118,9 +198,16 @@ const NotificationComposer = ({
         toast.error("Scheduled time is required.");
         return;
       }
-      if (isRecurringSchedule && repeatDays.length === 0) {
+      if (isRecurringSchedule && !isMonthlyRepeat && repeatDays.length === 0) {
         toast.error("Select at least one repeat day.");
         return;
+      }
+      if (isMonthlyRepeat) {
+        const dayNumber = Number.parseInt(monthlyDayOfMonth, 10);
+        if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 31) {
+          toast.error("Monthly day must be between 1 and 31.");
+          return;
+        }
       }
       if (!isRecurringSchedule && !scheduledDate) {
         toast.error("Scheduled date is required.");
@@ -139,31 +226,66 @@ const NotificationComposer = ({
         timezone,
       } as const;
 
-      const created =
+      const saved =
         deliveryMode === "now"
-          ? await createNotification({
-              ...payloadBase,
-              scheduleType: "once",
-            })
-          : isRecurringSchedule
-            ? await createNotification({
-                ...payloadBase,
-                scheduleType: "repeat",
-                repeatDays,
-                repeatTimeLocal: scheduledTime,
+          ? isEditMode && initialNotification
+            ? await updateNotification(initialNotification.id, {
+                title: payloadBase.title,
+                message: payloadBase.message,
+                deliveryMode: "now",
+                scheduleType: "once",
+                timezone,
               })
             : await createNotification({
                 ...payloadBase,
                 scheduleType: "once",
-                scheduledAtUtc: toScheduledAtUtcIso(scheduledDate, scheduledTime),
-              });
+              })
+          : isRecurringSchedule
+            ? isEditMode && initialNotification
+              ? await updateNotification(initialNotification.id, {
+                  title: payloadBase.title,
+                  message: payloadBase.message,
+                  deliveryMode: "scheduled",
+                  scheduleType: "repeat",
+                  repeatPattern,
+                  repeatDays: isMonthlyRepeat ? [] : repeatDays,
+                  monthlyDayOfMonth: isMonthlyRepeat
+                    ? Number.parseInt(monthlyDayOfMonth, 10)
+                    : null,
+                  repeatTimeLocal: scheduledTime,
+                  timezone,
+                })
+              : await createNotification({
+                  ...payloadBase,
+                  scheduleType: "repeat",
+                  repeatPattern,
+                  repeatDays: isMonthlyRepeat ? [] : repeatDays,
+                  monthlyDayOfMonth: isMonthlyRepeat
+                    ? Number.parseInt(monthlyDayOfMonth, 10)
+                    : null,
+                  repeatTimeLocal: scheduledTime,
+                })
+            : isEditMode && initialNotification
+              ? await updateNotification(initialNotification.id, {
+                  title: payloadBase.title,
+                  message: payloadBase.message,
+                  deliveryMode: "scheduled",
+                  scheduleType: "once",
+                  scheduledAtUtc: toScheduledAtUtcIso(scheduledDate, scheduledTime),
+                  timezone,
+                })
+              : await createNotification({
+                  ...payloadBase,
+                  scheduleType: "once",
+                  scheduledAtUtc: toScheduledAtUtcIso(scheduledDate, scheduledTime),
+                });
 
       toast.success(
-        deliveryMode === "now"
+        isEditMode ? "Notification updated." : deliveryMode === "now"
           ? "Notification saved."
           : "Scheduled notification saved."
       );
-      onCreated?.(created);
+      onSaved?.(saved);
     } catch (error) {
       const message = axios.isAxiosError<{ message?: string }>(error)
         ? error.response?.data?.message || "Unable to save notification."
@@ -179,11 +301,12 @@ const NotificationComposer = ({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-brand">
-            Notification Composer
+            {isEditMode ? "Edit Notification" : "Notification Composer"}
           </h2>
           <p className="mt-2 text-sm text-contrast/80">
-            Create a notification and choose whether to send it now or schedule
-            it for later.
+            {isEditMode
+              ? "Update the notification content or schedule."
+              : "Create a notification and choose whether to send it now or schedule it for later."}
           </p>
         </div>
         <div className="inline-flex rounded-xl border border-accent-3 bg-primary/35 p-1">
@@ -253,7 +376,7 @@ const NotificationComposer = ({
                   Delivery settings
                 </p>
                 <p className="mt-1 text-xs text-contrast/65">
-                  Choose a one-time schedule or repeat on selected weekdays.
+                  Choose a one-time schedule or repeat weekly, biweekly, or monthly.
                 </p>
               </div>
               <span className="inline-flex h-8 items-center rounded-full border border-brand/20 bg-brand/10 px-3 text-xs font-semibold uppercase tracking-wide text-brand">
@@ -298,28 +421,73 @@ const NotificationComposer = ({
               </div>
 
               {isRecurringSchedule ? (
-                <div className="rounded-xl border border-accent-3 bg-primary/25 p-3">
-                  <div className="grid grid-cols-7 gap-2">
-                    {WEEKDAY_OPTIONS.map((day) => {
-                      const selected = repeatDays.includes(day.key);
-                      return (
-                        <button
-                          key={day.key}
-                          type="button"
-                          onClick={() => toggleRepeatDay(day.key)}
-                          className={`h-10 rounded-lg border text-xs font-semibold transition-colors ${
-                            selected
-                              ? "border-brand/50 bg-brand text-primary"
-                              : "border-accent-3 bg-primary/40 text-contrast/75 hover:border-brand/40 hover:text-brand"
-                          }`}
-                          aria-pressed={selected}
-                          title={day.label}
-                        >
-                          {day.short}
-                        </button>
-                      );
-                    })}
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-accent-3 bg-primary/25 p-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        ["weekly", "Weekly"],
+                        ["biweekly", "Biweekly"],
+                        ["monthly", "Monthly"],
+                      ] as const).map(([value, label]) => {
+                        const selected = repeatPattern === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setRepeatPattern(value)}
+                            className={`h-10 rounded-lg border text-xs font-semibold transition-colors ${
+                              selected
+                                ? "border-brand/50 bg-brand text-primary"
+                                : "border-accent-3 bg-primary/40 text-contrast/75 hover:border-brand/40 hover:text-brand"
+                            }`}
+                            aria-pressed={selected}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {repeatPattern === "monthly" ? (
+                    <label className="block text-xs text-contrast/70">
+                      Day of month
+                      <input
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={monthlyDayOfMonth}
+                        onChange={(event) =>
+                          setMonthlyDayOfMonth(event.target.value)
+                        }
+                        className="mt-2 h-11 w-full rounded-lg border border-accent-3 bg-primary px-4 text-sm text-contrast outline-none"
+                      />
+                    </label>
+                  ) : (
+                    <div className="rounded-xl border border-accent-3 bg-primary/25 p-3">
+                      <div className="grid grid-cols-7 gap-2">
+                        {WEEKDAY_OPTIONS.map((day) => {
+                          const selected = repeatDays.includes(day.key);
+                          return (
+                            <button
+                              key={day.key}
+                              type="button"
+                              onClick={() => toggleRepeatDay(day.key)}
+                              className={`h-10 rounded-lg border text-xs font-semibold transition-colors ${
+                                selected
+                                  ? "border-brand/50 bg-brand text-primary"
+                                  : "border-accent-3 bg-primary/40 text-contrast/75 hover:border-brand/40 hover:text-brand"
+                              }`}
+                              aria-pressed={selected}
+                              title={day.label}
+                            >
+                              {day.short}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : null}
 
@@ -372,7 +540,9 @@ const NotificationComposer = ({
             <Button type="submit" disabled={submitting}>
               {submitting
                 ? "Saving..."
-                : deliveryMode === "now"
+                : isEditMode
+                  ? "Save changes"
+                  : deliveryMode === "now"
                   ? "Send notification now"
                   : "Schedule notification"}
             </Button>

@@ -19,6 +19,8 @@ type NotificationsWorkspaceProps = {
 
 const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [editingNotification, setEditingNotification] =
+    useState<NotificationRecord | null>(null);
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [togglingIds, setTogglingIds] = useState<string[]>([]);
@@ -58,9 +60,27 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
     return () => window.clearTimeout(timeoutId);
   }, [isComposerOpen]);
 
-  const handleCreated = (notification: NotificationRecord) => {
-    setNotifications((current) => [notification, ...current]);
+  const handleSaved = (notification: NotificationRecord) => {
+    setNotifications((current) => {
+      const existingIndex = current.findIndex((item) => item.id === notification.id);
+      if (existingIndex === -1) {
+        return [notification, ...current];
+      }
+      return current.map((item) => (item.id === notification.id ? notification : item));
+    });
+    setEditingNotification(null);
     setIsComposerOpen(false);
+  };
+
+  const handleStartCreate = () => {
+    setEditingNotification(null);
+    setIsComposerOpen(true);
+  };
+
+  const handleEditNotification = (notification: NotificationRecord) => {
+    if (deletingSet.has(notification.id)) return;
+    setEditingNotification(notification);
+    setIsComposerOpen(true);
   };
 
   const handleToggleStatus = async (notification: NotificationRecord) => {
@@ -107,14 +127,14 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
     <div className="space-y-6">
       <div className="flex justify-end">
         {!isComposerOpen ? (
-          <Button type="button" onClick={() => setIsComposerOpen(true)}>
+          <Button type="button" onClick={handleStartCreate}>
             Add new notification
           </Button>
         ) : null}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <NotificationsCalendar />
+        <NotificationsCalendar notifications={notifications} />
         <NotificationOverview
           notifications={notifications}
           loading={loadingNotifications}
@@ -122,6 +142,7 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
           deletingIds={deletingIds}
           onToggleStatus={handleToggleStatus}
           onDelete={handleDeleteNotification}
+          onEdit={handleEditNotification}
         />
       </div>
 
@@ -129,8 +150,12 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
         <div ref={composerRef} className="scroll-mt-24">
           <NotificationComposer
             businessId={businessId}
-            onCancel={() => setIsComposerOpen(false)}
-            onCreated={handleCreated}
+            initialNotification={editingNotification}
+            onCancel={() => {
+              setEditingNotification(null);
+              setIsComposerOpen(false);
+            }}
+            onSaved={handleSaved}
           />
         </div>
       ) : null}

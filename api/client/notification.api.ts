@@ -28,6 +28,14 @@ export async function getNotificationById(id: string) {
   return res.data;
 }
 
+export async function updateNotification(
+  id: string,
+  payload: Partial<CreateNotificationPayload>
+) {
+  const res = await api.patch<NotificationRecord>(`/notification/id/${id}`, payload);
+  return res.data;
+}
+
 export async function updateNotificationStatus(
   id: string,
   payload?: UpdateNotificationStatusPayload

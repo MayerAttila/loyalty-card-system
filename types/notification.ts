@@ -1,6 +1,7 @@
 export type NotificationStatus = "active" | "inactive";
 export type NotificationDeliveryMode = "now" | "scheduled";
 export type NotificationScheduleType = "once" | "repeat";
+export type NotificationRepeatPattern = "weekly" | "biweekly" | "monthly";
 export type NotificationWeekday =
   | "mon"
   | "tue"
@@ -26,6 +27,8 @@ export type NotificationRecord = {
   scheduleType: NotificationScheduleType;
   scheduledAtUtc: string | null;
   repeatDays: NotificationWeekday[];
+  repeatPattern: NotificationRepeatPattern | null;
+  monthlyDayOfMonth: number | null;
   repeatTimeLocal: string | null;
   timezone: string;
   nextRunAtUtc: string | null;
@@ -43,6 +46,8 @@ export type CreateNotificationPayload = {
   scheduleType?: NotificationScheduleType;
   scheduledAtUtc?: string | null;
   repeatDays?: NotificationWeekday[];
+  repeatPattern?: NotificationRepeatPattern | null;
+  monthlyDayOfMonth?: number | null;
   repeatTimeLocal?: string | null;
   timezone?: string;
 };
