@@ -53,7 +53,7 @@ const buildNavItems = (
     allow: ["ADMIN", "OWNER"],
   },
   {
-    href: `${basePath}/stamping-logs`,
+    href: `${basePath}/logs`,
     label: "Logs",
     icon: FiList,
     allow: ["ADMIN", "OWNER"],

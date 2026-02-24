@@ -64,3 +64,42 @@ export type SendNotificationNowResponse = {
   targetCardCount: number;
   attemptedAt: string;
 };
+
+export type NotificationLogChannel = "apple_wallet" | "google_wallet";
+export type NotificationLogStatus = "queued" | "sent" | "failed" | "skipped";
+export type NotificationLogTriggerType = "manual_now" | "scheduled";
+
+export type NotificationLogEntry = {
+  id: string;
+  notificationId: string;
+  businessId: string;
+  customerLoyaltyCardId: string;
+  executionId: string;
+  triggerType: NotificationLogTriggerType;
+  channel: NotificationLogChannel;
+  status: NotificationLogStatus;
+  scheduledForUtc: string | null;
+  attemptedAt: string | null;
+  providerMessageId: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  notification: {
+    id: string;
+    message: string;
+  };
+  customerLoyaltyCard: {
+    id: string;
+    customer: {
+      id: string;
+      name: string;
+      email: string;
+    };
+    template: {
+      id: string;
+      template: string;
+      maxPoints: number;
+    };
+  };
+};
