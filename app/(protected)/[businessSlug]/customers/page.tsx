@@ -6,6 +6,8 @@ import CustomersClient from "./CustomersClient";
 import EmptyState from "@/components/EmptyState";
 import HelpCard from "@/components/HelpCard";
 
+const INITIAL_TABLE_LOAD_COUNT = 20;
+
 const CustomersPage = async () => {
   const session = await getSession();
   const businessId = session?.user?.businessId;
@@ -20,7 +22,9 @@ const CustomersPage = async () => {
     );
   }
   const customers = businessId
-    ? await getCustomersByBusinessId(businessId)
+    ? await getCustomersByBusinessId(businessId, {
+        limit: INITIAL_TABLE_LOAD_COUNT,
+      })
     : [];
 
   return (
@@ -33,7 +37,7 @@ const CustomersPage = async () => {
           />
         ) : null}
         {businessId ? <CustomerInviteCard businessId={businessId} /> : null}
-        <CustomersClient customers={customers} />
+        <CustomersClient customers={customers} businessId={businessId} />
       </div>
     </RequireRole>
   );

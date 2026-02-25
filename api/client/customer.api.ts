@@ -1,4 +1,5 @@
 import { api } from "./axios";
+import type { Customer } from "@/types/customer";
 
 export type CreateCustomerPayload = {
   name: string;
@@ -24,4 +25,17 @@ export const createCustomer = async (payload: CreateCustomerPayload) => {
     cardId: string | null;
     cardPreview: CustomerCardPreview | null;
   };
+};
+
+export const getCustomersByBusinessId = async (
+  businessId: string,
+  limit?: number
+) => {
+  const { data } = await api.get<Customer[]>(
+    `/customer/business/${encodeURIComponent(businessId)}`,
+    {
+      params: typeof limit === "number" ? { limit } : undefined,
+    }
+  );
+  return data;
 };

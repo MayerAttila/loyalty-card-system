@@ -1,25 +1,52 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import CustomersTable from "./CustomersTable";
 import SearchBar from "@/components/SearchBar";
 import { Customer } from "@/types/customer";
+import { getCustomersByBusinessId as getCustomersByBusinessIdClient } from "@/api/client/customer.api";
 
 type CustomersClientProps = {
   customers: Customer[];
+  businessId: string;
 };
 
-const CustomersClient = ({ customers }: CustomersClientProps) => {
+const INITIAL_TABLE_LOAD_COUNT = 20;
+
+const CustomersClient = ({ customers, businessId }: CustomersClientProps) => {
+  const [allCustomers, setAllCustomers] = useState<Customer[]>(customers);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (customers.length < INITIAL_TABLE_LOAD_COUNT) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const fullCustomers = await getCustomersByBusinessIdClient(businessId);
+        if (cancelled) return;
+        setAllCustomers((prev) =>
+          fullCustomers.length > prev.length ? fullCustomers : prev
+        );
+      } catch (error) {
+        console.error("background customers hydrate failed", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, customers.length]);
+
   const dedupedCustomers = useMemo(() => {
     const map = new Map<string, Customer>();
-    customers.forEach((customer) => {
+    allCustomers.forEach((customer) => {
       map.set(customer.id, customer);
     });
     return Array.from(map.values());
-  }, [customers]);
+  }, [allCustomers]);
 
   const searchData = useMemo(
     () =>

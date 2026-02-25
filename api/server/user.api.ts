@@ -12,9 +12,18 @@ export const getUserById = async (id: string) => {
   return data;
 };
 
-export const getUsersByBusinessId = async (businessId: string) => {
+export const getUsersByBusinessId = async (
+  businessId: string,
+  options?: { limit?: number }
+) => {
+  const params = new URLSearchParams();
+  if (options?.limit && Number.isFinite(options.limit)) {
+    params.set("limit", String(options.limit));
+  }
   const data = await apiFetch<User[]>(
-    `/user/businessId/${encodeURIComponent(businessId)}`
+    `/user/businessId/${encodeURIComponent(businessId)}${
+      params.size ? `?${params.toString()}` : ""
+    }`
   );
   return data;
 };

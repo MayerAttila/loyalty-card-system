@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import {
   deleteUser,
+  getUsersByBusinessId as getUsersByBusinessIdClient,
   sendEmployeeInvite,
   updateUserRole,
 } from "@/api/client/user.api";
@@ -18,6 +19,8 @@ type EmployeeClientProps = {
   currentUserRole?: User["role"];
   businessId: string;
 };
+
+const INITIAL_TABLE_LOAD_COUNT = 20;
 
 const EmployeeClient = ({
   initialUserData,
@@ -32,7 +35,25 @@ const EmployeeClient = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (initialUserData.length < INITIAL_TABLE_LOAD_COUNT) return;
 
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const allUsers = await getUsersByBusinessIdClient(businessId);
+        if (cancelled) return;
+        setUsers((prev) => (allUsers.length > prev.length ? allUsers : prev));
+      } catch (error) {
+        console.error("background users hydrate failed", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, initialUserData.length]);
   const handleRoleUpdate = useCallback(async (userId: string, role: User["role"]) => {
     setUpdatingIds((prev) => {
       const next = new Set(prev);

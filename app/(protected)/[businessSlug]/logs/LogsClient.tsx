@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DataTable, { type DataTableColumn } from "@/components/DataTable";
 import FormSwitch from "@/components/FormSwitch";
 import SearchBar from "@/components/SearchBar";
 import type { StampingLogEntry } from "@/types/stampingLog";
 import type { NotificationLogEntry } from "@/types/notification";
+import { getStampingLogs as getStampingLogsClient } from "@/api/client/stampingLog.api";
+import { getNotificationLogs as getNotificationLogsClient } from "@/api/client/notificationLog.api";
 
 const formatDateTime = (value: unknown) => {
   if (!value) return "";
@@ -42,11 +44,58 @@ type Props = {
 };
 
 type SearchRow = Record<string, string>;
+const INITIAL_TABLE_LOAD_COUNT = 20;
 
 const LogsClient = ({ logs, notificationLogs }: Props) => {
+  const [stampingLogsState, setStampingLogsState] = useState(logs);
+  const [notificationLogsState, setNotificationLogsState] =
+    useState(notificationLogs);
   const [activeTab, setActiveTab] = useState<LogsTabKey>("stamping");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchAccessor, setSearchAccessor] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (
+      logs.length < INITIAL_TABLE_LOAD_COUNT &&
+      notificationLogs.length < INITIAL_TABLE_LOAD_COUNT
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void Promise.allSettled([
+      getStampingLogsClient(),
+      getNotificationLogsClient(),
+    ]).then(([stampingResult, notificationResult]) => {
+      if (cancelled) return;
+
+      if (stampingResult.status === "fulfilled") {
+        setStampingLogsState((prev) =>
+          stampingResult.value.length > prev.length ? stampingResult.value : prev
+        );
+      } else {
+        console.error("background stamping logs hydrate failed", stampingResult.reason);
+      }
+
+      if (notificationResult.status === "fulfilled") {
+        setNotificationLogsState((prev) =>
+          notificationResult.value.length > prev.length
+            ? notificationResult.value
+            : prev
+        );
+      } else {
+        console.error(
+          "background notification logs hydrate failed",
+          notificationResult.reason
+        );
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [logs.length, notificationLogs.length]);
 
   const stampingColumns = useMemo<DataTableColumn<StampingLogEntry>[]>(
     () => [
@@ -191,19 +240,19 @@ const LogsClient = ({ logs, notificationLogs }: Props) => {
 
   const stampingSearchData = useMemo(
     () =>
-      logs.map((log) => ({
+      stampingLogsState.map((log) => ({
         customerName: log.customer.name,
         customerEmail: log.customer.email,
         staffName: log.stampedBy.name,
         staffEmail: log.stampedBy.email,
         staffRole: log.stampedBy.role,
       })),
-    [logs],
+    [stampingLogsState],
   );
 
   const notificationSearchData = useMemo(
     () =>
-      notificationLogs.map((log) => ({
+      notificationLogsState.map((log) => ({
         message: log.notification.message,
         customerName: log.customerLoyaltyCard.customer.name,
         customerEmail: log.customerLoyaltyCard.customer.email,
@@ -212,16 +261,16 @@ const LogsClient = ({ logs, notificationLogs }: Props) => {
         triggerType: log.triggerType,
         errorMessage: log.errorMessage ?? "",
       })),
-    [notificationLogs],
+    [notificationLogsState],
   );
 
   const filteredStampingLogs = useMemo(() => {
-    if (!searchQuery) return logs;
+    if (!searchQuery) return stampingLogsState;
 
     const q = normalizeStr(searchQuery);
     const searchIn = (value: unknown) => normalizeStr(value).includes(q);
 
-    return logs.filter((log) => {
+    return stampingLogsState.filter((log) => {
       const fields = {
         customerName: log.customer.name,
         customerEmail: log.customer.email,
@@ -236,15 +285,15 @@ const LogsClient = ({ logs, notificationLogs }: Props) => {
 
       return Object.values(fields).some(searchIn);
     });
-  }, [logs, searchAccessor, searchQuery]);
+  }, [stampingLogsState, searchAccessor, searchQuery]);
 
   const filteredNotificationLogs = useMemo(() => {
-    if (!searchQuery) return notificationLogs;
+    if (!searchQuery) return notificationLogsState;
 
     const q = normalizeStr(searchQuery);
     const searchIn = (value: unknown) => normalizeStr(value).includes(q);
 
-    return notificationLogs.filter((log) => {
+    return notificationLogsState.filter((log) => {
       const fields = {
         message: log.notification.message,
         customerName: log.customerLoyaltyCard.customer.name,
@@ -261,7 +310,7 @@ const LogsClient = ({ logs, notificationLogs }: Props) => {
 
       return Object.values(fields).some(searchIn);
     });
-  }, [notificationLogs, searchAccessor, searchQuery]);
+  }, [notificationLogsState, searchAccessor, searchQuery]);
 
   const isStampingTab = activeTab === "stamping";
 

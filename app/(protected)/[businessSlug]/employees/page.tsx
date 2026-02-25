@@ -5,6 +5,8 @@ import { getSession } from "@/api/server/auth.api";
 import EmptyState from "@/components/EmptyState";
 import HelpCard from "@/components/HelpCard";
 
+const INITIAL_TABLE_LOAD_COUNT = 20;
+
 const EmployeesPage = async () => {
   const session = await getSession();
 
@@ -20,7 +22,9 @@ const EmployeesPage = async () => {
   }
 
   const businessId = session.user.businessId;
-  const initialUserData = await getUsersByBusinessId(businessId);
+  const initialUserData = await getUsersByBusinessId(businessId, {
+    limit: INITIAL_TABLE_LOAD_COUNT,
+  });
   const hasTeamMembers = initialUserData.some((user) => user.role !== "OWNER");
 
   return (

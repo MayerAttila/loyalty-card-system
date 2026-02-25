@@ -6,16 +6,18 @@ import { getNotificationLogs } from "@/api/server/notificationLog.api";
 import type { NotificationLogEntry } from "@/types/notification";
 import HelpCard from "@/components/HelpCard";
 
+const INITIAL_TABLE_LOAD_COUNT = 20;
+
 const LogsPage = async () => {
   let logs: StampingLogEntry[] = [];
   let notificationLogs: NotificationLogEntry[] = [];
   try {
-    logs = await getStampingLogs();
+    logs = await getStampingLogs(INITIAL_TABLE_LOAD_COUNT);
   } catch {
     logs = [];
   }
   try {
-    notificationLogs = await getNotificationLogs();
+    notificationLogs = await getNotificationLogs(INITIAL_TABLE_LOAD_COUNT);
   } catch {
     notificationLogs = [];
   }
