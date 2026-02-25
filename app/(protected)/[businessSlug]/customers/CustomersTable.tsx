@@ -9,6 +9,16 @@ type CustomersTableProps = {
 };
 
 const CustomersTable = ({ customers }: CustomersTableProps) => {
+  const walletLabelMap: Record<
+    NonNullable<Customer["cardSummary"]>["walletPlatform"],
+    string
+  > = {
+    none: "None",
+    google: "Google",
+    apple: "Apple",
+    both: "Both",
+  };
+
   const columns: DataTableColumn<Customer>[] = [
     {
       key: "name",
@@ -78,7 +88,7 @@ const CustomersTable = ({ customers }: CustomersTableProps) => {
       width: 120,
       render: (_, row) => (
         <span className="text-contrast/80">
-          {row.cardSummary?.hasWallet ? "Yes" : "No"}
+          {row.cardSummary ? walletLabelMap[row.cardSummary.walletPlatform] : "None"}
         </span>
       ),
     },

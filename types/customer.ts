@@ -12,6 +12,6 @@ export type Customer = {
     maxPoints: number | null;
     rewardsEarned: number;
     lastActivity: string | null;
-    hasWallet: boolean;
+    walletPlatform: "none" | "google" | "apple" | "both";
   } | null;
 };
