@@ -153,6 +153,8 @@ const readStoredHolidayCountry = (): HolidayCountryCode | null => {
 
 type NotificationsCalendarProps = {
   notifications?: NotificationRecord[];
+  selectedNotificationId?: string | null;
+  onDateSelect?: (dateKey: string) => void;
 };
 
 type CalendarNotificationMarker = {
@@ -163,10 +165,12 @@ type CalendarNotificationMarker = {
 
 const NotificationsCalendar = ({
   notifications = [],
+  selectedNotificationId = null,
+  onDateSelect,
 }: NotificationsCalendarProps) => {
   const today = useMemo(() => startOfDay(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(today));
-  const [selectedDateKeys, setSelectedDateKeys] = useState<string[]>([]);
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [holidayCountryCode, setHolidayCountryCode] =
     useState<HolidayCountryCode>(
       () => readStoredHolidayCountry() ?? detectDefaultHolidayCountry(),
@@ -351,6 +355,18 @@ const NotificationsCalendar = ({
     return map;
   }, [calendarCells, notifications]);
 
+  const selectedNotificationDateKeys = useMemo(() => {
+    if (!selectedNotificationId) return new Set<string>();
+
+    const keys = new Set<string>();
+    for (const [dateKey, markers] of notificationMarkersByDate.entries()) {
+      if (markers.some((marker) => marker.id === selectedNotificationId)) {
+        keys.add(dateKey);
+      }
+    }
+    return keys;
+  }, [notificationMarkersByDate, selectedNotificationId]);
+
   const isHolidayLoading = useMemo(
     () =>
       visibleYears.some((year) =>
@@ -364,12 +380,8 @@ const NotificationsCalendar = ({
   const toggleDate = (cell: CalendarCell) => {
     if (cell.isPast) return;
 
-    setSelectedDateKeys((current) => {
-      if (current.includes(cell.key)) {
-        return current.filter((value) => value !== cell.key);
-      }
-      return [...current, cell.key];
-    });
+    setSelectedDateKey((current) => (current === cell.key ? null : cell.key));
+    onDateSelect?.(cell.key);
   };
 
   return (
@@ -440,12 +452,22 @@ const NotificationsCalendar = ({
           ))}
 
           {calendarCells.map((cell) => {
-            const isSelected = selectedDateKeys.includes(cell.key);
+            const isSelected = selectedDateKey === cell.key;
             const markers = notificationMarkersByDate.get(cell.key) ?? [];
+            const hasSelectedNotification = Boolean(selectedNotificationId);
+            const isSelectedNotificationDate = selectedNotificationDateKeys.has(
+              cell.key,
+            );
             const holidays = holidaysByDate.get(cell.key) ?? [];
-            const visibleMarkers = markers.slice(0, 3);
+            const orderedMarkers = hasSelectedNotification
+              ? [
+                  ...markers.filter((marker) => marker.id === selectedNotificationId),
+                  ...markers.filter((marker) => marker.id !== selectedNotificationId),
+                ]
+              : markers;
+            const visibleMarkers = orderedMarkers.slice(0, 3);
             const extraMarkerCount = Math.max(
-              markers.length - visibleMarkers.length,
+              orderedMarkers.length - visibleMarkers.length,
               0,
             );
             const holidayLabel =
@@ -466,13 +488,18 @@ const NotificationsCalendar = ({
                   ? "border-accent-3 bg-primary/70 text-contrast hover:border-brand/50 hover:bg-brand/10 hover:text-brand"
                   : "border-accent-3/70 bg-primary/40 text-contrast/45 hover:border-accent-3 hover:text-contrast/70";
 
+            const selectedScheduleClassName =
+              !isSelected && isSelectedNotificationDate
+                ? " ring-1 ring-brand/55 ring-inset border-brand/40 bg-brand/5"
+                : "";
+
             return (
               <button
                 key={cell.key}
                 type="button"
                 onClick={() => toggleDate(cell)}
                 disabled={cell.isPast}
-                className={`${baseClassName} ${stateClassName}`}
+                className={`${baseClassName} ${stateClassName}${selectedScheduleClassName}`}
                 aria-pressed={isSelected}
                 aria-label={`${isSelected ? "Deselect" : "Select"} ${cell.date.toDateString()}${holidayLabel ? `. Holiday: ${holidayLabel}` : ""}`}
                 title={holidayLabel || undefined}
@@ -492,10 +519,22 @@ const NotificationsCalendar = ({
                     {visibleMarkers.map((marker) => (
                       <span
                         key={marker.id}
-                        className="h-1.5 w-1.5 rounded-full"
+                        className={`rounded-full ${
+                          marker.id === selectedNotificationId
+                            ? "h-2 w-2"
+                            : "h-1.5 w-1.5"
+                        }`}
                         style={{
                           backgroundColor: marker.color,
-                          opacity: marker.active ? 1 : 0.35,
+                          opacity:
+                            hasSelectedNotification &&
+                            marker.id !== selectedNotificationId
+                              ? marker.active
+                                ? 0.25
+                                : 0.15
+                              : marker.active
+                                ? 1
+                                : 0.35,
                         }}
                         aria-hidden="true"
                       />

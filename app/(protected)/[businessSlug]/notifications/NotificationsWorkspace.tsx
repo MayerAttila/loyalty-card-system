@@ -26,6 +26,12 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
   const [togglingIds, setTogglingIds] = useState<string[]>([]);
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [sendingIds, setSendingIds] = useState<string[]>([]);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(
+    null,
+  );
+  const [composerPrefillDateKey, setComposerPrefillDateKey] = useState<
+    string | null
+  >(null);
   const composerRef = useRef<HTMLDivElement | null>(null);
 
   const togglingSet = useMemo(() => new Set(togglingIds), [togglingIds]);
@@ -70,18 +76,23 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
       }
       return current.map((item) => (item.id === notification.id ? notification : item));
     });
+    setSelectedNotificationId(notification.id);
     setEditingNotification(null);
+    setComposerPrefillDateKey(null);
     setIsComposerOpen(false);
   };
 
   const handleStartCreate = () => {
     setEditingNotification(null);
+    setComposerPrefillDateKey(null);
     setIsComposerOpen(true);
   };
 
   const handleEditNotification = (notification: NotificationRecord) => {
     if (deletingSet.has(notification.id) || sendingSet.has(notification.id)) return;
+    setSelectedNotificationId(notification.id);
     setEditingNotification(notification);
+    setComposerPrefillDateKey(null);
     setIsComposerOpen(true);
   };
 
@@ -128,6 +139,9 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
       setNotifications((current) =>
         current.filter((item) => item.id !== notification.id)
       );
+      setSelectedNotificationId((current) =>
+        current === notification.id ? null : current,
+      );
       toast.success("Notification deleted.");
     } catch (error) {
       console.error("deleteNotification failed", error);
@@ -170,17 +184,31 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-2">
-        <NotificationsCalendar notifications={notifications} />
+        <NotificationsCalendar
+          notifications={notifications}
+          selectedNotificationId={selectedNotificationId}
+          onDateSelect={(dateKey) => {
+            setEditingNotification(null);
+            setComposerPrefillDateKey(dateKey);
+            setIsComposerOpen(true);
+          }}
+        />
         <NotificationOverview
           notifications={notifications}
           loading={loadingNotifications}
           togglingIds={togglingIds}
           deletingIds={deletingIds}
           sendingIds={sendingIds}
+          selectedNotificationId={selectedNotificationId}
           onToggleStatus={handleToggleStatus}
           onDelete={handleDeleteNotification}
           onEdit={handleEditNotification}
           onSendNow={handleSendNowNotification}
+          onSelectNotification={(notification) => {
+            setSelectedNotificationId((current) =>
+              current === notification.id ? null : notification.id,
+            );
+          }}
           onCreate={handleStartCreate}
           showCreateButton={!isComposerOpen}
         />
@@ -191,8 +219,10 @@ const NotificationsWorkspace = ({ businessId }: NotificationsWorkspaceProps) => 
           <NotificationComposer
             businessId={businessId}
             initialNotification={editingNotification}
+            prefillDateKey={composerPrefillDateKey}
             onCancel={() => {
               setEditingNotification(null);
+              setComposerPrefillDateKey(null);
               setIsComposerOpen(false);
             }}
             onSaved={handleSaved}

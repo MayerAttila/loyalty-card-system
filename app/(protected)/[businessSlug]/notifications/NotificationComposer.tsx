@@ -5,11 +5,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import FormSwitch from "@/components/FormSwitch";
+import { getPublicHolidays } from "@/api/client/holiday.api";
 import {
   createNotification,
   sendNotificationNow,
   updateNotification,
 } from "@/api/client/notification.api";
+import type { HolidayCountryCode, PublicHolidayRecord } from "@/types/holiday";
 import type {
   NotificationRecord,
   NotificationRepeatPattern,
@@ -53,6 +55,73 @@ const SCHEDULE_TYPE_ITEMS = [
   { key: "once", label: "One time" },
   { key: "repeat", label: "Repeat" },
 ] as const;
+const HOLIDAY_COUNTRY_STORAGE_KEY = "notifications_holiday_country";
+const DEFAULT_HOLIDAY_COUNTRY: HolidayCountryCode = "HU";
+const HOLIDAY_WARNING_WINDOW_DAYS = 31;
+
+const weekdayToJsDay = (day: WeekdayKey) => {
+  switch (day) {
+    case "sun":
+      return 0;
+    case "mon":
+      return 1;
+    case "tue":
+      return 2;
+    case "wed":
+      return 3;
+    case "thu":
+      return 4;
+    case "fri":
+      return 5;
+    case "sat":
+      return 6;
+    default:
+      return null;
+  }
+};
+
+const toDateKey = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const addDays = (date: Date, amount: number) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount);
+
+const startOfWeekMonday = (date: Date) => {
+  const day = date.getDay();
+  const mondayOffset = (day + 6) % 7;
+  return addDays(startOfDay(date), -mondayOffset);
+};
+
+const getWeekDiff = (from: Date, to: Date) => {
+  const diffMs =
+    startOfWeekMonday(to).getTime() - startOfWeekMonday(from).getTime();
+  return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+};
+
+const readHolidayCountryPreference = (): HolidayCountryCode => {
+  if (typeof window === "undefined") return DEFAULT_HOLIDAY_COUNTRY;
+  try {
+    const stored = window.localStorage.getItem(HOLIDAY_COUNTRY_STORAGE_KEY);
+    if (!stored) return DEFAULT_HOLIDAY_COUNTRY;
+    const value = stored.trim().toUpperCase();
+    return value || DEFAULT_HOLIDAY_COUNTRY;
+  } catch {
+    return DEFAULT_HOLIDAY_COUNTRY;
+  }
+};
+
+const formatHolidayDate = (date: Date) =>
+  date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 
 const toLocalDateInputValue = (date: Date) => {
   const y = date.getFullYear();
@@ -71,6 +140,7 @@ type NotificationComposerProps = {
   businessId: string;
   onCancel?: () => void;
   initialNotification?: NotificationRecord | null;
+  prefillDateKey?: string | null;
   onSaved?: (notification: NotificationRecord) => void;
 };
 
@@ -90,6 +160,7 @@ const NotificationComposer = ({
   businessId,
   onCancel,
   initialNotification = null,
+  prefillDateKey = null,
   onSaved,
 }: NotificationComposerProps) => {
   const now = useMemo(() => new Date(), []);
@@ -104,10 +175,18 @@ const NotificationComposer = ({
   );
   const [scheduledTime, setScheduledTime] = useState("10:00");
   const [submitting, setSubmitting] = useState(false);
+  const [holidayCountryCode] = useState<HolidayCountryCode>(() =>
+    readHolidayCountryPreference(),
+  );
+  const [holidayCache, setHolidayCache] = useState<
+    Record<string, PublicHolidayRecord[]>
+  >({});
+  const [holidayWarningLoadError, setHolidayWarningLoadError] = useState(false);
   const isEditMode = Boolean(initialNotification?.id);
   const isRecurringSchedule =
     deliveryMode === "scheduled" && scheduleType === "repeat";
   const isMonthlyRepeat = isRecurringSchedule && repeatPattern === "monthly";
+  const holidayCacheKeyFor = (year: number) => `${holidayCountryCode}:${year}`;
 
   useEffect(() => {
     if (!initialNotification) {
@@ -146,6 +225,159 @@ const NotificationComposer = ({
       setScheduledTime("10:00");
     }
   }, [initialNotification, now]);
+
+  useEffect(() => {
+    if (initialNotification || !prefillDateKey) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(prefillDateKey)) return;
+
+    setDeliveryMode("scheduled");
+    setScheduleType("once");
+    setScheduledDate(prefillDateKey);
+  }, [initialNotification, prefillDateKey]);
+
+  const holidayWarningYears = useMemo(() => {
+    if (deliveryMode !== "scheduled") return [] as number[];
+
+    const years = new Set<number>();
+    if (!isRecurringSchedule) {
+      const [year] = scheduledDate.split("-").map(Number);
+      if (Number.isInteger(year)) years.add(year);
+      return Array.from(years);
+    }
+
+    const rangeStart = startOfDay(now);
+    const rangeEnd = addDays(rangeStart, HOLIDAY_WARNING_WINDOW_DAYS);
+    years.add(rangeStart.getFullYear());
+    years.add(rangeEnd.getFullYear());
+    return Array.from(years);
+  }, [deliveryMode, isRecurringSchedule, now, scheduledDate]);
+
+  useEffect(() => {
+    const missingYears = holidayWarningYears.filter(
+      (year) => !holidayCache[holidayCacheKeyFor(year)],
+    );
+    if (missingYears.length === 0) return;
+
+    let cancelled = false;
+    setHolidayWarningLoadError(false);
+
+    void Promise.all(
+      missingYears.map(async (year) => ({
+        year,
+        holidays: await getPublicHolidays(holidayCountryCode, year),
+      })),
+    )
+      .then((results) => {
+        if (cancelled) return;
+        setHolidayCache((current) => {
+          const next = { ...current };
+          for (const result of results) {
+            next[holidayCacheKeyFor(result.year)] = result.holidays;
+          }
+          return next;
+        });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("notification composer holiday warning fetch failed", error);
+        setHolidayWarningLoadError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [holidayCache, holidayCountryCode, holidayWarningYears]);
+
+  const holidayRecordsByDate = useMemo(() => {
+    const map = new Map<string, PublicHolidayRecord[]>();
+    for (const year of holidayWarningYears) {
+      const holidays = holidayCache[holidayCacheKeyFor(year)] ?? [];
+      for (const holiday of holidays) {
+        const current = map.get(holiday.date) ?? [];
+        current.push(holiday);
+        map.set(holiday.date, current);
+      }
+    }
+    return map;
+  }, [holidayCache, holidayWarningYears]);
+
+  const holidayWarningText = useMemo(() => {
+    if (deliveryMode !== "scheduled") return null;
+
+    if (!isRecurringSchedule) {
+      if (!scheduledDate) return null;
+      const matches = holidayRecordsByDate.get(scheduledDate) ?? [];
+      if (matches.length === 0) return null;
+      const names = matches.map((holiday) => holiday.localName || holiday.name);
+      return `Selected date is a holiday (${names.join(", ")}).`;
+    }
+
+    const rangeStart = startOfDay(now);
+    const rangeDays = HOLIDAY_WARNING_WINDOW_DAYS;
+    const overlaps: Array<{ date: Date; names: string[] }> = [];
+
+    const selectedJsWeekdays = new Set<number>(
+      repeatDays
+        .map((day) => weekdayToJsDay(day))
+        .filter(
+          (
+            day,
+          ): day is NonNullable<ReturnType<typeof weekdayToJsDay>> =>
+            day !== null,
+        ),
+    );
+    const biweeklyAnchor = startOfWeekMonday(now);
+
+    for (let i = 0; i <= rangeDays; i += 1) {
+      const candidate = addDays(rangeStart, i);
+      const dateKey = toDateKey(candidate);
+      const holidayMatches = holidayRecordsByDate.get(dateKey) ?? [];
+      if (holidayMatches.length === 0) continue;
+
+      let matchesSchedule = false;
+      if (repeatPattern === "monthly") {
+        const dayNumber = Number.parseInt(monthlyDayOfMonth, 10);
+        matchesSchedule =
+          Number.isInteger(dayNumber) && dayNumber >= 1 && dayNumber <= 31
+            ? candidate.getDate() === dayNumber
+            : false;
+      } else {
+        if (!selectedJsWeekdays.has(candidate.getDay())) {
+          matchesSchedule = false;
+        } else if (repeatPattern === "biweekly") {
+          const diffWeeks = getWeekDiff(biweeklyAnchor, candidate);
+          const parity = ((diffWeeks % 2) + 2) % 2;
+          matchesSchedule = parity === 0;
+        } else {
+          matchesSchedule = true;
+        }
+      }
+
+      if (!matchesSchedule) continue;
+      overlaps.push({
+        date: candidate,
+        names: holidayMatches.map((holiday) => holiday.localName || holiday.name),
+      });
+    }
+
+    if (overlaps.length === 0) return null;
+
+    const preview = overlaps
+      .slice(0, 2)
+      .map((item) => `${formatHolidayDate(item.date)} (${item.names.join(", ")})`)
+      .join("; ");
+    const suffix = overlaps.length > 2 ? ` +${overlaps.length - 2} more` : "";
+    return `Upcoming repeats hit holiday dates in the next ${rangeDays} days: ${preview}${suffix}.`;
+  }, [
+    deliveryMode,
+    holidayRecordsByDate,
+    isRecurringSchedule,
+    monthlyDayOfMonth,
+    now,
+    repeatDays,
+    repeatPattern,
+    scheduledDate,
+  ]);
 
   const isSamePresetSelected = (preset: WeekdayKey[]) =>
     preset.length === repeatDays.length &&
@@ -480,6 +712,23 @@ const NotificationComposer = ({
                   />
                 </label>
               </div>
+
+              {holidayWarningText ? (
+                <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">
+                    Holiday warning
+                  </p>
+                  <p className="mt-1 text-xs text-amber-100/90">
+                    {holidayWarningText}
+                  </p>
+                </div>
+              ) : null}
+
+              {holidayWarningLoadError ? (
+                <p className="text-xs text-contrast/55">
+                  Holiday warning check is temporarily unavailable.
+                </p>
+              ) : null}
             </div>
           </div>
         ) : null}

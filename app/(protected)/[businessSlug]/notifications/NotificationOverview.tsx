@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Button from "@/components/Button";
 import DeleteButton from "@/components/DeleteButton";
 import EditButton from "@/components/EditButton";
-import { FaPaperPlane } from "react-icons/fa6";
+import { FaPaperPlane, FaXmark } from "react-icons/fa6";
 import type { NotificationRecord } from "@/types/notification";
 import { getNotificationColor } from "./notificationVisuals";
 
@@ -34,10 +34,12 @@ type NotificationOverviewProps = {
   togglingIds?: string[];
   deletingIds?: string[];
   sendingIds?: string[];
+  selectedNotificationId?: string | null;
   onToggleStatus: (notification: NotificationRecord) => void | Promise<void>;
   onDelete: (notification: NotificationRecord) => void | Promise<void>;
   onEdit: (notification: NotificationRecord) => void | Promise<void>;
   onSendNow?: (notification: NotificationRecord) => void | Promise<void>;
+  onSelectNotification?: (notification: NotificationRecord) => void;
   onCreate?: () => void;
   showCreateButton?: boolean;
 };
@@ -85,15 +87,23 @@ const NotificationOverview = ({
   togglingIds = [],
   deletingIds = [],
   sendingIds = [],
+  selectedNotificationId = null,
   onToggleStatus,
   onDelete,
   onEdit,
   onSendNow,
+  onSelectNotification,
   onCreate,
   showCreateButton = false,
 }: NotificationOverviewProps) => {
+  const [armedSendNotificationId, setArmedSendNotificationId] = useState<
+    string | null
+  >(null);
+
   const sortedNotifications = useMemo(() => {
-    return [...notifications].sort((a, b) => {
+    return notifications
+      .filter((notification) => notification.deliveryMode === "scheduled")
+      .sort((a, b) => {
       const aTime = new Date(
         a.nextRunAtUtc ?? a.scheduledAtUtc ?? a.createdAt,
       ).getTime();
@@ -141,10 +151,12 @@ const NotificationOverview = ({
 
         {sortedNotifications.map((notification) => {
           const isActive = notification.status === "active";
+          const isSelected = selectedNotificationId === notification.id;
           const isToggling = togglingIds.includes(notification.id);
           const isDeleting = deletingIds.includes(notification.id);
           const isSending = sendingIds.includes(notification.id);
           const isBusy = isToggling || isDeleting || isSending;
+          const isSendArmed = armedSendNotificationId === notification.id;
           const scheduleLine = buildScheduleLine(notification);
           const displayMessage =
             notification.message?.trim() || "Notification message";
@@ -156,7 +168,22 @@ const NotificationOverview = ({
           return (
             <article
               key={notification.id}
-              className="rounded-xl border border-accent-3 bg-primary/25 px-3 py-2.5"
+              role={onSelectNotification ? "button" : undefined}
+              tabIndex={onSelectNotification ? 0 : undefined}
+              onClick={() => onSelectNotification?.(notification)}
+              onKeyDown={(event) => {
+                if (!onSelectNotification) return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectNotification(notification);
+                }
+              }}
+              className={`rounded-xl border px-3 py-2.5 transition-colors ${
+                isSelected
+                  ? "border-brand/60 bg-brand/10"
+                  : "border-accent-3 bg-primary/25"
+              } ${onSelectNotification ? "cursor-pointer" : ""}`}
+              aria-pressed={onSelectNotification ? isSelected : undefined}
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
@@ -178,18 +205,56 @@ const NotificationOverview = ({
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
+                <div
+                  className="flex shrink-0 items-center gap-1 self-end sm:self-auto"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
                   {onSendNow ? (
-                    <button
-                      type="button"
-                      onClick={() => void onSendNow(notification)}
-                      disabled={isBusy}
-                      title={isSending ? "Sending..." : "Send now"}
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isBusy) return;
+                          if (!isSendArmed) {
+                            setArmedSendNotificationId(notification.id);
+                            return;
+                          }
+                          setArmedSendNotificationId(null);
+                          void onSendNow(notification);
+                        }}
+                        disabled={isBusy}
+                        title={
+                          isSending
+                            ? "Sending..."
+                            : isSendArmed
+                              ? "Confirm send now"
+                              : "Send now"
+                        }
                         aria-label={`Send notification now: ${actionLabel}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-brand transition-transform duration-200 hover:bg-brand/20 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <FaPaperPlane className="text-sm" />
-                    </button>
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-brand transition-transform duration-200 hover:bg-brand/20 disabled:cursor-not-allowed disabled:opacity-60 ${
+                          isSendArmed ? "scale-[1.06]" : "scale-100"
+                        }`}
+                      >
+                        <FaPaperPlane className="text-sm" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isBusy) return;
+                          setArmedSendNotificationId(null);
+                        }}
+                        aria-label="Cancel send now"
+                        title="Cancel"
+                        className={`inline-flex items-center justify-center overflow-hidden rounded-full border text-xs font-semibold transition-all duration-200 border-contrast/40 bg-contrast/5 text-contrast hover:bg-contrast/10 ${
+                          isSendArmed
+                            ? "ml-1 h-8 w-8 opacity-100"
+                            : "pointer-events-none ml-0 h-0 w-0 opacity-0"
+                        }`}
+                      >
+                        <FaXmark className="text-sm" />
+                      </button>
+                    </div>
                   ) : null}
                   <EditButton
                     disabled={isBusy}
