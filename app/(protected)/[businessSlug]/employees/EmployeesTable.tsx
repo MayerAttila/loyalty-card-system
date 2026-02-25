@@ -4,6 +4,7 @@ import React from "react";
 import { User } from "@/types/user";
 import DataTable, { DataTableColumn } from "@/components/DataTable";
 import DeleteButton from "@/components/DeleteButton";
+import CustomDropdown from "@/components/CustomDropdown";
 
 type EmployeesTableProps = {
   users: User[];
@@ -46,6 +47,10 @@ const EmployeesTable = ({
     currentUserRole === "OWNER"
       ? (["OWNER", "ADMIN", "STAFF"] as const)
       : (["ADMIN", "STAFF"] as const);
+  const roleDropdownOptions = roleOptions.map((role) => ({
+    value: role,
+    label: roleLabels[role],
+  }));
   const columns: DataTableColumn<User>[] = [
     {
       key: "name",
@@ -74,22 +79,22 @@ const EmployeesTable = ({
         }
 
         return (
-          <select
-            className="rounded-lg border border-accent-3 bg-accent-1 px-2 py-1 text-xs text-contrast"
+          <CustomDropdown
+            ariaLabel={`Change role for ${row.name}`}
             value={row.role}
+            options={roleDropdownOptions}
             disabled={updatingIds.has(row.id)}
-            onChange={(event) => {
-              const nextRole = event.target.value as User["role"];
+            menuPlacement="top"
+            menuAlign="left"
+            renderInPortal
+            matchButtonWidth
+            buttonClassName="h-8 min-w-[110px] rounded-lg px-2 py-1 text-xs"
+            onChange={(value) => {
+              const nextRole = value as User["role"];
               if (nextRole === row.role) return;
               onUpdateRole(row.id, nextRole);
             }}
-          >
-            {roleOptions.map((role) => (
-              <option key={role} value={role}>
-                {roleLabels[role]}
-              </option>
-            ))}
-          </select>
+          />
         );
       },
     },
