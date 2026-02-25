@@ -45,6 +45,29 @@ type Props = {
 
 type SearchRow = Record<string, string>;
 const INITIAL_TABLE_LOAD_COUNT = 20;
+const BACKGROUND_HYDRATE_CHUNK_SIZE = 200;
+
+async function fetchAllInBatches<T>(
+  fetchPage: (limit: number, offset: number) => Promise<T[]>,
+  chunkSize: number,
+  onPage: (rows: T[]) => void,
+  isCancelled: () => boolean,
+) {
+  let offset = 0;
+  const merged: T[] = [];
+
+  while (!isCancelled()) {
+    const page = await fetchPage(chunkSize, offset);
+    if (isCancelled()) return;
+
+    if (!page.length) break;
+    merged.push(...page);
+    onPage([...merged]);
+
+    if (page.length < chunkSize) break;
+    offset += page.length;
+  }
+}
 
 const LogsClient = ({ logs, notificationLogs }: Props) => {
   const [stampingLogsState, setStampingLogsState] = useState(logs);
@@ -64,27 +87,29 @@ const LogsClient = ({ logs, notificationLogs }: Props) => {
 
     let cancelled = false;
 
+    const isCancelled = () => cancelled;
+
     void Promise.allSettled([
-      getStampingLogsClient(),
-      getNotificationLogsClient(),
+      fetchAllInBatches(
+        (limit, offset) => getStampingLogsClient(limit, offset),
+        BACKGROUND_HYDRATE_CHUNK_SIZE,
+        (rows) => setStampingLogsState(rows),
+        isCancelled,
+      ),
+      fetchAllInBatches(
+        (limit, offset) => getNotificationLogsClient(limit, offset),
+        BACKGROUND_HYDRATE_CHUNK_SIZE,
+        (rows) => setNotificationLogsState(rows),
+        isCancelled,
+      ),
     ]).then(([stampingResult, notificationResult]) => {
       if (cancelled) return;
 
-      if (stampingResult.status === "fulfilled") {
-        setStampingLogsState((prev) =>
-          stampingResult.value.length > prev.length ? stampingResult.value : prev
-        );
-      } else {
+      if (stampingResult.status === "rejected") {
         console.error("background stamping logs hydrate failed", stampingResult.reason);
       }
 
-      if (notificationResult.status === "fulfilled") {
-        setNotificationLogsState((prev) =>
-          notificationResult.value.length > prev.length
-            ? notificationResult.value
-            : prev
-        );
-      } else {
+      if (notificationResult.status === "rejected") {
         console.error(
           "background notification logs hydrate failed",
           notificationResult.reason

@@ -12,6 +12,7 @@ type CustomersClientProps = {
 };
 
 const INITIAL_TABLE_LOAD_COUNT = 20;
+const BACKGROUND_HYDRATE_CHUNK_SIZE = 200;
 
 const CustomersClient = ({ customers, businessId }: CustomersClientProps) => {
   const [allCustomers, setAllCustomers] = useState<Customer[]>(customers);
@@ -25,11 +26,24 @@ const CustomersClient = ({ customers, businessId }: CustomersClientProps) => {
 
     void (async () => {
       try {
-        const fullCustomers = await getCustomersByBusinessIdClient(businessId);
-        if (cancelled) return;
-        setAllCustomers((prev) =>
-          fullCustomers.length > prev.length ? fullCustomers : prev
-        );
+        let offset = 0;
+        const merged: Customer[] = [];
+
+        while (!cancelled) {
+          const page = await getCustomersByBusinessIdClient(
+            businessId,
+            BACKGROUND_HYDRATE_CHUNK_SIZE,
+            offset
+          );
+          if (cancelled) return;
+
+          if (!page.length) break;
+          merged.push(...page);
+          setAllCustomers([...merged]);
+
+          if (page.length < BACKGROUND_HYDRATE_CHUNK_SIZE) break;
+          offset += page.length;
+        }
       } catch (error) {
         console.error("background customers hydrate failed", error);
       }

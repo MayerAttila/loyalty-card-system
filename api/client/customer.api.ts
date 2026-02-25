@@ -29,12 +29,19 @@ export const createCustomer = async (payload: CreateCustomerPayload) => {
 
 export const getCustomersByBusinessId = async (
   businessId: string,
-  limit?: number
+  limit?: number,
+  offset?: number
 ) => {
   const { data } = await api.get<Customer[]>(
     `/customer/business/${encodeURIComponent(businessId)}`,
     {
-      params: typeof limit === "number" ? { limit } : undefined,
+      params:
+        typeof limit === "number" || typeof offset === "number"
+          ? {
+              ...(typeof limit === "number" ? { limit } : {}),
+              ...(typeof offset === "number" ? { offset } : {}),
+            }
+          : undefined,
     }
   );
   return data;

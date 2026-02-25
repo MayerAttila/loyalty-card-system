@@ -21,6 +21,7 @@ type EmployeeClientProps = {
 };
 
 const INITIAL_TABLE_LOAD_COUNT = 20;
+const BACKGROUND_HYDRATE_CHUNK_SIZE = 200;
 
 const EmployeeClient = ({
   initialUserData,
@@ -42,9 +43,24 @@ const EmployeeClient = ({
 
     void (async () => {
       try {
-        const allUsers = await getUsersByBusinessIdClient(businessId);
-        if (cancelled) return;
-        setUsers((prev) => (allUsers.length > prev.length ? allUsers : prev));
+        let offset = 0;
+        const merged: User[] = [];
+
+        while (!cancelled) {
+          const page = await getUsersByBusinessIdClient(
+            businessId,
+            BACKGROUND_HYDRATE_CHUNK_SIZE,
+            offset
+          );
+          if (cancelled) return;
+
+          if (!page.length) break;
+          merged.push(...page);
+          setUsers([...merged]);
+
+          if (page.length < BACKGROUND_HYDRATE_CHUNK_SIZE) break;
+          offset += page.length;
+        }
       } catch (error) {
         console.error("background users hydrate failed", error);
       }

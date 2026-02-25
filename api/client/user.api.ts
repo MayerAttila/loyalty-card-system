@@ -52,11 +52,21 @@ export const sendEmployeeInvite = async (payload: {
   return data;
 };
 
-export const getUsersByBusinessId = async (businessId: string, limit?: number) => {
+export const getUsersByBusinessId = async (
+  businessId: string,
+  limit?: number,
+  offset?: number
+) => {
   const { data } = await api.get<User[]>(
     `/user/businessId/${encodeURIComponent(businessId)}`,
     {
-      params: typeof limit === "number" ? { limit } : undefined,
+      params:
+        typeof limit === "number" || typeof offset === "number"
+          ? {
+              ...(typeof limit === "number" ? { limit } : {}),
+              ...(typeof offset === "number" ? { offset } : {}),
+            }
+          : undefined,
     }
   );
   return data;
