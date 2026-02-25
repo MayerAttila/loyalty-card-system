@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import CustomDropdown from "@/components/CustomDropdown";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -23,6 +24,10 @@ type DataTableProps<T> = {
   defaultSortKey?: string;
   defaultSortDirection?: SortDirection;
   respectStoredSort?: boolean;
+  visibleRowCountOptions?: number[];
+  defaultVisibleRowCount?: number;
+  viewportOffsetPx?: number;
+  showVisibleRowControl?: boolean;
 };
 
 type ResizeState = {
@@ -33,6 +38,12 @@ type ResizeState = {
 
 const DEFAULT_WIDTH = 180;
 const MIN_WIDTH = 110;
+const DEFAULT_VISIBLE_ROW_OPTIONS = [20, 50, 100];
+const DEFAULT_VISIBLE_ROW_COUNT = 20;
+const DEFAULT_VIEWPORT_OFFSET_PX = 260;
+const ESTIMATED_HEADER_HEIGHT_PX = 48;
+const ESTIMATED_ROW_HEIGHT_PX = 44;
+const ESTIMATED_EMPTY_STATE_HEIGHT_PX = 84;
 
 function buildDefaultWidths<T>(columns: DataTableColumn<T>[]) {
   return columns.reduce<Record<string, number>>((acc, column) => {
@@ -45,6 +56,19 @@ function getStorageId(storageKey?: string) {
   return storageKey ? `datatable:${storageKey}` : null;
 }
 
+function buildVisibleRowOptions(values?: number[]) {
+  const source = values?.length ? values : DEFAULT_VISIBLE_ROW_OPTIONS;
+  const normalized = Array.from(
+    new Set(
+      source
+        .map((value) => Number.parseInt(String(value), 10))
+        .filter((value) => Number.isInteger(value) && value > 0),
+    ),
+  ).sort((a, b) => a - b);
+
+  return normalized.length > 0 ? normalized : DEFAULT_VISIBLE_ROW_OPTIONS;
+}
+
 const DataTable = <T,>({
   data,
   columns,
@@ -53,7 +77,18 @@ const DataTable = <T,>({
   defaultSortKey,
   defaultSortDirection = "asc",
   respectStoredSort = true,
+  visibleRowCountOptions,
+  defaultVisibleRowCount = DEFAULT_VISIBLE_ROW_COUNT,
+  viewportOffsetPx = DEFAULT_VIEWPORT_OFFSET_PX,
+  showVisibleRowControl = true,
 }: DataTableProps<T>) => {
+  const rowCountOptions = useMemo(
+    () => buildVisibleRowOptions(visibleRowCountOptions),
+    [visibleRowCountOptions],
+  );
+  const resolvedDefaultVisibleRowCount = rowCountOptions.includes(defaultVisibleRowCount)
+    ? defaultVisibleRowCount
+    : rowCountOptions[0] ?? DEFAULT_VISIBLE_ROW_COUNT;
   const fallbackSortKey =
     columns.find((column) => column.sortable)?.key ?? null;
   const resolvedSortKey =
@@ -69,6 +104,10 @@ const DataTable = <T,>({
   );
   const [resizing, setResizing] = useState<ResizeState | null>(null);
   const [isHydrated, setIsHydrated] = useState(!storageKey);
+  const [visibleRowCount, setVisibleRowCount] = useState<number>(
+    resolvedDefaultVisibleRowCount,
+  );
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const storageId = getStorageId(storageKey);
@@ -85,6 +124,7 @@ const DataTable = <T,>({
         widths?: Record<string, number>;
         sortKey?: string | null;
         sortDirection?: SortDirection;
+        visibleRowCount?: number;
       };
 
       if (parsed.widths) {
@@ -105,11 +145,31 @@ const DataTable = <T,>({
       } else {
         setSortDirection(defaultSortDirection);
       }
+
+      const nextVisibleRowCount =
+        typeof parsed.visibleRowCount === "number" &&
+        rowCountOptions.includes(parsed.visibleRowCount)
+          ? parsed.visibleRowCount
+          : resolvedDefaultVisibleRowCount;
+      setVisibleRowCount(nextVisibleRowCount);
     } catch {
     } finally {
       setIsHydrated(true);
     }
-  }, [storageKey]);
+  }, [
+    storageKey,
+    respectStoredSort,
+    resolvedDefaultVisibleRowCount,
+    defaultSortDirection,
+    resolvedSortKey,
+    rowCountOptions,
+  ]);
+
+  useEffect(() => {
+    if (!storageKey) {
+      setVisibleRowCount(resolvedDefaultVisibleRowCount);
+    }
+  }, [storageKey, resolvedDefaultVisibleRowCount]);
 
   useEffect(() => {
     const storageId = getStorageId(storageKey);
@@ -119,10 +179,11 @@ const DataTable = <T,>({
       widths: columnWidths,
       sortKey,
       sortDirection,
+      visibleRowCount,
     });
 
     localStorage.setItem(storageId, payload);
-  }, [storageKey, columnWidths, sortKey, sortDirection, isHydrated]);
+  }, [storageKey, columnWidths, sortKey, sortDirection, visibleRowCount, isHydrated]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -179,6 +240,20 @@ const DataTable = <T,>({
     return sorted;
   }, [data, sortKey, sortDirection, columns]);
 
+  const totalRows = sortedData.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / visibleRowCount));
+
+  useEffect(() => {
+    setCurrentPage((prev) => Math.min(Math.max(1, prev), totalPages));
+  }, [totalPages]);
+
+  const pageStartIndex = totalRows === 0 ? 0 : (currentPage - 1) * visibleRowCount;
+  const paginatedData = useMemo(
+    () => sortedData.slice(pageStartIndex, pageStartIndex + visibleRowCount),
+    [sortedData, pageStartIndex, visibleRowCount],
+  );
+  const pageEndIndex = Math.min(pageStartIndex + paginatedData.length, totalRows);
+
   const handleSort = (key: string) => {
     if (key === sortKey) {
       setSortDirection((direction) => (direction === "asc" ? "desc" : "asc"));
@@ -215,9 +290,27 @@ const DataTable = <T,>({
     );
   };
 
+  const estimatedRowsHeightPx =
+    totalRows === 0
+      ? ESTIMATED_EMPTY_STATE_HEIGHT_PX
+      : Math.max(1, paginatedData.length) * ESTIMATED_ROW_HEIGHT_PX;
+  const tableViewportMaxHeight = `min(calc(100vh - ${viewportOffsetPx}px), ${
+    ESTIMATED_HEADER_HEIGHT_PX + estimatedRowsHeightPx
+  }px)`;
+  const shouldConstrainViewport =
+    totalRows > 0 && paginatedData.length >= visibleRowCount;
+
+  const visibleRowDropdownOptions = rowCountOptions.map((count) => ({
+    value: String(count),
+    label: String(count),
+  }));
+
   return (
     <div className="overflow-hidden rounded-xl border border-accent-3 bg-primary/40 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-auto [scrollbar-width:thin] [scrollbar-color:rgb(var(--color-accent-4)/0.7)_transparent] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-[rgb(var(--color-accent-4)/0.7)] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb:hover]:bg-[rgb(var(--color-accent-4)/0.9)]"
+        style={{ maxHeight: shouldConstrainViewport ? tableViewportMaxHeight : undefined }}
+      >
       <table className="min-w-full table-fixed text-left text-sm text-contrast">
         <thead className="border-b border-accent-3 text-xs uppercase tracking-wide text-contrast/70">
           <tr>
@@ -229,7 +322,7 @@ const DataTable = <T,>({
               return (
                 <th
                   key={column.key}
-                  className={`relative px-4 py-3 ${
+                  className={`sticky top-0 z-10 bg-accent-1/95 px-4 py-3 backdrop-blur-sm ${
                     isRightAligned ? "text-right" : "text-left"
                   }`}
                   style={{ width }}
@@ -263,7 +356,7 @@ const DataTable = <T,>({
           </tr>
         </thead>
         <tbody>
-          {sortedData.length === 0 ? (
+          {totalRows === 0 ? (
             <tr>
               <td
                 className="px-4 py-6 text-center text-contrast/70"
@@ -273,11 +366,11 @@ const DataTable = <T,>({
               </td>
             </tr>
           ) : (
-            sortedData.map((row, index) => (
+            paginatedData.map((row, index) => (
               <tr
-                key={`row-${index}`}
+                key={`row-${pageStartIndex + index}`}
                 className={`border-b border-accent-3/60 transition-colors ${
-                  index % 2 === 0
+                  (pageStartIndex + index) % 2 === 0
                     ? "bg-primary/40"
                     : "bg-accent-1/50"
                 } hover:bg-accent-2/60`}
@@ -305,6 +398,59 @@ const DataTable = <T,>({
         </tbody>
       </table>
       </div>
+
+      {showVisibleRowControl ? (
+        <div className="flex flex-col gap-2 border-t border-accent-3 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-start gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-contrast/60">
+              Rows per page
+            </span>
+            <CustomDropdown
+              value={String(visibleRowCount)}
+              options={visibleRowDropdownOptions}
+              onChange={(value) => {
+                const nextValue = Number.parseInt(value, 10);
+                if (!Number.isInteger(nextValue)) return;
+                setVisibleRowCount(nextValue);
+                setCurrentPage(1);
+              }}
+              ariaLabel="Rows per page"
+              menuPlacement="top"
+              menuAlign="left"
+              matchButtonWidth
+              renderInPortal
+              buttonClassName="h-8 min-w-[78px] justify-between rounded-lg bg-accent-1 px-2 text-xs"
+              menuClassName="w-auto min-w-[78px]"
+            />
+            <span className="text-xs text-contrast/60">
+              {totalRows === 0 ? "0-0 of 0" : `${pageStartIndex + 1}-${pageEndIndex} of ${totalRows}`}
+            </span>
+          </div>
+          <div className="flex items-center justify-start gap-2 sm:justify-end">
+            <button
+              type="button"
+              className="rounded-lg border border-accent-3 bg-accent-1 px-3 py-1.5 text-xs font-medium text-contrast transition hover:border-brand/60 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage <= 1 || totalRows === 0}
+            >
+              Prev
+            </button>
+            <span className="text-xs text-contrast/70">
+              Page {totalRows === 0 ? 0 : currentPage} / {totalRows === 0 ? 0 : totalPages}
+            </span>
+            <button
+              type="button"
+              className="rounded-lg border border-accent-3 bg-accent-1 px-3 py-1.5 text-xs font-medium text-contrast transition hover:border-brand/60 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage >= totalPages || totalRows === 0}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

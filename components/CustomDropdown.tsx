@@ -68,12 +68,9 @@ const CustomDropdown = ({
     if (!button) return;
 
     const rect = button.getBoundingClientRect();
-    const anchorLeft =
-      menuAlign === "right" ? rect.right + window.scrollX : rect.left + window.scrollX;
+    const anchorLeft = menuAlign === "right" ? rect.right : rect.left;
     const anchorTop =
-      menuPlacement === "top"
-        ? rect.top + window.scrollY - 8
-        : rect.bottom + window.scrollY + 8;
+      menuPlacement === "top" ? rect.top - 8 : rect.bottom + 8;
 
     const transformX = menuAlign === "right" ? "translateX(-100%)" : "translateX(0)";
     const transformY = menuPlacement === "top" ? "translateY(-100%)" : "translateY(0)";
