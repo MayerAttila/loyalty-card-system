@@ -3,6 +3,8 @@ import MainHeader from "@/components/MainHeader";
 import TopBrandWave from "@/components/TopBrandWave";
 import BottomBrandWave from "@/components/BottomBrandWave";
 import BackgroundFog from "@/components/BackgroundFog";
+import ReferralCapture from "@/components/ReferralCapture";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -14,6 +16,9 @@ export default function RootLayout({
       <div className="relative">
         <BackgroundFog />
         <div className="relative z-10">
+          <Suspense fallback={null}>
+            <ReferralCapture />
+          </Suspense>
           <MainHeader />
           <TopBrandWave />
           {children}

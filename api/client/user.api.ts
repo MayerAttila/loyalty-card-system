@@ -9,8 +9,15 @@ export type CreateUserPayload = {
   role?: "OWNER" | "ADMIN" | "STAFF";
 };
 
-export const createUser = async (payload: CreateUserPayload) => {
-  const { data } = await api.post<User>("/user", payload);
+export const createUser = async (
+  payload: CreateUserPayload,
+  options?: { withCredentials?: boolean }
+) => {
+  const { data } = await api.post<User>("/user", payload, {
+    ...(typeof options?.withCredentials === "boolean"
+      ? { withCredentials: options.withCredentials }
+      : {}),
+  });
   return data;
 };
 

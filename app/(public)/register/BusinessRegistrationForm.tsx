@@ -6,10 +6,15 @@ import { toast } from "react-toastify";
 import { createBusiness } from "@/api/client/business.api";
 import { CreateBusinessPayload } from "@/api/client/business.api";
 import { createUser } from "@/api/client/user.api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getSession, signIn } from "@/api/client/auth.api";
 import { useRouter } from "next/navigation";
 import { toBusinessSlug } from "@/lib/slug";
+import {
+  clearStoredReferralCode,
+  readStoredReferralCode,
+  storeReferralCode,
+} from "@/lib/referral";
 
 const PASSWORD_REQUIREMENTS_TEXT =
   "Password must be at least 8 characters and include one uppercase letter and one number.";
@@ -41,7 +46,20 @@ const BusinessRegistrationForm = ({
 }: BusinessRegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const queryRef =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("ref")
+        : null;
+    if (queryRef) {
+      setReferralCode(storeReferralCode(queryRef));
+      return;
+    }
+    setReferralCode(readStoredReferralCode());
+  }, []);
 
   const resolveAppRedirect = (url?: string | null) => {
     if (!url || typeof window === "undefined") {
@@ -127,17 +145,24 @@ const BusinessRegistrationForm = ({
 
     const payload: CreateBusinessPayload = {
       name: businessName,
+      ...(referralCode ? { referralCode } : {}),
     };
 
     try {
-      const business = await createBusiness(payload);
-      await createUser({
-        name: String(formData.get("ownerName") ?? ""),
-        email: String(formData.get("ownerEmail") ?? ""),
-        password: ownerPassword,
-        businessId: business.id,
-        role: "OWNER",
-      });
+      const business = await createBusiness(payload, { withCredentials: false });
+      if (referralCode) {
+        clearStoredReferralCode();
+      }
+      await createUser(
+        {
+          name: String(formData.get("ownerName") ?? ""),
+          email: String(formData.get("ownerEmail") ?? ""),
+          password: ownerPassword,
+          businessId: business.id,
+          role: "OWNER",
+        },
+        { withCredentials: false }
+      );
       setErrors({});
       form.reset();
       toast.success("Business account created! Signing you in...");

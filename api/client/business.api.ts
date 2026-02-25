@@ -6,14 +6,23 @@ export type CreateBusinessPayload = {
   name: string;
   address?: string;
   website?: string;
+  referralCode?: string;
 };
 
-export const createBusiness = async (payload: {
-  name: string;
-  address?: string;
-  website?: string;
-}) => {
-  const { data } = await api.post<Business>("/business", payload);
+export const createBusiness = async (
+  payload: {
+    name: string;
+    address?: string;
+    website?: string;
+    referralCode?: string;
+  },
+  options?: { withCredentials?: boolean }
+) => {
+  const { data } = await api.post<Business>("/business", payload, {
+    ...(typeof options?.withCredentials === "boolean"
+      ? { withCredentials: options.withCredentials }
+      : {}),
+  });
   return data;
 };
 
