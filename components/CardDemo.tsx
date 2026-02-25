@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import FormSwitch from "@/components/FormSwitch";
 import GooglePreviewCard from "@/app/(protected)/[businessSlug]/cards/GooglePreviewCard";
+import ApplePreviewCard from "@/app/(protected)/[businessSlug]/cards/ApplePreviewCard";
+import { detectWalletPlatform } from "@/app/(public)/join/[businessId]/walletPlatform";
 
 const CardDemo = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const [previewType, setPreviewType] = useState<"google" | "apple">("google");
+  const [mobilePreviewType, setMobilePreviewType] = useState<"google" | "apple">(
+    "google",
+  );
 
   const desktopPinRef = useRef<HTMLDivElement | null>(null);
   const desktopStageRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +101,16 @@ const CardDemo = () => {
         "Collect a stamp with every donut and enjoy a free treat after 6 — turning quick cravings into loyal daily visits.",
     },
   ];
+
+  const PreviewCard =
+    previewType === "apple" ? ApplePreviewCard : GooglePreviewCard;
+  const MobilePreviewCard =
+    mobilePreviewType === "apple" ? ApplePreviewCard : GooglePreviewCard;
+
+  useEffect(() => {
+    const platform = detectWalletPlatform();
+    setMobilePreviewType(platform === "ios" ? "apple" : "google");
+  }, []);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -303,16 +320,31 @@ const CardDemo = () => {
         ref={desktopPinRef}
         className="mt-6 hidden md:flex md:min-h-[calc(100vh-6rem)] md:flex-col md:items-center md:justify-center md:gap-6 md:pb-4"
       >
-        <div className="w-full">
-          <h2
-            data-carddemo-title
-            className="text-2xl font-semibold text-contrast"
-          >
-            Card designs your customers will love
-          </h2>
-          <p data-carddemo-title className="mt-2 text-sm text-contrast/80">
-            Create clean, modern loyalty cards that match your brand.
-          </p>
+        <div className="flex w-full flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2
+              data-carddemo-title
+              className="text-2xl font-semibold text-contrast"
+            >
+              Card designs your customers will love
+            </h2>
+            <p data-carddemo-title className="mt-2 text-sm text-contrast/80">
+              Create clean, modern loyalty cards that match your brand.
+            </p>
+          </div>
+          <div data-carddemo-title className="shrink-0">
+            <FormSwitch
+              items={[
+                { key: "google", label: "Google" },
+                { key: "apple", label: "Apple" },
+              ]}
+              activeKey={previewType}
+              variant="glass"
+              onChange={(key) =>
+                setPreviewType(key === "apple" ? "apple" : "google")
+              }
+            />
+          </div>
         </div>
 
         <div
@@ -329,7 +361,7 @@ const CardDemo = () => {
               }}
               className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
             >
-              <GooglePreviewCard
+              <PreviewCard
                 text1={demo.text1}
                 text2={demo.text2}
                 maxPoints={demo.maxPoints}
@@ -382,7 +414,7 @@ const CardDemo = () => {
               className="will-change-transform"
             >
               <div className="flex justify-center">
-                <GooglePreviewCard
+                <MobilePreviewCard
                   text1={demo.text1}
                   text2={demo.text2}
                   maxPoints={demo.maxPoints}

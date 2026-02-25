@@ -5,7 +5,9 @@ import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
 import Button from "@/components/Button";
+import FormSwitch from "@/components/FormSwitch";
 import GooglePreviewCard from "./GooglePreviewCard";
+import ApplePreviewCard from "./ApplePreviewCard";
 import { CardTemplate } from "@/types/cardTemplate";
 import { getBusinessStamps } from "@/api/client/business.api";
 
@@ -14,6 +16,8 @@ type SavedTemplatesProps = {
   businessId?: string;
   businessName?: string;
   initialHasLogo?: boolean;
+  previewType?: "google" | "apple";
+  onPreviewTypeChange?: (value: "google" | "apple") => void;
   deletingIds?: Set<string>;
   activatingIds?: Set<string>;
   onEdit?: (template: CardTemplate) => void;
@@ -27,6 +31,8 @@ const CardTemplatesPanel = ({
   businessId,
   businessName,
   initialHasLogo,
+  previewType = "google",
+  onPreviewTypeChange,
   deletingIds,
   activatingIds,
   onEdit,
@@ -34,6 +40,7 @@ const CardTemplatesPanel = ({
   onDelete,
   onToggleActive,
 }: SavedTemplatesProps) => {
+  const PreviewCard = previewType === "apple" ? ApplePreviewCard : GooglePreviewCard;
   const templates = initialTemplates;
   const [logoAvailable, setLogoAvailable] = useState(Boolean(initialHasLogo));
   const [logoVersion] = useState(0);
@@ -124,16 +131,16 @@ const CardTemplatesPanel = ({
             Reuse or update your existing loyalty card designs.
           </p>
         </div>
-        {onCreate ? (
-          <Button
-            type="button"
-            onClick={onCreate}
-            disabled={!businessId}
-            size="sm"
-          >
-            New template
-          </Button>
-        ) : null}
+        <FormSwitch
+          items={[
+            { key: "google", label: "Google preview" },
+            { key: "apple", label: "Apple preview" },
+          ]}
+          activeKey={previewType}
+          onChange={(key) =>
+            onPreviewTypeChange?.(key === "apple" ? "apple" : "google")
+          }
+        />
       </div>
 
       <div className="mt-5">
@@ -192,7 +199,7 @@ const CardTemplatesPanel = ({
                     ) : null}
                   </div>
                 </div>
-                <GooglePreviewCard
+                <PreviewCard
                   text1={template.text1 ?? ""}
                   text2={template.text2 ?? ""}
                   maxPoints={template.maxPoints}
@@ -211,6 +218,19 @@ const CardTemplatesPanel = ({
           </div>
         )}
       </div>
+
+      {onCreate ? (
+        <div className="mt-5 flex justify-end">
+          <Button
+            type="button"
+            onClick={onCreate}
+            disabled={!businessId}
+            size="sm"
+          >
+            New template
+          </Button>
+        </div>
+      ) : null}
     </section>
   );
 };

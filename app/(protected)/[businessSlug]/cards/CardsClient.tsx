@@ -25,6 +25,8 @@ type EditorRenderState = {
   isCreating: boolean;
 };
 
+type CardPreviewType = "google" | "apple";
+
 const CardsClient = ({
   initialTemplates,
   businessId,
@@ -39,6 +41,7 @@ const CardsClient = ({
   const [editorExpanded, setEditorExpanded] = useState(false);
   const [editorRenderState, setEditorRenderState] =
     useState<EditorRenderState | null>(null);
+  const [previewType, setPreviewType] = useState<CardPreviewType>("google");
   const editorSectionRef = useRef<HTMLDivElement | null>(null);
   const hasTemplates = templates.length > 0;
   const hasActiveTemplate = templates.some((template) => template.isActive);
@@ -232,6 +235,8 @@ const CardsClient = ({
             businessId={businessId}
             businessName={initialBusinessName}
             initialHasLogo={initialHasLogo}
+            previewType={previewType}
+            onPreviewTypeChange={setPreviewType}
             deletingIds={deletingIds}
             activatingIds={activatingIds}
             onEdit={(template) => {
@@ -266,6 +271,7 @@ const CardsClient = ({
                 initialBusinessName={initialBusinessName}
                 initialHasLogo={initialHasLogo}
                 businessId={businessId}
+                previewType={previewType}
                 selectedTemplate={editorRenderState.selectedTemplate}
                 onTemplateSaved={handleTemplateSaved}
                 onCancel={() => {

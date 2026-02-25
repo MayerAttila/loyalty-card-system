@@ -10,6 +10,7 @@ import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import { useSession } from "@/lib/auth/useSession";
 import GooglePreviewCard from "./GooglePreviewCard";
+import ApplePreviewCard from "./ApplePreviewCard";
 import LogoUploadPanel from "@/components/LogoUploadPanel";
 import StampPanel from "@/components/StampPanel";
 import { CardTemplate } from "@/types/cardTemplate";
@@ -21,6 +22,7 @@ type CardTemplateEditorProps = {
   initialCardColor?: string;
   initialHasLogo?: boolean;
   businessId?: string;
+  previewType?: "google" | "apple";
   selectedTemplate?: CardTemplate;
   onTemplateSaved?: (template: CardTemplate) => void;
   onCancel?: () => void;
@@ -33,10 +35,12 @@ const CardTemplateEditor = ({
   initialCardColor = "#e6345a",
   initialHasLogo = false,
   businessId: businessIdProp,
+  previewType = "google",
   selectedTemplate,
   onTemplateSaved,
   onCancel,
 }: CardTemplateEditorProps) => {
+  const PreviewCard = previewType === "apple" ? ApplePreviewCard : GooglePreviewCard;
   const { session } = useSession();
   const businessId = businessIdProp ?? session?.user?.businessId;
   const [businessName] = useState(initialBusinessName);
@@ -244,7 +248,7 @@ const CardTemplateEditor = ({
               Select a business to manage stamps.
             </p>
           )}
-          <div className="grid gap-6 lg:items-start lg:grid-cols-[minmax(0,_1fr)_360px]">
+          <div className="grid gap-6 lg:items-start lg:grid-cols-[minmax(0,_1fr)_minmax(0,_2fr)]">
             <div className="space-y-4">
               <label className="block text-xs text-contrast/70">
                 Max stamps
@@ -286,8 +290,8 @@ const CardTemplateEditor = ({
               <p className="text-xs font-semibold uppercase tracking-wide text-contrast/60">
                 Live preview
               </p>
-              <div className="mt-3 flex items-center justify-center">
-                <GooglePreviewCard
+              <div className="mt-3 flex items-center justify-center lg:hidden">
+                <PreviewCard
                   text1={sanitized.text1}
                   text2={sanitized.text2}
                   maxPoints={sanitized.maxPoints}
@@ -309,6 +313,68 @@ const CardTemplateEditor = ({
                   useStampImages={useBusinessStamps}
                   className="max-w-full"
                 />
+              </div>
+
+              <div className="mt-3 hidden lg:grid lg:grid-cols-2 lg:gap-3">
+                <div className="min-w-0">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-contrast/55">
+                    Google Wallet
+                  </p>
+                  <div className="flex items-center justify-center">
+                    <GooglePreviewCard
+                      text1={sanitized.text1}
+                      text2={sanitized.text2}
+                      maxPoints={sanitized.maxPoints}
+                      filledPoints={sanitized.filledPoints}
+                      rewardsCollected={sanitized.rewardsCollected}
+                      cardColor={sanitized.cardColor}
+                      logoSrc={logoAvailable ? logoSrc : undefined}
+                      useLogo={logoAvailable}
+                      filledStampSrc={
+                        useBusinessStamps && selectedStampOnUrl
+                          ? selectedStampOnUrl
+                          : undefined
+                      }
+                      emptyStampSrc={
+                        useBusinessStamps && selectedStampOffUrl
+                          ? selectedStampOffUrl
+                          : undefined
+                      }
+                      useStampImages={useBusinessStamps}
+                      className="max-w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-contrast/55">
+                    Apple Wallet
+                  </p>
+                  <div className="flex items-center justify-center">
+                    <ApplePreviewCard
+                      text1={sanitized.text1}
+                      text2={sanitized.text2}
+                      maxPoints={sanitized.maxPoints}
+                      filledPoints={sanitized.filledPoints}
+                      rewardsCollected={sanitized.rewardsCollected}
+                      cardColor={sanitized.cardColor}
+                      logoSrc={logoAvailable ? logoSrc : undefined}
+                      useLogo={logoAvailable}
+                      filledStampSrc={
+                        useBusinessStamps && selectedStampOnUrl
+                          ? selectedStampOnUrl
+                          : undefined
+                      }
+                      emptyStampSrc={
+                        useBusinessStamps && selectedStampOffUrl
+                          ? selectedStampOffUrl
+                          : undefined
+                      }
+                      useStampImages={useBusinessStamps}
+                      className="max-w-full"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

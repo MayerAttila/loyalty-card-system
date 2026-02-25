@@ -12,12 +12,14 @@ type FormSwitchProps = {
   items?: FormSwitchItem[];
   activeKey?: string | null;
   onChange?: (key: string) => void;
+  variant?: "default" | "glass";
 };
 
 const FormSwitch = ({
   items = [],
   activeKey = null,
   onChange = () => {},
+  variant = "default",
 }: FormSwitchProps) => {
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [slideStyle, setSlideStyle] = useState({ width: 0, left: 0 });
@@ -41,12 +43,20 @@ const FormSwitch = ({
     }
   }, [activeKey, items]);
 
+  const shellClassName =
+    variant === "glass"
+      ? "relative inline-flex items-center space-x-1 rounded-full border border-accent-3/55 bg-accent-1/45 p-1 backdrop-blur-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_14px_30px_-22px_rgba(0,0,0,0.5)]"
+      : "relative inline-flex items-center space-x-1 rounded-full bg-accent-2 p-1 shadow-[inset_0_2px_4px_rgba(15,23,42,0.08)]";
+
+  const sliderClassName =
+    variant === "glass"
+      ? "absolute rounded-full border border-accent-3/45 bg-primary/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_6px_16px_rgba(0,0,0,0.22)] transition-all duration-[350ms] ease-in-out"
+      : "absolute rounded-full bg-primary shadow-md transition-all duration-[350ms] ease-in-out";
+
   return (
-    <div
-      className="relative inline-flex items-center space-x-1 rounded-full bg-accent-2 p-1 shadow-[inset_0_2px_4px_rgba(15,23,42,0.08)]"
-    >
+    <div className={shellClassName}>
       <div
-        className="absolute rounded-full bg-primary shadow-md transition-all duration-[350ms] ease-in-out"
+        className={sliderClassName}
         style={{
           width: slideStyle.width,
           height: "calc(100% - 8px)",
