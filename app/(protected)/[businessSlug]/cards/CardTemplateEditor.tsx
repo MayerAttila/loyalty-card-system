@@ -9,7 +9,7 @@ import {
 import CustomInput from "@/components/CustomInput";
 import Button from "@/components/Button";
 import { useSession } from "@/lib/auth/useSession";
-import WalletCardPreview from "./WalletCardPreview";
+import GooglePreviewCard from "./GooglePreviewCard";
 import LogoUploadPanel from "@/components/LogoUploadPanel";
 import StampPanel from "@/components/StampPanel";
 import { CardTemplate } from "@/types/cardTemplate";
@@ -287,7 +287,7 @@ const CardTemplateEditor = ({
                 Live preview
               </p>
               <div className="mt-3 flex items-center justify-center">
-                <WalletCardPreview
+                <GooglePreviewCard
                   text1={sanitized.text1}
                   text2={sanitized.text2}
                   maxPoints={sanitized.maxPoints}

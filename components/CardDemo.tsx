@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import WalletCardPreview from "@/app/(protected)/[businessSlug]/cards/WalletCardPreview";
+import GooglePreviewCard from "@/app/(protected)/[businessSlug]/cards/GooglePreviewCard";
 
 const CardDemo = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -329,7 +329,7 @@ const CardDemo = () => {
               }}
               className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
             >
-              <WalletCardPreview
+              <GooglePreviewCard
                 text1={demo.text1}
                 text2={demo.text2}
                 maxPoints={demo.maxPoints}
@@ -382,7 +382,7 @@ const CardDemo = () => {
               className="will-change-transform"
             >
               <div className="flex justify-center">
-                <WalletCardPreview
+                <GooglePreviewCard
                   text1={demo.text1}
                   text2={demo.text2}
                   maxPoints={demo.maxPoints}

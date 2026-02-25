@@ -5,7 +5,7 @@ import ActiveButton from "@/components/ActiveButton";
 import EditButton from "@/components/EditButton";
 import DeleteButton from "@/components/DeleteButton";
 import Button from "@/components/Button";
-import WalletCardPreview from "./WalletCardPreview";
+import GooglePreviewCard from "./GooglePreviewCard";
 import { CardTemplate } from "@/types/cardTemplate";
 import { getBusinessStamps } from "@/api/client/business.api";
 
@@ -192,7 +192,7 @@ const CardTemplatesPanel = ({
                     ) : null}
                   </div>
                 </div>
-                <WalletCardPreview
+                <GooglePreviewCard
                   text1={template.text1 ?? ""}
                   text2={template.text2 ?? ""}
                   maxPoints={template.maxPoints}

@@ -2,7 +2,7 @@
 
 import React from "react";
 
-type WalletCardPreviewProps = {
+type GooglePreviewCardProps = {
   text1: string;
   text2: string;
   maxPoints: number;
@@ -17,7 +17,9 @@ type WalletCardPreviewProps = {
   className?: string;
 };
 
-const WalletCardPreview = ({
+export type PreviewCardProps = GooglePreviewCardProps;
+
+const GooglePreviewCard = ({
   text1,
   text2,
   maxPoints,
@@ -30,7 +32,7 @@ const WalletCardPreview = ({
   emptyStampSrc,
   useStampImages = false,
   className = "",
-}: WalletCardPreviewProps) => {
+}: GooglePreviewCardProps) => {
   const safeMax = Math.max(4, Math.min(16, maxPoints));
   const safeFilled = Math.min(Math.max(0, filledPoints), safeMax);
   const stamps = Array.from({ length: safeMax });
@@ -192,4 +194,4 @@ const WalletCardPreview = ({
   );
 };
 
-export default WalletCardPreview;
+export default GooglePreviewCard;

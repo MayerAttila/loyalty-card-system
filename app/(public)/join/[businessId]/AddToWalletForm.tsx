@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { CustomerCardPreview } from "@/api/client/customer.api";
 import { detectWalletPlatform, type WalletPlatform } from "./walletPlatform";
-import WalletCardPreview from "@/app/(protected)/[businessSlug]/cards/WalletCardPreview";
+import GooglePreviewCard from "@/app/(protected)/[businessSlug]/cards/GooglePreviewCard";
 import WalletSaveButtons from "./WalletSaveButtons";
 
 type AddToWalletFormProps = {
@@ -60,7 +60,7 @@ const AddToWalletForm = ({
           Generating your Wallet link...
         </p>
       ) : preview ? (
-        <WalletCardPreview
+        <GooglePreviewCard
           text1={preview.issuerName}
           text2={preview.programName}
           maxPoints={preview.maxPoints}
