@@ -20,6 +20,9 @@ const ApplePreviewCard = ({
   const safeFilled = Math.min(Math.max(0, filledPoints), safeMax);
   const shouldUseStampImages =
     useStampImages && Boolean(filledStampSrc) && Boolean(emptyStampSrc);
+  const stampImageClass = shouldUseStampImages
+    ? "h-11 w-11 scale-[1.38]"
+    : "h-11 w-11";
 
   const getContrastTextColor = (hexColor: string) => {
     const normalized = hexColor.trim().replace("#", "");
@@ -65,11 +68,20 @@ const ApplePreviewCard = ({
     : "rgba(255,255,255,0.64)";
 
   const stamps = Array.from({ length: safeMax }, (_, index) => index);
-  const columns = safeMax <= 6 ? safeMax : safeMax <= 10 ? 5 : 6;
+  const maxColumns = safeMax <= 5 ? safeMax : safeMax <= 10 ? Math.ceil(safeMax / 2) : 6;
+  const stampRows = stamps.reduce<number[][]>((rows, stampIndex) => {
+    const currentRow = rows[rows.length - 1];
+    if (!currentRow || currentRow.length >= maxColumns) {
+      rows.push([stampIndex]);
+      return rows;
+    }
+    currentRow.push(stampIndex);
+    return rows;
+  }, []);
 
   return (
     <div
-      className={`w-full max-w-[320px] rounded-[22px] border p-4 shadow-[0_18px_35px_rgba(0,0,0,0.22)] ${className}`}
+      className={`flex w-full max-w-[320px] flex-col rounded-[22px] border p-4 shadow-[0_18px_35px_rgba(0,0,0,0.22)] ${className}`}
       style={{
         color: textColor,
         borderColor: withAlpha(cardColor, isDarkText ? 0.2 : 0.35),
@@ -100,47 +112,57 @@ const ApplePreviewCard = ({
           </div>
         </div>
 
-        <div className="mt-3">
-          <div
-            className="grid gap-2"
-            style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
-          >
-            {stamps.map((index) => {
-              const isFilled = index < safeFilled;
-              const stampTone = withAlpha(textColor, isFilled ? 0.18 : 0.08);
-              const stampBorder = withAlpha(textColor, isFilled ? 0.35 : 0.2);
+        <div className="flex flex-1 items-center pt-3">
+          <div className="w-full space-y-2">
+            {stampRows.map((row, rowIndex) => (
+              <div
+                key={`apple-row-${rowIndex}`}
+                className="grid gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+                  justifyItems: "center",
+                }}
+              >
+                {row.map((index) => {
+                  const isFilled = index < safeFilled;
+                  const stampTone = withAlpha(textColor, isFilled ? 0.18 : 0.08);
+                  const stampBorder = withAlpha(textColor, isFilled ? 0.35 : 0.2);
 
-              return (
-                <div
-                  key={`apple-stamp-${index}`}
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold"
-                  style={{
-                    backgroundColor: shouldUseStampImages ? "transparent" : stampTone,
-                    border: shouldUseStampImages ? "none" : `1px solid ${stampBorder}`,
-                    color: mutedText,
-                  }}
-                >
-                  {shouldUseStampImages ? (
-                    <img
-                      src={isFilled ? filledStampSrc : emptyStampSrc}
-                      alt={isFilled ? "Stamp on" : "Stamp off"}
-                      className="h-11 w-11 rounded-full object-contain"
-                    />
-                  ) : (
-                    <span
-                      className="leading-none"
-                      style={{ color: withAlpha(textColor, 0.85) }}
+                  return (
+                    <div
+                      key={`apple-stamp-${index}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold"
+                      style={{
+                        backgroundColor: shouldUseStampImages ? "transparent" : stampTone,
+                        border: shouldUseStampImages
+                          ? "none"
+                          : `1px solid ${stampBorder}`,
+                        color: mutedText,
+                      }}
                     >
-                      {index + 1}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                      {shouldUseStampImages ? (
+                        <img
+                          src={isFilled ? filledStampSrc : emptyStampSrc}
+                          alt={isFilled ? "Stamp on" : "Stamp off"}
+                          className={`${stampImageClass} rounded-full object-contain`}
+                        />
+                      ) : (
+                        <span
+                          className="leading-none"
+                          style={{ color: withAlpha(textColor, 0.85) }}
+                        >
+                          {index + 1}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4">
           <div className="flex flex-col">
             <span
               className="text-[11px] font-semibold tracking-[0.06em] uppercase"

@@ -40,8 +40,9 @@ const GooglePreviewCard = ({
   const secondRowCount = safeMax - firstRowCount;
   const shouldUseStampImages =
     useStampImages && Boolean(filledStampSrc) && Boolean(emptyStampSrc);
-  const stampSizeClass = shouldUseStampImages ? "h-16 w-16" : "h-8 w-8";
-  const imageSizeClass = shouldUseStampImages ? "h-16 w-16" : "h-6 w-6";
+  const stampSizeClass = "h-8 w-8";
+  const imageSizeClass = shouldUseStampImages ? "h-8 w-8" : "h-6 w-6";
+  const imageScaleClass = shouldUseStampImages ? "scale-[1.55]" : "";
 
   const getContrastTextColor = (hexColor: string) => {
     const normalized = hexColor.trim().replace("#", "");
@@ -75,7 +76,7 @@ const GooglePreviewCard = ({
 
   return (
     <div
-      className={`w-full max-w-[320px] rounded-[28px] p-5 shadow-[0_18px_35px_rgba(0,0,0,0.25)] ${className}`}
+      className={`flex w-full max-w-[320px] flex-col rounded-[28px] p-5 shadow-[0_18px_35px_rgba(0,0,0,0.25)] ${className}`}
       style={{ backgroundColor: cardColor, color: textColor }}
     >
       <div className="flex items-center gap-2 text-xs tracking-wide">
@@ -86,67 +87,29 @@ const GooglePreviewCard = ({
             className="h-6 w-6 rounded-full object-contain"
           />
         ) : null}
-        <span className="truncate" style={{ color: withAlpha(textColor, 0.85) }}>
+        <span
+          className="truncate"
+          style={{ color: withAlpha(textColor, 0.85) }}
+        >
           {text1}
         </span>
       </div>
-      <h3 className="mt-1 text-xl font-semibold leading-tight">
-        {text2}
-      </h3>
+      <h3 className="mt-1 text-xl font-semibold leading-tight">{text2}</h3>
 
-      <div className="mt-5 space-y-2">
-        <div
-          className="grid gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${firstRowCount}, minmax(0, 1fr))`,
-            justifyItems: "center",
-          }}
-        >
-          {stamps.slice(0, firstRowCount).map((_, index) => {
-            const isFilled = index < safeFilled;
-            return (
-              <div
-                key={`stamp-${index}`}
-                className={`flex ${stampSizeClass} items-center justify-center text-xs font-semibold`}
-                style={{
-                  backgroundColor: shouldUseStampImages
-                    ? "transparent"
-                    : withAlpha(textColor, isFilled ? 0.18 : 0.08),
-                  borderRadius: "9999px",
-                  border: shouldUseStampImages
-                    ? "none"
-                    : `1px solid ${withAlpha(textColor, isFilled ? 0.35 : 0.2)}`,
-                }}
-              >
-                {shouldUseStampImages ? (
-                  <img
-                    src={isFilled ? filledStampSrc : emptyStampSrc}
-                    alt={isFilled ? "Stamp on" : "Stamp off"}
-                    className={`${imageSizeClass} object-contain`}
-                  />
-                ) : (
-                  <span style={{ color: withAlpha(textColor, 0.85) }}>
-                    {index + 1}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {secondRowCount > 0 ? (
+      <div className="flex flex-1 items-center pt-5">
+        <div className="w-full space-y-3">
           <div
             className="grid gap-2"
             style={{
-              gridTemplateColumns: `repeat(${secondRowCount}, minmax(0, 1fr))`,
+              gridTemplateColumns: `repeat(${firstRowCount}, minmax(0, 1fr))`,
               justifyItems: "center",
             }}
           >
-            {stamps.slice(firstRowCount).map((_, index) => {
-              const absoluteIndex = firstRowCount + index;
-              const isFilled = absoluteIndex < safeFilled;
+            {stamps.slice(0, firstRowCount).map((_, index) => {
+              const isFilled = index < safeFilled;
               return (
                 <div
-                  key={`stamp-${absoluteIndex}`}
+                  key={`stamp-${index}`}
                   className={`flex ${stampSizeClass} items-center justify-center text-xs font-semibold`}
                   style={{
                     backgroundColor: shouldUseStampImages
@@ -157,7 +120,7 @@ const GooglePreviewCard = ({
                       ? "none"
                       : `1px solid ${withAlpha(
                           textColor,
-                          isFilled ? 0.35 : 0.2
+                          isFilled ? 0.35 : 0.2,
                         )}`,
                   }}
                 >
@@ -165,22 +128,66 @@ const GooglePreviewCard = ({
                     <img
                       src={isFilled ? filledStampSrc : emptyStampSrc}
                       alt={isFilled ? "Stamp on" : "Stamp off"}
-                      className={`${imageSizeClass} object-contain`}
+                      className={`${imageSizeClass} ${imageScaleClass} object-contain`}
                     />
                   ) : (
                     <span style={{ color: withAlpha(textColor, 0.85) }}>
-                      {absoluteIndex + 1}
+                      {index + 1}
                     </span>
                   )}
                 </div>
               );
             })}
           </div>
-        ) : null}
+          {secondRowCount > 0 ? (
+            <div
+              className="grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${secondRowCount}, minmax(0, 1fr))`,
+                justifyItems: "center",
+              }}
+            >
+              {stamps.slice(firstRowCount).map((_, index) => {
+                const absoluteIndex = firstRowCount + index;
+                const isFilled = absoluteIndex < safeFilled;
+                return (
+                  <div
+                    key={`stamp-${absoluteIndex}`}
+                    className={`flex ${stampSizeClass} items-center justify-center text-xs font-semibold`}
+                    style={{
+                      backgroundColor: shouldUseStampImages
+                        ? "transparent"
+                        : withAlpha(textColor, isFilled ? 0.18 : 0.08),
+                      borderRadius: "9999px",
+                      border: shouldUseStampImages
+                        ? "none"
+                        : `1px solid ${withAlpha(
+                            textColor,
+                            isFilled ? 0.35 : 0.2,
+                          )}`,
+                    }}
+                  >
+                    {shouldUseStampImages ? (
+                      <img
+                        src={isFilled ? filledStampSrc : emptyStampSrc}
+                        alt={isFilled ? "Stamp on" : "Stamp off"}
+                        className={`${imageSizeClass} ${imageScaleClass} object-contain`}
+                      />
+                    ) : (
+                      <span style={{ color: withAlpha(textColor, 0.85) }}>
+                        {absoluteIndex + 1}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div
-        className="mt-4 flex items-center justify-between text-sm"
+        className="flex items-center justify-between pt-4 text-sm"
         style={{ color: withAlpha(textColor, 0.85) }}
       >
         <span>
@@ -188,8 +195,6 @@ const GooglePreviewCard = ({
         </span>
         <span>Rewards {Math.max(0, rewardsCollected)}</span>
       </div>
-
-      <div className="mt-5" />
     </div>
   );
 };

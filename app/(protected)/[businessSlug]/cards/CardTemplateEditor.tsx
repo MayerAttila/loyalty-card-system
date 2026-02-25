@@ -341,7 +341,7 @@ const CardTemplateEditor = ({
                           : undefined
                       }
                       useStampImages={useBusinessStamps}
-                      className="max-w-full"
+                      className="max-w-full lg:min-h-[244px]"
                     />
                   </div>
                 </div>
@@ -371,7 +371,7 @@ const CardTemplateEditor = ({
                           : undefined
                       }
                       useStampImages={useBusinessStamps}
-                      className="max-w-full"
+                      className="max-w-full lg:min-h-[244px]"
                     />
                   </div>
                 </div>

@@ -205,7 +205,15 @@ const CardDemo = () => {
           const x = relative * overlapStep;
           const scale = Math.max(0.8, 1 - distance * 0.08);
           const zIndex = 1000 - Math.round(distance * 100);
-          gsap.set(cardEl, { x, scale, opacity: 1, zIndex, force3D: true });
+          gsap.set(cardEl, {
+            xPercent: -50,
+            yPercent: -50,
+            x,
+            scale,
+            opacity: 1,
+            zIndex,
+            force3D: true,
+          });
 
           desktopPrevRelativeRef.current[cardIndex] = relative;
         });
@@ -349,7 +357,7 @@ const CardDemo = () => {
 
         <div
           ref={desktopStageRef}
-          className="relative mx-auto h-[390px] w-full max-w-[1080px] overflow-hidden"
+          className="relative mx-auto h-[320px] w-full max-w-[1080px] overflow-hidden"
           data-carddemo-track
         >
           {demos.map((demo, index) => (
@@ -359,7 +367,7 @@ const CardDemo = () => {
               ref={(el) => {
                 desktopCardRefs.current[index] = el;
               }}
-              className="absolute left-1/2 top-0 w-[320px] -translate-x-1/2 will-change-transform"
+              className="absolute left-1/2 top-1/2 w-[320px] -translate-x-1/2 -translate-y-1/2 will-change-transform"
             >
               <PreviewCard
                 text1={demo.text1}
