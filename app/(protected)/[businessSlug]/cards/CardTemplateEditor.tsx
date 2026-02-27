@@ -159,12 +159,20 @@ const CardTemplateEditor = ({
           <div className="grid items-start gap-4 grid-cols-1 sm:grid-cols-11">
             <div className="sm:col-span-1">
               {businessId ? (
-                <LogoUploadPanel
-                  businessId={businessId}
-                  businessName={businessName || "Business"}
-                  hasLogo={logoAvailable}
-                  onLogoChange={() => setLogoVersion((prev) => prev + 1)}
-                />
+                <div>
+                  <LogoUploadPanel
+                    businessId={businessId}
+                    businessName={businessName || "Business"}
+                    hasLogo={logoAvailable}
+                    highlightUploadLabel={Boolean(errors.logo)}
+                    onLogoChange={() => {
+                      setLogoVersion((prev) => prev + 1);
+                      if (errors.logo) {
+                        setErrors((prev) => ({ ...prev, logo: undefined }));
+                      }
+                    }}
+                  />
+                </div>
               ) : (
                 <div />
               )}
@@ -394,6 +402,9 @@ const CardTemplateEditor = ({
                 return;
               }
               const nextErrors: Partial<Record<string, string>> = {};
+              if (!logoAvailable) {
+                nextErrors.logo = "Logo is required.";
+              }
               if (!templateName.trim()) {
                 nextErrors.templateName = "Template name is required.";
               }
@@ -438,7 +449,16 @@ const CardTemplateEditor = ({
                 );
               } catch (error) {
                 console.error(error);
-                toast.error("Unable to save card template.");
+                const message =
+                  typeof error === "object" &&
+                  error !== null &&
+                  "response" in error &&
+                  typeof (error as { response?: { data?: { message?: unknown } } })
+                    .response?.data?.message === "string"
+                    ? (error as { response?: { data?: { message?: string } } })
+                        .response?.data?.message
+                    : "Unable to save card template.";
+                toast.error(message);
               } finally {
                 setSaving(false);
               }

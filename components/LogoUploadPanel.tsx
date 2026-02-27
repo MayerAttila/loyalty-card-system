@@ -13,6 +13,7 @@ type LogoUploadPanelProps = {
   businessId: string;
   businessName: string;
   hasLogo?: boolean;
+  highlightUploadLabel?: boolean;
   onLogoChange?: () => void;
 };
 
@@ -20,6 +21,7 @@ const LogoUploadPanel = ({
   businessId,
   businessName,
   hasLogo,
+  highlightUploadLabel = false,
   onLogoChange,
 }: LogoUploadPanelProps) => {
   const [logoUploading, setLogoUploading] = useState(false);
@@ -107,7 +109,11 @@ const LogoUploadPanel = ({
             onClick={() => logoInputRef.current?.click()}
             disabled={logoUploading}
           />
-          <span className="text-[10px] font-semibold text-contrast/60">
+          <span
+            className={`text-[10px] font-semibold ${
+              highlightUploadLabel ? "text-brand" : "text-contrast/60"
+            }`}
+          >
             Upload logo
           </span>
         </div>
