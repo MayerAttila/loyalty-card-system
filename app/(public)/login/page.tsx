@@ -11,6 +11,7 @@ import { toBusinessSlug } from "@/lib/slug";
 
 const LoginPage = () => {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [hasFailedLoginOnce, setHasFailedLoginOnce] = useState(false);
   const router = useRouter();
 
   const resolveAppRedirect = (url?: string | null) => {
@@ -87,6 +88,7 @@ const LoginPage = () => {
         toast.error("Login succeeded but session was not established. Please try again.");
         return;
       }
+      setHasFailedLoginOnce(true);
       toast.error("Invalid email or password.");
       return;
     }
@@ -141,7 +143,9 @@ const LoginPage = () => {
               </Link>
             </div>
             <Link
-              className="text-xs font-semibold text-brand hover:text-brand/80"
+              className={`text-xs font-semibold text-brand hover:text-brand/80 ${
+                hasFailedLoginOnce ? "inline-flex" : "hidden"
+              } md:inline-flex`}
               href="/forgot-password"
             >
               Forgot password?
