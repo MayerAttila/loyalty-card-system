@@ -32,11 +32,11 @@ const FeaturesPanel = () => {
         "Customers save the card on their phone and never forget it.",
     },
     {
-      title: "Apple Wallet ready (Coming soon)",
+      title: "Apple Wallet ready",
       description: "Let iPhone customers add their card in one tap.",
     },
     {
-      title: "Customer notifications (Coming soon)",
+      title: "Customer notifications",
       description: "Send reminders and reward updates to bring customers back.",
     },
   ];
@@ -96,7 +96,10 @@ const FeaturesPanel = () => {
         </div>
 
         <div className="hidden md:block md:w-1/2 md:self-start md:sticky md:top-24">
-          <PhoneCanvas className="h-[640px] w-full" screenUrl="/phone-screen.png" />
+          <PhoneCanvas
+            className="h-[640px] w-full"
+            screenUrl="/phone-screen.png"
+          />
         </div>
       </div>
     </section>

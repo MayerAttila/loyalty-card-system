@@ -9,21 +9,21 @@ export type SubscriptionPlanCardContent = {
   badge?: string;
 };
 
-export const getSubscriptionPlanCatalog = (trialDays = 30): Record<
-  SubscriptionPlanKey,
-  SubscriptionPlanCardContent
-> => ({
+export const getSubscriptionPlanCatalog = (
+  trialDays = 30,
+): Record<SubscriptionPlanKey, SubscriptionPlanCardContent> => ({
   trial: {
     title: "Free trial",
     price: `${trialDays} days`,
     interval: "no card required",
     description: "Try the full product before adding payment details.",
     features: [
-      "Full access during trial",
-      "Custom card branding",
+      "Branded loyalty card design",
       "Staff invitations",
+      "Easy-to-use card stamping",
       "Stamping history logs",
-      "Google Wallet cards",
+      "Google Wallet support",
+      "Apple Wallet support",
     ],
   },
   monthly: {
@@ -32,12 +32,13 @@ export const getSubscriptionPlanCatalog = (trialDays = 30): Record<
     interval: "per month",
     description: "Flexible monthly plan for smaller teams.",
     features: [
-      "Custom card branding",
+      "Branded loyalty card design",
       "Staff invitations",
+      "Easy-to-use card stamping",
       "Stamping history logs",
-      "Google Wallet cards",
-      "Apple Wallet (Coming soon)",
-      "Customer notifications (Coming soon)",
+      "Google Wallet support",
+      "Apple Wallet support",
+      "Customer notifications",
     ],
   },
   annual: {
@@ -46,15 +47,15 @@ export const getSubscriptionPlanCatalog = (trialDays = 30): Record<
     interval: "per year",
     description: "Save with annual subscription for growing teams.",
     features: [
-      "Custom card branding",
+      "Branded loyalty card design",
       "Staff invitations",
+      "Easy-to-use card stamping",
       "Stamping history logs",
-      "Google Wallet cards",
-      "Apple Wallet (Coming soon)",
-      "Customer notifications (Coming soon)",
+      "Google Wallet support",
+      "Apple Wallet support",
+      "Customer notifications",
       "2 months free vs monthly",
     ],
     badge: "Best value",
   },
 });
-
