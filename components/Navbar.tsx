@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/api/client/auth.api";
 import {
@@ -85,6 +85,7 @@ export default function Navbar({
   basePath?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoLoadFailedSrc, setLogoLoadFailedSrc] = useState<string | null>(
@@ -110,6 +111,11 @@ export default function Navbar({
       ? `${apiBaseUrl}/business/id/${businessId}/logo`
       : "";
   const canShowLogo = Boolean(logoSrc) && logoLoadFailedSrc !== logoSrc;
+  const activePath = pathname ?? "";
+  const isActiveLink = (href: string) =>
+    activePath === href || activePath.startsWith(`${href}/`);
+  const settingsHref = `${basePath}/settings`;
+  const settingsActive = isActiveLink(settingsHref);
 
   return (
     <>
@@ -197,17 +203,26 @@ export default function Navbar({
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-2">
           {allowedNavItems.map((item) => {
             const Icon = item.icon;
+            const active = isActiveLink(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 title={item.label}
                 aria-label={item.label}
-                className={`flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-contrast transition hover:border-accent-4 hover:bg-accent-2 ${
+                className={`flex items-center gap-3 rounded-xl border px-3 py-2 text-sm font-medium transition ${
+                  active
+                    ? "border-brand/40 bg-brand/10 text-brand"
+                    : "border-transparent text-contrast hover:border-accent-4 hover:bg-accent-2"
+                } ${
                   collapsed ? "justify-center" : ""
                 }`}
               >
-                <Icon className="h-5 w-5 shrink-0 text-contrast" />
+                <Icon
+                  className={`h-5 w-5 shrink-0 ${
+                    active ? "text-brand" : "text-contrast"
+                  }`}
+                />
                 {!collapsed && (
                   <span className="whitespace-nowrap">{item.label}</span>
                 )}
@@ -218,14 +233,20 @@ export default function Navbar({
 
         <div className="space-y-2 border-t border-accent-3 px-3 py-4">
           <Link
-            href={`${basePath}/settings`}
+            href={settingsHref}
             title="Settings"
             aria-label="Settings"
-            className={`flex w-full items-center gap-3 rounded-xl border border-accent-4 px-3 py-2 text-sm font-semibold text-contrast transition hover:bg-accent-2 ${
-              collapsed ? "justify-center" : ""
-            }`}
+            className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+              settingsActive
+                ? "border-brand/40 bg-brand/10 text-brand"
+                : "border-accent-4 text-contrast hover:bg-accent-2"
+            } ${collapsed ? "justify-center" : ""}`}
           >
-            <FiSettings className="h-5 w-5 shrink-0 text-contrast" />
+            <FiSettings
+              className={`h-5 w-5 shrink-0 ${
+                settingsActive ? "text-brand" : "text-contrast"
+              }`}
+            />
             {!collapsed && <span className="whitespace-nowrap">Settings</span>}
           </Link>
           <button
