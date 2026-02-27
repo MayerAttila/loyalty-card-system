@@ -11,7 +11,6 @@ import { getSubscriptionPlanCatalog } from "@/lib/subscription/planCatalog";
 import {
   createPortalSessionAction,
   cancelSubscriptionAction,
-  resetSubscriptionForTestingAction,
   getSubscriptionStatusAction,
   startTrialNoCardAction,
 } from "@/lib/subscription/actions";
@@ -367,30 +366,6 @@ const SubscriptionClient = ({ embedded = false }: SubscriptionClientProps) => {
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="neutral"
-              onClick={async () => {
-                if (actionLoading) return;
-                setActionLoading(true);
-                try {
-                  await resetSubscriptionForTestingAction();
-                  const updated = await getSubscriptionStatusAction();
-                  setStatus(updated);
-                  toast.success("Subscription history reset.");
-                } catch (error) {
-                  console.error(error);
-                  toast.error("Unable to reset subscription.");
-                } finally {
-                  setActionLoading(false);
-                }
-              }}
-              disabled={actionLoading}
-            >
-              Test reset
-            </Button>
-          </div>
         </div>
       </div>
 
