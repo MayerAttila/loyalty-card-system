@@ -49,6 +49,7 @@ const StampPanel = ({
   const stampOnInputRef = useRef<HTMLInputElement | null>(null);
   const stampOffInputRef = useRef<HTMLInputElement | null>(null);
   const showStampSections = !showToggle || useStampImages;
+  const showSelectionHint = useStampImages && selectable;
 
   const loadStamps = useCallback(async () => {
     try {
@@ -150,32 +151,42 @@ const StampPanel = ({
     <div className="rounded-lg border border-accent-3 bg-primary p-4">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-contrast">Stamp images</h3>
-        {showToggle ? (
-          <button
-            type="button"
-            role="switch"
-            aria-checked={useStampImages}
-            onClick={() => {
-              if (!onToggleUseStampImages) return;
-              onToggleUseStampImages(!useStampImages);
-            }}
-            disabled={!onToggleUseStampImages}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-contrast/80 disabled:opacity-60"
+        <div className="flex items-center gap-3">
+          <p
+            aria-hidden={!showSelectionHint}
+            className={`text-[11px] text-contrast/60 transition-opacity duration-200 ${
+              showSelectionHint ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
           >
-            <span
-              className={`relative inline-flex h-5 w-9 items-center rounded-full border border-accent-3 transition-colors duration-200 ${
-                useStampImages ? "bg-brand/80" : "bg-accent-2"
-              }`}
+            Select stamp images by clicking on them.
+          </p>
+          {showToggle ? (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={useStampImages}
+              onClick={() => {
+                if (!onToggleUseStampImages) return;
+                onToggleUseStampImages(!useStampImages);
+              }}
+              disabled={!onToggleUseStampImages}
+              className="inline-flex items-center gap-2 text-xs font-semibold text-contrast/80 disabled:opacity-60"
             >
               <span
-                className={`inline-block h-4 w-4 translate-x-0 rounded-full bg-primary shadow-sm transition-transform duration-200 ${
-                  useStampImages ? "translate-x-4" : "translate-x-1"
+                className={`relative inline-flex h-5 w-9 items-center rounded-full border border-accent-3 transition-colors duration-200 ${
+                  useStampImages ? "bg-brand/80" : "bg-accent-2"
                 }`}
-              />
-            </span>
-            <span>{useStampImages ? "On" : "Off"}</span>
-          </button>
-        ) : null}
+              >
+                <span
+                  className={`inline-block h-4 w-4 translate-x-0 rounded-full bg-primary shadow-sm transition-transform duration-200 ${
+                    useStampImages ? "translate-x-4" : "translate-x-1"
+                  }`}
+                />
+              </span>
+              <span>{useStampImages ? "On" : "Off"}</span>
+            </button>
+          ) : null}
+        </div>
       </div>
       <div
         className={`grid transition-all duration-300 ease-out ${
